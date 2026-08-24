@@ -7,7 +7,9 @@ plugins {
 
 android {
     namespace = "com.argy.perlindungankonsumen"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_secure_storage butuh compileSdk 37; flutter.compileSdkVersion
+    // (36) belum mengikuti, jadi di-override manual di sini.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
