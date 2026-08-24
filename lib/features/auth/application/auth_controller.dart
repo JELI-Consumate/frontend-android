@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/storage/sector_storage.dart';
+import '../../onboarding/application/sector_selection_provider.dart';
 import '../data/auth_repository.dart';
 import '../data/models/app_user.dart';
 
@@ -74,6 +76,12 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<void> signOut() async {
     await _repository.logout();
+    // Sektor yang dipilih itu pilihan akun ini, bukan pilihan device --
+    // kalau tidak ikut dibersihkan, akun lain yang login di device yang
+    // sama akan langsung "mewarisi" sektor akun sebelumnya tanpa pernah
+    // ditanya.
+    await ref.read(sectorStorageProvider).clear();
+    ref.invalidate(selectedSectorSlugProvider);
     state = const AsyncValue.data(null);
   }
 
