@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" fill="none">
+  <!-- backdrop lingkaran lembut -->
+  <circle cx="100" cy="104" r="86" fill="#FFFFFF" fill-opacity="0.12"/>
+  <circle cx="100" cy="104" r="60" fill="#FFFFFF" fill-opacity="0.10"/>
+
+  <!-- badan telepon -->
+  <rect x="62" y="46" width="76" height="128" rx="14" fill="#FFFFFF"/>
+  <rect x="70" y="60" width="60" height="88" rx="4" fill="#DCE6FB"/>
+  <circle cx="100" cy="160" r="5" fill="#B9CBF3"/>
+
+  <!-- baris konten di layar -->
+  <rect x="78" y="70" width="44" height="6" rx="3" fill="#FFFFFF"/>
+  <rect x="78" y="84" width="32" height="6" rx="3" fill="#B9CBF3"/>
+  <rect x="78" y="98" width="44" height="28" rx="4" fill="#FFFFFF"/>
+  <rect x="78" y="132" width="20" height="6" rx="3" fill="#B9CBF3"/>
+
+  <!-- keranjang kecil di dalam layar -->
+  <g stroke="#0037B0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M84 104h4l3 14h20l3-11H93"/>
+  </g>
+  <circle cx="93" cy="122" r="2.4" fill="#0037B0"/>
+  <circle cx="107" cy="122" r="2.4" fill="#0037B0"/>
+
+  <!-- lencana perisai (terlindungi) -->
+  <g transform="translate(122 32)">
+    <path d="M20 0 38 7v14c0 15-9 24-18 28-9-4-18-13-18-28V7z" fill="#0037B0"/>
+    <path d="M20 6 33 11v10c0 12-7 19-13 22-6-3-13-10-13-22V11z" fill="#FFFFFF"/>
+    <path d="M13 20l5 5 10-11" stroke="#0037B0" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- kilau dekoratif -->
+  <g fill="#FFFFFF">
+    <path d="M40 60l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>
+    <circle cx="150" cy="140" r="4"/>
+    <circle cx="46" cy="150" r="3"/>
+  </g>
+</svg>
