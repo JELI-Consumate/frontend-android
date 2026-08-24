@@ -4,6 +4,7 @@ abstract final class AppColors {
   static const Color primary = Color(0xFF0037B0);
   static const Color ink = Color(0xFF434655);
   static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
   static const Color muted = Color(0xFFC4C5D7);
   static const Color background = Color(0xFFF8F9FF);
   static const Color primaryPressed = Color(0xFF002B8C);
