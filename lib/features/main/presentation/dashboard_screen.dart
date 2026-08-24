@@ -5,14 +5,12 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../auth/application/auth_controller.dart';
-import '../application/learning_providers.dart';
-import '../data/models/sector_detail.dart';
-import 'journey_detail_screen.dart';
+import '../../learning/application/learning_providers.dart';
+import '../../learning/data/models/sector_detail.dart';
+import '../../learning/presentation/journey_detail_screen.dart';
 import 'widgets/continue_learning_card.dart';
 import 'widgets/journey_card.dart';
 
-/// Tab "Beranda". Sapaan + kartu "Lanjutkan Belajar" (kalau ada journey
-/// yang sedang dikerjakan) + preview satu journey berikutnya.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -23,37 +21,55 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () => ref.refresh(primarySectorDetailProvider.future),
-          child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.screenPadding),
-            children: [
-              Text.rich(
-                TextSpan(
-                  style: AppTypography.titleLarge,
-                  children: [
-                    const TextSpan(text: 'Halo, Selamat datang kembali '),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: ClipRRect(
+            child: RefreshIndicator(
+              onRefresh: () => ref.refresh(primarySectorDetailProvider.future),
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                children: [
+                  Text.rich(
                     TextSpan(
-                      text: '${user?.name ?? ''}!',
-                      style: const TextStyle(color: AppColors.primary),
+                      style: AppTypography.titleLarge,
+                      children: [
+                        const TextSpan(
+                          text: 'Halo, Selamat datang kembali ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 30,
+                            color: Color(0xFF000000),
+                          ),
+                        ),
+                        TextSpan(
+                          text: '${user?.name ?? ''}!',
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 30,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    'Siap belajar perlindungan konsumen hari ini?',
+                    style: AppTypography.bodyMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  const _SearchBarStub(),
+                  const SizedBox(height: AppSpacing.lg),
+                  switch (sectorAsync) {
+                    AsyncData(:final value) => _DashboardBody(
+                      sectorDetail: value,
+                    ),
+                    AsyncError() => const _ErrorState(),
+                    _ => const _LoadingState(),
+                  },
+                ],
               ),
-              const SizedBox(height: AppSpacing.xxs),
-              Text(
-                'Siap belajar perlindungan konsumen hari ini?',
-                style: AppTypography.bodySmall,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              const _SearchBarStub(),
-              const SizedBox(height: AppSpacing.lg),
-              switch (sectorAsync) {
-                AsyncData(:final value) => _DashboardBody(sectorDetail: value),
-                AsyncError() => const _ErrorState(),
-                _ => const _LoadingState(),
-              },
-            ],
+            ),
           ),
         ),
       ),
@@ -80,13 +96,13 @@ class _DashboardBody extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (inProgress != null) ...[
-          Text('Lanjutkan Belajar', style: AppTypography.titleMedium),
+          Text('Lanjutkan Belajar', style: AppTypography.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           _ContinueLearningSection(journeyId: inProgress.id),
           const SizedBox(height: AppSpacing.lg),
         ],
         if (nextJourney != null) ...[
-          Text('Perjalanan', style: AppTypography.titleMedium),
+          Text('Perjalanan', style: AppTypography.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           JourneyCard(
             journey: nextJourney,
@@ -137,9 +153,9 @@ class _SearchBarStub extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.white,
-      borderRadius: BorderRadius.circular(AppRadius.md),
+      borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         onTap: () => ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pencarian belum tersedia.')),
         ),
@@ -149,7 +165,7 @@ class _SearchBarStub extends StatelessWidget {
             vertical: AppSpacing.sm,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(color: AppColors.border),
           ),
           child: Row(

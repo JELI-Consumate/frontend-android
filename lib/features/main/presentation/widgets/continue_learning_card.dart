@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../data/models/journey_detail.dart';
+import '../../../learning/data/models/journey_detail.dart';
 
 /// Kartu "Lanjutkan Belajar" di dashboard. Judulnya diambil dari module
 /// yang sedang dikerjakan (bukan judul journey) — itu yang secara konkret
@@ -28,31 +28,29 @@ class ContinueLearningCard extends StatelessWidget {
 
     return Material(
       color: AppColors.white,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: InkWell(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
+        side: BorderSide(color: AppColors.border),
+      ),
+      child: InkWell(
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Belum ada foto/banner per module dari backend (cuma teks +
+            // durasi), jadi ilustrasi journey yang sama dipakai lagi di
+            // sini diperbesar mengisi lebar kartu -- konsisten dengan
+            // ilustrasi di kartu journey di bawahnya.
             Container(
-              height: 110,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.lg),
-                ),
-              ),
+              height: 130,
+              width: double.infinity,
+              alignment: Alignment.center,
+              color: AppColors.primarySoft,
               padding: const EdgeInsets.all(AppSpacing.md),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: SizedBox(
-                  width: 84,
-                  height: 84,
-                  child: SvgPicture.asset(
-                    'assets/images/journey_illustration.svg',
-                  ),
-                ),
+              child: SvgPicture.asset(
+                'assets/images/journey_illustration.svg',
+                height: 104,
               ),
             ),
             Padding(

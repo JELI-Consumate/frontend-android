@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../application/learning_providers.dart';
-import 'journey_detail_screen.dart';
+import '../../learning/application/learning_providers.dart';
+import '../../learning/presentation/journey_detail_screen.dart';
 import 'widgets/journey_card.dart';
 
 /// Tab "Perjalanan": seluruh journey di sektor, berurutan sesuai BR-01 —
