@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:perlindungan_konsumen/core/storage/sector_storage.dart';
 import 'package:perlindungan_konsumen/features/auth/data/auth_repository.dart';
 import 'package:perlindungan_konsumen/features/auth/presentation/otp_verification_screen.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
@@ -10,9 +11,18 @@ import 'package:perlindungan_konsumen/main.dart';
 
 import 'support/fake_auth_repository.dart';
 import 'support/fake_learning_repository.dart';
+import 'support/fake_sector_storage.dart';
 
 void main() {
-  Future<void> pumpApp(WidgetTester tester, FakeAuthRepository repository) {
+  // `sectorStorage` default-nya sudah "sudah pilih sektor" (slug
+  // 'e-commerce') supaya test yang cuma mau menguji hal lain tetap
+  // langsung tembus ke MainShell tanpa mampir ke SectorSelectionScreen.
+  // Test yang justru menguji layar itu mengoper storage kosong sendiri.
+  Future<void> pumpApp(
+    WidgetTester tester,
+    FakeAuthRepository repository, {
+    FakeSectorStorage? sectorStorage,
+  }) {
     return tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -22,6 +32,9 @@ void main() {
           // ter-build dan minta data lewat provider ini juga.
           learningRepositoryProvider.overrideWithValue(
             FakeLearningRepository(),
+          ),
+          sectorStorageProvider.overrideWithValue(
+            sectorStorage ?? FakeSectorStorage(initialSlug: 'e-commerce'),
           ),
         ],
         child: const MyApp(),
@@ -58,15 +71,35 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.calls, contains('me'));
-    // Tab awal "Beranda" (dashboard pembelajaran) — bukan lagi HomeScreen
-    // langsung, itu sekarang tab "Profil". Navigasikan ke sana dulu.
+    // Tab awal "Beranda" (dashboard pembelajaran), bukan langsung "Profil"
+    // -- navigasikan ke sana dulu untuk mengecek isinya.
     expect(find.text('Lanjutkan Belajar'), findsOneWidget);
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Halo, Budi Santoso!'), findsOneWidget);
+    expect(find.text('Budi Santoso'), findsOneWidget);
   });
+
+  testWidgets(
+    'Belum pernah pilih sektor, tampil layar pilih sektor dulu sebelum MainShell',
+    (tester) async {
+      final repository = FakeAuthRepository(storedToken: 'token-123');
+
+      await pumpApp(tester, repository, sectorStorage: FakeSectorStorage());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pilih Sektor Belajarmu'), findsOneWidget);
+      expect(find.text('E-Commerce'), findsOneWidget);
+      expect(find.text('Lanjutkan Belajar'), findsNothing);
+
+      await tester.tap(find.text('E-Commerce'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pilih Sektor Belajarmu'), findsNothing);
+      expect(find.text('Lanjutkan Belajar'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'OTP benar setelah didorong dari alur nyata langsung masuk ke MainShell',

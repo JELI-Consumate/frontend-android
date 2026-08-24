@@ -4,16 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:perlindungan_konsumen/core/network/api_exception.dart';
+import 'package:perlindungan_konsumen/core/storage/sector_storage.dart';
 import 'package:perlindungan_konsumen/core/theme/app_theme.dart';
 import 'package:perlindungan_konsumen/features/auth/application/auth_controller.dart';
 import 'package:perlindungan_konsumen/features/auth/data/models/app_user.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/journey.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
-import 'package:perlindungan_konsumen/features/learning/presentation/dashboard_screen.dart';
-import 'package:perlindungan_konsumen/features/learning/presentation/journeys_screen.dart';
+import 'package:perlindungan_konsumen/features/main/presentation/dashboard_screen.dart';
+import 'package:perlindungan_konsumen/features/main/presentation/journeys_screen.dart';
 
 import 'support/fake_learning_repository.dart';
+import 'support/fake_sector_storage.dart';
 
 void main() {
   Future<void> pump(
@@ -31,6 +33,14 @@ void main() {
           learningRepositoryProvider.overrideWithValue(repository),
           currentUserProvider.overrideWithValue(
             const AppUser(id: 1, name: 'Argy', email: 'argy@example.com'),
+          ),
+          // DashboardScreen/JourneysScreen sekarang lewat
+          // primarySectorDetailProvider -> selectedSectorSlugProvider ->
+          // sectorStorageProvider -- tanpa override ini providernya akan
+          // coba baca flutter_secure_storage sungguhan (tidak ada plugin
+          // di widget test).
+          sectorStorageProvider.overrideWithValue(
+            FakeSectorStorage(initialSlug: 'e-commerce'),
           ),
         ],
         child: MaterialApp(theme: AppTheme.light, home: screen),
@@ -149,12 +159,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Fraksi module selesai dari 5 module fixture (1 selesai).
+      // Subtitle-nya sekarang beberapa Text terpisah (ikon + label + "•" +
+      // status), bukan satu string gabungan lagi -- cek tiap bagiannya.
       expect(find.text('1/5'), findsOneWidget);
-      expect(find.text('Opening · Selesai'), findsOneWidget);
-      expect(
-        find.text('Video · 10 menit'),
-        findsOneWidget,
-      ); // module current (id 2)
+      expect(find.text('Opening'), findsOneWidget);
+      expect(find.text('Selesai'), findsOneWidget);
+      expect(find.text('Video'), findsOneWidget); // module current (id 2)
+      expect(find.text('10 menit'), findsOneWidget);
     });
 
     testWidgets('tap module memunculkan pesan belum tersedia', (tester) async {
