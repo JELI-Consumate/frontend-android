@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../core/theme/app_colors.dart';
-import '../core/theme/app_spacing.dart';
-import '../core/theme/app_typography.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
+import '../theme/app_typography.dart';
 
-/// Tab yang belum diimplementasikan — dipakai untuk "Pencapaian" (badge /
+/// Layar generik "segera hadir" -- dipakai untuk tab "Pencapaian" (badge /
 /// empowerment index) yang endpoint-nya (`/badges`, `/empowerment-index`)
-/// di luar cakupan pekerjaan Dashboard & Perjalanan ini.
-class PlaceholderTabScreen extends StatelessWidget {
-  const PlaceholderTabScreen({
+/// di luar cakupan pekerjaan Dashboard & Perjalanan saat ini.
+class PlaceholderScreen extends StatelessWidget {
+  const PlaceholderScreen({
     super.key,
     required this.title,
     required this.message,

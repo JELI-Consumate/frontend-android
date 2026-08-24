@@ -89,25 +89,9 @@ abstract final class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        height: 64,
-        indicatorColor: AppColors.primarySoft,
-        labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          final active = states.contains(WidgetState.selected);
-          return AppTypography.labelMedium.copyWith(
-            color: active ? AppColors.primary : AppColors.inkMuted,
-            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-          );
-        }),
-        iconTheme: WidgetStateProperty.resolveWith((states) {
-          final active = states.contains(WidgetState.selected);
-          return IconThemeData(
-            color: active ? AppColors.primary : AppColors.inkMuted,
-          );
-        }),
-      ),
+      // Tidak ada navigationBarTheme -- bar navigasi bawah dibangun custom
+      // di MainShell/_BottomNavBar (bukan `NavigationBar` bawaan Material),
+      // jadi warnanya diatur langsung di sana, bukan lewat tema.
     );
   }
 }
