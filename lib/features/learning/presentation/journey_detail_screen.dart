@@ -105,9 +105,20 @@ class _JourneyBadge extends StatelessWidget {
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
-      child: Text(
-        'Journey $order',
-        style: AppTypography.labelMedium.copyWith(color: AppColors.white),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.auto_stories_outlined,
+            size: 14,
+            color: AppColors.white,
+          ),
+          const SizedBox(width: AppSpacing.xxs),
+          Text(
+            'Journey $order',
+            style: AppTypography.labelMedium.copyWith(color: AppColors.white),
+          ),
+        ],
       ),
     );
   }
@@ -167,7 +178,7 @@ class _ProgressCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Selesaikan semua langkah untuk menyelesaikan journey ini.',
+            'Selesaikan semua langkah untuk membuka simulasi.',
             style: AppTypography.bodySmall,
           ),
         ],
