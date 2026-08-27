@@ -45,33 +45,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _editName(String currentName) async {
-    final controller = TextEditingController(text: currentName);
-
-    final newName = await showDialog<String>(
+    final newName = await showModalBottomSheet<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.white,
-        title: Text('Ubah nama', style: AppTypography.titleLarge),
-        content: AppTextField(
-          controller: controller,
-          hintText: 'Nama lengkap',
-          icon: Icons.person_outline,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(controller.text.trim()),
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditNameSheet(currentName: currentName),
     );
-
-    controller.dispose();
 
     if (newName == null || newName.isEmpty || newName == currentName) return;
 
@@ -187,6 +166,126 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet ubah nama -- dulunya `AlertDialog`, ganti ke bottom sheet
+/// supaya field-nya tidak ketutupan keyboard di layar kecil (dialog di
+/// tengah layar mepet ke keyboard, sheet ini justru naik mengikutinya) dan
+/// terasa lebih natural untuk aksi cepat sekali field begini di mobile.
+class _EditNameSheet extends StatefulWidget {
+  const _EditNameSheet({required this.currentName});
+
+  final String currentName;
+
+  @override
+  State<_EditNameSheet> createState() => _EditNameSheetState();
+}
+
+class _EditNameSheetState extends State<_EditNameSheet> {
+  late final _controller = TextEditingController(text: widget.currentName);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit(String trimmed) {
+    if (trimmed.isEmpty || trimmed == widget.currentName) return;
+    Navigator.of(context).pop(trimmed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      // Naik mengikuti tinggi keyboard supaya field-nya tidak ketutupan.
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenPadding,
+              AppSpacing.sm,
+              AppSpacing.screenPadding,
+              AppSpacing.lg,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Center(child: _SheetDragHandle()),
+                const SizedBox(height: AppSpacing.md),
+                Text('Ubah Nama', style: AppTypography.titleLarge),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  'Nama ini akan tampil di profil dan sertifikatmu.',
+                  style: AppTypography.bodySmall,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                AppTextField(
+                  controller: _controller,
+                  hintText: 'Nama lengkap',
+                  icon: Icons.person_outline,
+                  autofocus: true,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (value) => _submit(value.trim()),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _controller,
+                  builder: (context, value, _) {
+                    final trimmed = value.text.trim();
+                    final canSubmit =
+                        trimmed.isNotEmpty && trimmed != widget.currentName;
+                    return PrimaryButton(
+                      label: 'Simpan',
+                      trailingIcon: Icons.check,
+                      onPressed: canSubmit ? () => _submit(trimmed) : null,
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Batal'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Garis kecil di puncak bottom sheet -- penanda visual umum bahwa ini
+/// panel yang bisa ditutup swipe-down, bukan bagian dari layar utama.
+class _SheetDragHandle extends StatelessWidget {
+  const _SheetDragHandle();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: AppColors.border,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
     );
   }

@@ -23,6 +23,7 @@ class AppTextField extends StatefulWidget {
     this.onTap,
     this.suffixIcon,
     this.helperText,
+    this.autofocus = false,
   });
 
   final TextEditingController controller;
@@ -54,6 +55,11 @@ class AppTextField extends StatefulWidget {
   /// Material, supaya tidak dobel dengan pesan error.
   final String? helperText;
 
+  /// Langsung fokus + buka keyboard begitu field ini muncul di layar --
+  /// dipakai untuk field tunggal di bottom sheet (mis. ubah nama) supaya
+  /// pengguna tidak perlu tap dulu.
+  final bool autofocus;
+
   @override
   State<AppTextField> createState() => _AppTextFieldState();
 }
@@ -72,6 +78,7 @@ class _AppTextFieldState extends State<AppTextField> {
           controller: widget.controller,
           enabled: widget.enabled,
           readOnly: widget.readOnly,
+          autofocus: widget.autofocus,
           onTap: widget.onTap,
           obscureText: _hidden,
           keyboardType: widget.keyboardType,
