@@ -4,14 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../module/presentation/module_screen.dart';
 import '../application/learning_providers.dart';
 import '../data/models/journey_detail.dart';
 import 'widgets/module_row.dart';
 
 /// Layar checklist satu journey: header + progress + daftar module
-/// berurutan. Menyentuh satu module memunculkan pesan "belum tersedia" —
-/// layar konsumsi konten (video/kuis/simulasi/dst.) di luar cakupan
-/// pekerjaan ini.
+/// berurutan. Menyentuh satu module membuka layar konsumsi kontennya
+/// (video/materi/infografis/komik/kuis/simulasi/refleksi -- lihat
+/// `ModuleScreen`), lalu me-refresh detail journey ini begitu kembali,
+/// soalnya progress-nya bisa saja sudah berubah di sana.
 class JourneyDetailScreen extends ConsumerWidget {
   const JourneyDetailScreen({super.key, required this.journeyId});
 
@@ -27,7 +29,10 @@ class JourneyDetailScreen extends ConsumerWidget {
         child: RefreshIndicator(
           onRefresh: () => ref.refresh(journeyDetailProvider(journeyId).future),
           child: switch (detailAsync) {
-            AsyncData(:final value) => _JourneyDetailBody(detail: value),
+            AsyncData(:final value) => _JourneyDetailBody(
+              journeyId: journeyId,
+              detail: value,
+            ),
             AsyncError() => ListView(
               padding: const EdgeInsets.all(AppSpacing.screenPadding),
               children: const [_ErrorMessage()],
@@ -40,13 +45,30 @@ class JourneyDetailScreen extends ConsumerWidget {
   }
 }
 
-class _JourneyDetailBody extends StatelessWidget {
-  const _JourneyDetailBody({required this.detail});
+class _JourneyDetailBody extends ConsumerWidget {
+  const _JourneyDetailBody({required this.journeyId, required this.detail});
 
+  final int journeyId;
   final JourneyDetail detail;
 
+  Future<void> _openModule(
+    BuildContext context,
+    WidgetRef ref,
+    int moduleId,
+  ) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => ModuleScreen(moduleId: moduleId)),
+    );
+    // Progress module ini bisa saja berubah di layar yang baru saja ditutup
+    // (selesai baca materi, submit kuis, dst.) -- refresh checklist journey
+    // ini dan ringkasan sektor di dashboard supaya keduanya ikut ter-update,
+    // bukan cuma di-refresh kalau user narik-turun manual.
+    ref.invalidate(journeyDetailProvider(journeyId));
+    ref.invalidate(primarySectorDetailProvider);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final journey = detail.journey;
     final currentModule = detail.currentModule;
 
@@ -78,9 +100,7 @@ class _JourneyDetailBody extends StatelessWidget {
             child: ModuleRow(
               module: module,
               isCurrent: currentModule?.id == module.id,
-              onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Materi ini belum tersedia.')),
-              ),
+              onTap: () => _openModule(context, ref, module.id),
             ),
           ),
         ),

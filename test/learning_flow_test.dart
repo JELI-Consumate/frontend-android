@@ -13,16 +13,20 @@ import 'package:perlindungan_konsumen/features/learning/data/models/journey.dart
 import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
 import 'package:perlindungan_konsumen/features/main/presentation/dashboard_screen.dart';
 import 'package:perlindungan_konsumen/features/main/presentation/journeys_screen.dart';
+import 'package:perlindungan_konsumen/features/module/data/module_repository.dart';
 
 import 'support/fake_learning_repository.dart';
+import 'support/fake_module_repository.dart';
 import 'support/fake_sector_storage.dart';
+import 'support/module_fixtures.dart';
 
 void main() {
   Future<void> pump(
     WidgetTester tester,
     Widget screen,
-    FakeLearningRepository repository,
-  ) async {
+    FakeLearningRepository repository, {
+    FakeModuleRepository? moduleRepository,
+  }) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.reset);
@@ -41,6 +45,12 @@ void main() {
           // di widget test).
           sectorStorageProvider.overrideWithValue(
             FakeSectorStorage(initialSlug: 'e-commerce'),
+          ),
+          // Cuma benar-benar dibaca kalau test menavigasi ke ModuleScreen
+          // (lihat grup JourneyDetailScreen di bawah) -- provider Riverpod
+          // malas, jadi aman dioverride di semua test lewat helper ini.
+          moduleRepositoryProvider.overrideWithValue(
+            moduleRepository ?? FakeModuleRepository(),
           ),
         ],
         child: MaterialApp(theme: AppTheme.light, home: screen),
@@ -168,9 +178,23 @@ void main() {
       expect(find.text('10 menit'), findsOneWidget);
     });
 
-    testWidgets('tap module memunculkan pesan belum tersedia', (tester) async {
+    testWidgets('tap module membuka layar konsumsi konten sesuai tipenya', (
+      tester,
+    ) async {
       final repository = FakeLearningRepository();
-      await pump(tester, const JourneysScreen(), repository);
+      // Module id 2 di fixture default ("Pentingnya Perlindungan Konsumen
+      // dalam E-Commerce") bertipe video -- lihat isi lengkap tiap tipe
+      // konten di `module_flow_test.dart`, di sini cukup pastikan
+      // navigasinya benar-benar terjadi ke layar yang sesuai.
+      final moduleRepository = FakeModuleRepository(
+        modules: {2: videoModuleFixture()},
+      );
+      await pump(
+        tester,
+        const JourneysScreen(),
+        repository,
+        moduleRepository: moduleRepository,
+      );
       await tester.tap(find.text('Kenali Hakmu sebagai Konsumen'));
       await tester.pumpAndSettle();
 
@@ -179,7 +203,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Materi ini belum tersedia.'), findsOneWidget);
+      expect(
+        find.text('Apa risiko belanja online yang paling sering kamu temui?'),
+        findsOneWidget,
+      );
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      // Kembali dari ModuleScreen me-refresh checklist journey ini --
+      // panggilan `journeyDetail` bertambah lagi (sekali waktu buka layar,
+      // sekali lagi waktu kembali).
+      expect(
+        repository.calls.where((call) => call.startsWith('journeyDetail')),
+        hasLength(2),
+      );
     });
   });
 }

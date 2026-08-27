@@ -41,5 +41,12 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Dibutuhkan url_launcher (Android 11+ package visibility) supaya
+             bisa membuka video YouTube di app YouTube/browser -- lihat modul
+             tipe Video. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
     </queries>
 </manifest>

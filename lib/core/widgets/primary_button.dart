@@ -42,7 +42,18 @@ class PrimaryButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(label),
+                // `Flexible` + ellipsis, bukan `Text(label)` polos -- label
+                // panjang (mis. "Kumpulkan Jawaban", "Tonton di YouTube") di
+                // tombol sempit (layar kecil, atau `expand: false`) kalau
+                // tidak akan melempar RenderFlex overflow, bukan terpotong
+                // rapi.
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
                 if (trailingIcon != null) ...[
                   const SizedBox(width: AppSpacing.xs),
                   Icon(trailingIcon, size: 18),
