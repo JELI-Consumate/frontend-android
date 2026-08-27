@@ -6,10 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:perlindungan_konsumen/core/storage/sector_storage.dart';
 import 'package:perlindungan_konsumen/features/auth/data/auth_repository.dart';
 import 'package:perlindungan_konsumen/features/auth/presentation/otp_verification_screen.dart';
+import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 import 'package:perlindungan_konsumen/main.dart';
 
 import 'support/fake_auth_repository.dart';
+import 'support/fake_badge_repository.dart';
 import 'support/fake_learning_repository.dart';
 import 'support/fake_sector_storage.dart';
 
@@ -28,11 +30,13 @@ void main() {
         overrides: [
           authRepositoryProvider.overrideWithValue(repository),
           // MainShell me-render semua tab lewat IndexedStack (bukan lazy),
-          // jadi begitu user login, DashboardScreen & JourneysScreen ikut
-          // ter-build dan minta data lewat provider ini juga.
+          // jadi begitu user login, DashboardScreen, JourneysScreen, dan
+          // BadgesScreen ikut ter-build dan minta data lewat provider ini
+          // juga.
           learningRepositoryProvider.overrideWithValue(
             FakeLearningRepository(),
           ),
+          badgeRepositoryProvider.overrideWithValue(FakeBadgeRepository()),
           sectorStorageProvider.overrideWithValue(
             sectorStorage ?? FakeSectorStorage(initialSlug: 'e-commerce'),
           ),

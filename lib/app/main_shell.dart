@@ -4,7 +4,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_shadows.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/theme/app_typography.dart';
-import '../core/widgets/placeholder_screen.dart';
+import '../features/badges/presentation/badges_screen.dart';
 import '../features/main/presentation/dashboard_screen.dart';
 import '../features/main/presentation/journeys_screen.dart';
 import '../features/main/presentation/profile_screen.dart';
@@ -26,11 +26,7 @@ class _MainShellState extends State<MainShell> {
   static const _tabs = [
     DashboardScreen(),
     JourneysScreen(),
-    PlaceholderScreen(
-      title: 'Pencapaian',
-      message: 'Lencana dan indeks keberdayaanmu akan tampil di sini.',
-      icon: Icons.emoji_events_outlined,
-    ),
+    BadgesScreen(),
     ProfileScreen(),
   ];
 
