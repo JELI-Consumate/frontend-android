@@ -19,7 +19,7 @@ class ApiException implements Exception {
   bool get isGoogleOnlyAccount => code == 'GOOGLE_ONLY_ACCOUNT';
   bool get isInvalidCredentials => code == 'INVALID_CREDENTIALS';
   bool get isEmailNotVerified => code == 'EMAIL_NOT_VERIFIED';
-  bool get isInvalidResetToken => code == 'INVALID_RESET_TOKEN';
+  bool get isInvalidResetOtp => code == 'INVALID_RESET_OTP';
   bool get isInvalidOtp => code == 'INVALID_OTP';
 
   String? firstErrorFor(String field) => fieldErrors[field]?.firstOrNull;

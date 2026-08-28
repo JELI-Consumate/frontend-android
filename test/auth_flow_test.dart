@@ -209,7 +209,7 @@ void main() {
 
       await tester.enterText(
         find.widgetWithText(TextField, 'Kode Reset'),
-        'kode-rahasia',
+        '482913',
       );
       await tester.enterText(
         find.widgetWithText(TextField, 'Kata Sandi Baru'),

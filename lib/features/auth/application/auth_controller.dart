@@ -95,13 +95,13 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<String> resetPassword({
     required String email,
-    required String token,
+    required String otp,
     required String password,
     required String passwordConfirmation,
   }) {
     return _repository.resetPassword(
       email: email,
-      token: token,
+      otp: otp,
       password: password,
       passwordConfirmation: passwordConfirmation,
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -9,7 +10,10 @@ import '../../../core/widgets/primary_button.dart';
 import '../application/auth_controller.dart';
 import 'widgets/auth_error_mapper.dart';
 
-/// Layar terakhir alur lupa kata sandi: kode dari email + kata sandi baru.
+const _kOtpLength = 6;
+
+/// Layar terakhir alur lupa kata sandi: kode 6 digit dari email + kata
+/// sandi baru.
 ///
 /// Tidak ada deep link yang membuka layar ini otomatis dari email, jadi
 /// [initialEmail] hanya pre-fill kenyamanan — kode reset tetap harus
@@ -26,7 +30,7 @@ class ResetPasswordScreen extends ConsumerStatefulWidget {
 
 class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   late final _email = TextEditingController(text: widget.initialEmail ?? '');
-  final _token = TextEditingController();
+  final _otp = TextEditingController();
   final _password = TextEditingController();
   final _passwordConfirmation = TextEditingController();
 
@@ -38,7 +42,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   void dispose() {
     _email.dispose();
-    _token.dispose();
+    _otp.dispose();
     _password.dispose();
     _passwordConfirmation.dispose();
     super.dispose();
@@ -54,8 +58,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       errors['email'] = 'Format email belum benar.';
     }
 
-    if (_token.text.trim().isEmpty) {
-      errors['token'] = 'Kode reset wajib diisi.';
+    if (_otp.text.trim().isEmpty) {
+      errors['otp'] = 'Kode reset wajib diisi.';
+    } else if (_otp.text.trim().length != _kOtpLength) {
+      errors['otp'] = 'Kode reset harus $_kOtpLength digit.';
     }
 
     if (_password.text.isEmpty) {
@@ -84,7 +90,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           .read(authControllerProvider.notifier)
           .resetPassword(
             email: _email.text.trim(),
-            token: _token.text.trim(),
+            otp: _otp.text.trim(),
             password: _password.text,
             passwordConfirmation: _passwordConfirmation.text,
           );
@@ -106,7 +112,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         error,
         knownFields: const {
           'email',
-          'token',
+          'otp',
           'password',
           'password_confirmation',
         },
@@ -157,12 +163,17 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 AppTextField(
-                  controller: _token,
+                  controller: _otp,
                   hintText: 'Kode Reset',
                   icon: Icons.vpn_key_outlined,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(_kOtpLength),
+                  ],
                   textInputAction: TextInputAction.next,
                   enabled: !isLoading,
-                  errorText: _errors['token'],
+                  errorText: _errors['otp'],
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 AppTextField(

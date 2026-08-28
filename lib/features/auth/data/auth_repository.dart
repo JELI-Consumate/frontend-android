@@ -105,16 +105,16 @@ class AuthRepository {
         data: {'email': email},
       );
       return _messageOf(response.data) ??
-          'Jika email terdaftar, tautan reset kata sandi telah dikirim.';
+          'Jika email terdaftar, kode reset kata sandi telah dikirim.';
     });
   }
 
-  /// [token] adalah kode yang dikirim lewat email — pengguna menyalinnya
-  /// manual ke aplikasi karena belum ada deep link yang membuka layar ini
-  /// langsung dari email.
+  /// [otp] adalah kode 6 digit yang dikirim lewat email — pengguna
+  /// menyalinnya manual ke aplikasi karena belum ada deep link yang membuka
+  /// layar ini langsung dari email.
   Future<String> resetPassword({
     required String email,
-    required String token,
+    required String otp,
     required String password,
     required String passwordConfirmation,
   }) {
@@ -123,7 +123,7 @@ class AuthRepository {
         '/auth/reset-password',
         data: {
           'email': email,
-          'token': token,
+          'otp': otp,
           'password': password,
           'password_confirmation': passwordConfirmation,
         },

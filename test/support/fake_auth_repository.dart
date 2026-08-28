@@ -101,7 +101,7 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   String forgotPasswordMessage =
-      'Jika email terdaftar, tautan reset kata sandi telah dikirim.';
+      'Jika email terdaftar, kode reset kata sandi telah dikirim.';
   String resetPasswordMessage = 'Kata sandi berhasil direset.';
   String resendOtpMessage =
       'Jika email terdaftar dan belum diverifikasi, kode OTP baru telah dikirim.';
@@ -116,7 +116,7 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<String> resetPassword({
     required String email,
-    required String token,
+    required String otp,
     required String password,
     required String passwordConfirmation,
   }) async {
