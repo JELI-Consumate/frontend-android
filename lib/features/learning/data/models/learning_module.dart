@@ -39,6 +39,7 @@ class LearningModule {
     required this.estimatedMinutes,
     required this.isRequired,
     required this.progress,
+    required this.locked,
   });
 
   final int id;
@@ -49,6 +50,12 @@ class LearningModule {
   final int estimatedMinutes;
   final bool isRequired;
   final LearningProgress progress;
+
+  /// true kalau module SEBELUMNYA (order - 1) di journey yang sama belum
+  /// completed -- module pertama di journey selalu `false` (lihat
+  /// `JourneyController::attachModuleProgress` di backend). Menentukan
+  /// apakah baris ini masih bisa disentuh di `ModuleRow`.
+  final bool locked;
 
   factory LearningModule.fromJson(Map<String, dynamic> json) {
     return LearningModule(
@@ -62,6 +69,7 @@ class LearningModule {
       progress: LearningProgress.fromJson(
         json['progress'] as Map<String, dynamic>?,
       ),
+      locked: json['locked'] as bool? ?? false,
     );
   }
 }

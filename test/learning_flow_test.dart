@@ -219,5 +219,35 @@ void main() {
         hasLength(2),
       );
     });
+
+    testWidgets('module terkunci menampilkan gembok dan tidak bisa disentuh', (
+      tester,
+    ) async {
+      final repository = FakeLearningRepository();
+      // Module id 3 di fixture default ("Mengenal Aturan Hukum Saat Belanja
+      // Online") terkunci -- module 2 sebelumnya belum completed.
+      final moduleRepository = FakeModuleRepository(
+        modules: {3: articleModuleFixture()},
+      );
+      await pump(
+        tester,
+        const JourneysScreen(),
+        repository,
+        moduleRepository: moduleRepository,
+      );
+      await tester.tap(find.text('Kenali Hakmu sebagai Konsumen'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Selesaikan modul sebelumnya'), findsOneWidget);
+
+      await tester.tap(
+        find.text('3. Mengenal Aturan Hukum Saat Belanja Online'),
+      );
+      await tester.pumpAndSettle();
+
+      // Tidak menavigasi kemana-mana -- masih di layar detail journey.
+      expect(find.text('Progres Belajar'), findsOneWidget);
+      expect(moduleRepository.calls, isEmpty);
+    });
   });
 }

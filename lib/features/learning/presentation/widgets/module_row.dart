@@ -7,11 +7,11 @@ import '../../data/models/learning_module.dart';
 
 /// Satu baris di checklist journey -- selalu kartu putih bertepi, dengan dua
 /// varian border: module yang sedang dikerjakan (tepi biru menonjol) dan
-/// sisanya (tepi abu-abu tipis biasa).
-///
-/// Catatan: backend tidak mengunci module satu-satu di dalam journey
-/// (cuma journey yang dikunci berurutan — lihat JourneyAccessService), jadi
-/// semua baris di sini tetap bisa disentuh, tidak ada gembok per-module.
+/// sisanya (tepi abu-abu tipis biasa). Module terkunci (`module.locked`)
+/// ditampilkan pudar dengan gembok, tidak bisa disentuh -- sesuai pola yang
+/// sama dengan `JourneyCard` untuk journey terkunci: module sebelumnya
+/// (order - 1) di journey ini harus completed dulu (lihat
+/// `ModuleAccessService` di backend).
 class ModuleRow extends StatelessWidget {
   const ModuleRow({
     super.key,
@@ -27,55 +27,100 @@ class ModuleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCompleted = module.progress.status.isCompleted;
+    final isLocked = module.locked;
 
-    final content = Row(
-      children: [
-        _StatusIcon(
-          type: module.type,
-          isCompleted: isCompleted,
-          isCurrent: isCurrent,
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${module.order}. ${module.title}',
-                style: AppTypography.bodyLarge.copyWith(
-                  fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              _Subtitle(
-                type: module.type,
-                isCompleted: isCompleted,
-                module: module,
-              ),
-            ],
+    final titleStyle = AppTypography.bodyLarge.copyWith(
+      fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
+    );
+    final subtitleStyle = AppTypography.bodySmall;
+
+    // Tinggi kotak dipatok dari kasus TERPANJANG (judul 2 baris + subtitle)
+    // supaya seluruh baris sama tinggi, TAPI teksnya sendiri (title+subtitle)
+    // dibiarkan setinggi aslinya lalu di-tengahkan lewat `SizedBox` + `Row`
+    // yang center secara vertikal (default `Row`) -- bukan judulnya sendiri
+    // yang dipaksa 2 baris, soalnya itu bikin jarak kosong besar menganga di
+    // bawah judul begitu judulnya kebetulan cuma 1 baris.
+    final rowHeight =
+        (titleStyle.fontSize ?? 15) * (titleStyle.height ?? 1) * 2 +
+        2 +
+        (subtitleStyle.fontSize ?? 13) * (subtitleStyle.height ?? 1);
+
+    final content = SizedBox(
+      height: rowHeight,
+      child: Row(
+        children: [
+          _StatusIcon(
+            type: module.type,
+            isCompleted: isCompleted,
+            isCurrent: isCurrent,
+            isLocked: isLocked,
           ),
-        ),
-        Icon(Icons.chevron_right, color: AppColors.muted),
-      ],
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${module.order}. ${module.title}',
+                  style: titleStyle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                if (isLocked)
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.lock_outline,
+                        size: 13,
+                        color: AppColors.inkMuted,
+                      ),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          'Selesaikan modul sebelumnya',
+                          style: subtitleStyle.copyWith(
+                            color: AppColors.inkMuted,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  _Subtitle(
+                    type: module.type,
+                    isCompleted: isCompleted,
+                    module: module,
+                  ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: AppColors.muted),
+        ],
+      ),
     );
 
-    return Material(
-      color: AppColors.white,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        side: BorderSide(
-          color: isCurrent ? AppColors.primary : AppColors.border,
-          width: isCurrent ? 1.4 : 1,
+    return Opacity(
+      opacity: isLocked ? 0.5 : 1,
+      child: Material(
+        color: AppColors.white,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          side: BorderSide(
+            color: isCurrent ? AppColors.primary : AppColors.border,
+            width: isCurrent ? 1.4 : 1,
+          ),
         ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: content,
+        child: InkWell(
+          onTap: isLocked ? null : onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: content,
+          ),
         ),
       ),
     );
@@ -147,14 +192,24 @@ class _StatusIcon extends StatelessWidget {
     required this.type,
     required this.isCompleted,
     required this.isCurrent,
+    required this.isLocked,
   });
 
   final ModuleContentType type;
   final bool isCompleted;
   final bool isCurrent;
+  final bool isLocked;
 
   @override
   Widget build(BuildContext context) {
+    if (isLocked) {
+      return CircleAvatar(
+        radius: 18,
+        backgroundColor: AppColors.background,
+        child: Icon(Icons.lock_outline, color: AppColors.inkMuted, size: 18),
+      );
+    }
+
     // Module yang sedang dikerjakan tetap ditandai kartu biru menonjol
     // meski kebetulan sudah selesai (mis. "Opening Journey" di awal) --
     // status "Selesai"-nya tetap kelihatan lewat subtitle, bukan lewat

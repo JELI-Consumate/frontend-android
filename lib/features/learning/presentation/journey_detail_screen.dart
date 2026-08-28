@@ -9,11 +9,6 @@ import '../application/learning_providers.dart';
 import '../data/models/journey_detail.dart';
 import 'widgets/module_row.dart';
 
-/// Layar checklist satu journey: header + progress + daftar module
-/// berurutan. Menyentuh satu module membuka layar konsumsi kontennya
-/// (video/materi/infografis/komik/kuis/simulasi/refleksi -- lihat
-/// `ModuleScreen`), lalu me-refresh detail journey ini begitu kembali,
-/// soalnya progress-nya bisa saja sudah berubah di sana.
 class JourneyDetailScreen extends ConsumerWidget {
   const JourneyDetailScreen({super.key, required this.journeyId});
 
@@ -57,12 +52,13 @@ class _JourneyDetailBody extends ConsumerWidget {
     int moduleId,
   ) async {
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => ModuleScreen(moduleId: moduleId)),
+      MaterialPageRoute<void>(
+        builder: (_) => ModuleScreen(
+          moduleId: moduleId,
+          journeyModuleIds: detail.modules.map((module) => module.id).toList(),
+        ),
+      ),
     );
-    // Progress module ini bisa saja berubah di layar yang baru saja ditutup
-    // (selesai baca materi, submit kuis, dst.) -- refresh checklist journey
-    // ini dan ringkasan sektor di dashboard supaya keduanya ikut ter-update,
-    // bukan cuma di-refresh kalau user narik-turun manual.
     ref.invalidate(journeyDetailProvider(journeyId));
     ref.invalidate(primarySectorDetailProvider);
   }
@@ -80,7 +76,13 @@ class _JourneyDetailBody extends ConsumerWidget {
         AppSpacing.xl,
       ),
       children: [
-        _JourneyBadge(order: journey.order),
+        // Dibungkus `Align` -- tanpa ini, `ListView` memberi lebar TIGHT
+        // (dipaksa selebar layar) ke tiap child-nya, jadi badge pill ini
+        // ikut melebar penuh walau `Row`-nya sendiri `mainAxisSize.min`.
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _JourneyBadge(order: journey.order),
+        ),
         const SizedBox(height: AppSpacing.sm),
         Text(journey.title, style: AppTypography.displaySmall),
         if (journey.description case final description?) ...[

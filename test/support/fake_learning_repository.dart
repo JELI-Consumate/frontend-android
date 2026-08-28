@@ -98,6 +98,7 @@ class FakeLearningRepository implements LearningRepository {
         status: LearningStatus.completed,
         percent: 100,
       ),
+      locked: false,
     ),
     LearningModule(
       id: 2,
@@ -108,6 +109,7 @@ class FakeLearningRepository implements LearningRepository {
       estimatedMinutes: 10,
       isRequired: true,
       progress: LearningProgress.zero,
+      locked: false, // module 1 (sebelumnya) sudah completed
     ),
     LearningModule(
       id: 3,
@@ -118,6 +120,7 @@ class FakeLearningRepository implements LearningRepository {
       estimatedMinutes: 5,
       isRequired: true,
       progress: LearningProgress.zero,
+      locked: true, // module 2 (sebelumnya) belum completed
     ),
     LearningModule(
       id: 11,
@@ -128,6 +131,7 @@ class FakeLearningRepository implements LearningRepository {
       estimatedMinutes: 10,
       isRequired: true,
       progress: LearningProgress.zero,
+      locked: true,
     ),
     LearningModule(
       id: 12,
@@ -138,6 +142,7 @@ class FakeLearningRepository implements LearningRepository {
       estimatedMinutes: 5,
       isRequired: true,
       progress: LearningProgress.zero,
+      locked: true,
     ),
   ];
 
