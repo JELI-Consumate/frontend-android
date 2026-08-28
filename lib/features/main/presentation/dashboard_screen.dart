@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_alert_dialog.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../learning/application/learning_providers.dart';
 import '../../learning/data/models/sector_detail.dart';
@@ -156,8 +157,11 @@ class _SearchBarStub extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pencarian belum tersedia.')),
+        onTap: () => showAppAlert(
+          context,
+          type: AppAlertType.info,
+          title: 'Belum Tersedia',
+          message: 'Pencarian belum tersedia.',
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(

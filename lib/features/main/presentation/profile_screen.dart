@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_alert_dialog.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../auth/application/auth_controller.dart';
@@ -24,11 +25,24 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _busy = false;
 
-  void _showMessage(String message) {
+  void _showSuccess(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
+    showAppAlert(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+      type: AppAlertType.success,
+      title: 'Berhasil',
+      message: message,
+    );
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    showAppAlert(
+      context,
+      type: AppAlertType.error,
+      title: 'Terjadi Kesalahan',
+      message: message,
+    );
   }
 
   Future<void> _run(Future<void> Function() action) async {
@@ -36,9 +50,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       await action();
     } on ApiException catch (error) {
-      _showMessage(error.message);
+      _showError(error.message);
     } catch (_) {
-      _showMessage('Terjadi kesalahan tak terduga. Coba lagi sebentar.');
+      _showError('Terjadi kesalahan tak terduga. Coba lagi sebentar.');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -58,35 +72,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       await ref
           .read(authControllerProvider.notifier)
           .updateProfile(name: newName);
-      _showMessage('Nama berhasil diperbarui.');
+      _showSuccess('Nama berhasil diperbarui.');
     });
   }
 
   Future<void> _confirmSignOut() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.white,
-        title: Text('Keluar dari akun?', style: AppTypography.titleLarge),
-        content: Text(
-          'Kamu perlu masuk lagi untuk melanjutkan belajar.',
-          style: AppTypography.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Keluar', style: TextStyle(color: AppColors.danger)),
-          ),
-        ],
-      ),
+    await showAppAlert(
+      context,
+      type: AppAlertType.warning,
+      title: 'Keluar dari akun?',
+      message: 'Kamu perlu masuk lagi untuk melanjutkan belajar.',
+      confirmLabel: 'Keluar',
+      cancelLabel: 'Batal',
+      onConfirm: () => _run(ref.read(authControllerProvider.notifier).signOut),
     );
-
-    if (confirmed != true) return;
-    await _run(ref.read(authControllerProvider.notifier).signOut);
   }
 
   @override

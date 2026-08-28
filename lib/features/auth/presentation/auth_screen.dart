@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/app_alert_dialog.dart';
 import '../../../core/widgets/segmented_tabs.dart';
 import 'forgot_password_screen.dart';
 import 'widgets/auth_header.dart';
@@ -31,9 +32,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   void _notYetAvailable(String feature) {
-    ScaffoldMessenger.of(
+    showAppAlert(
       context,
-    ).showSnackBar(SnackBar(content: Text('$feature belum tersedia.')));
+      type: AppAlertType.info,
+      title: 'Belum Tersedia',
+      message: '$feature belum tersedia.',
+    );
   }
 
   @override

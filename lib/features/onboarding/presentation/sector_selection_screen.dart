@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_alert_dialog.dart';
 import '../../learning/application/learning_providers.dart';
 import '../../learning/data/models/sector.dart';
 import '../application/sector_selection_provider.dart';
@@ -37,10 +38,11 @@ class _SectorSelectionScreenState extends ConsumerState<SectorSelectionScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() => _savingSlug = null);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tidak bisa menyimpan pilihan sektor. Coba lagi.'),
-        ),
+      showAppAlert(
+        context,
+        type: AppAlertType.error,
+        title: 'Gagal Menyimpan',
+        message: 'Tidak bisa menyimpan pilihan sektor. Coba lagi.',
       );
     }
   }

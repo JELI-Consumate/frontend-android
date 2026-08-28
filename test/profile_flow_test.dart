@@ -121,4 +121,37 @@ void main() {
       findsNothing,
     );
   });
+
+  testWidgets(
+    'tombol Keluar memunculkan modal konfirmasi, Batal tidak keluar',
+    (tester) async {
+      final repository = await pumpProfileTab(tester);
+
+      await tester.tap(find.text('Keluar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Keluar dari akun?'), findsOneWidget);
+
+      await tester.tap(find.text('Batal'));
+      await tester.pumpAndSettle();
+
+      expect(repository.calls, isNot(contains('logout')));
+      expect(find.text('Keluar dari akun?'), findsNothing);
+    },
+  );
+
+  testWidgets('konfirmasi Keluar pada modal memicu sign out', (tester) async {
+    final repository = await pumpProfileTab(tester);
+
+    await tester.tap(find.text('Keluar'));
+    await tester.pumpAndSettle();
+
+    // Ada 2 "Keluar" di layar sekarang: tombol pemicu di baris profil (sudah
+    // ketutup di belakang modal) dan tombol konfirmasi di dalam modal --
+    // ambil yang PALING TERAKHIR (di atas, dalam modal).
+    await tester.tap(find.text('Keluar').last);
+    await tester.pumpAndSettle();
+
+    expect(repository.calls, contains('logout'));
+  });
 }
