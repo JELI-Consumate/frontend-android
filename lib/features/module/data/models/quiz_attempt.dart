@@ -82,3 +82,36 @@ class QuizAttempt {
     );
   }
 }
+
+/// Hasil satu panggilan `POST /quiz-attempts/{id}/check` -- gaya ujian, BEDA
+/// dari `SimulationCheckResult`: jawaban salah TETAP disimpan (soal langsung
+/// terkunci untuk attempt ini), bukan ditolak-boleh-coba-lagi.
+///
+/// [correct]/[correctOptionId]/[explanation] semuanya `null` untuk
+/// pertanyaan segmen likert -- tidak ada benar/salah di situ. [attempt]
+/// selalu snapshot TERBARU seluruh attempt -- begitu SEMUA pertanyaan sudah
+/// dicek, `attempt.review` sudah lengkap tanpa perlu panggilan submit
+/// terpisah lagi (lihat `QuizAttempt.review`).
+@immutable
+class QuizAnswerCheckResult {
+  const QuizAnswerCheckResult({
+    required this.correct,
+    required this.correctOptionId,
+    required this.explanation,
+    required this.attempt,
+  });
+
+  final bool? correct;
+  final int? correctOptionId;
+  final String? explanation;
+  final QuizAttempt attempt;
+
+  factory QuizAnswerCheckResult.fromJson(Map<String, dynamic> json) {
+    return QuizAnswerCheckResult(
+      correct: json['correct'] as bool?,
+      correctOptionId: (json['correct_option_id'] as num?)?.toInt(),
+      explanation: json['explanation'] as String?,
+      attempt: QuizAttempt.fromJson(json['attempt'] as Map<String, dynamic>),
+    );
+  }
+}

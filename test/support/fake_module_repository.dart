@@ -1,4 +1,5 @@
 import 'package:perlindungan_konsumen/core/network/api_exception.dart';
+import 'package:perlindungan_konsumen/features/module/data/models/content/quiz_content.dart';
 import 'package:perlindungan_konsumen/features/module/data/models/content/reflection_content.dart';
 import 'package:perlindungan_konsumen/features/module/data/models/module_detail.dart';
 import 'package:perlindungan_konsumen/features/module/data/models/quiz_attempt.dart';
@@ -28,7 +29,11 @@ class FakeModuleRepository implements ModuleRepository {
   // definisi -- likert tidak ada benar/salah). ---
   static const correctChoiceOptionByQuestion = {201: 301, 202: 304};
   static const likertOptionValue = {401: 1, 402: 2, 403: 3, 404: 4, 405: 5};
+  static const totalQuizQuestions = 3; // 201, 202 (choice) + 203 (likert)
   int quizAttemptCounter = 0;
+  final Map<int, int> _quizChoiceAnswers = {};
+  final Map<int, bool> _quizChoiceCorrectness = {};
+  final Map<int, int> _quizLikertAnswers = {};
 
   // --- Simulasi ordering: langkah id 601..603 -> posisi benar 1,2,3. ---
   static const correctOrderingPosition = {601: 1, 602: 2, 603: 3};
@@ -60,56 +65,92 @@ class FakeModuleRepository implements ModuleRepository {
     calls.add('startQuizAttempt($quizContentId)');
     if (failWith != null) throw failWith!;
     quizAttemptCounter++;
+    _quizChoiceAnswers.clear();
+    _quizChoiceCorrectness.clear();
+    _quizLikertAnswers.clear();
     return quizAttemptCounter;
   }
 
+  /// Meniru `QuizScoringService::checkAnswer` -- gaya ujian: soal pilihan
+  /// ganda yang SUDAH pernah dicek terkunci ke hasil PERTAMA kali tersimpan
+  /// (jawaban baru yang dikirim diabaikan), beda dari simulasi yang boleh
+  /// dicoba lagi. `review` di [QuizAttempt] cuma terisi begitu SEMUA
+  /// pertanyaan (choice + likert) sudah pernah dicek.
   @override
-  Future<QuizAttempt> submitQuizAttempt({
+  Future<QuizAnswerCheckResult> checkQuizAnswer({
     required int attemptId,
-    required Map<int, int> choiceAnswers,
-    required Map<int, int> likertAnswers,
+    required int questionId,
+    required QuizSegmentType type,
+    int? choiceOptionId,
+    int? likertOptionId,
   }) async {
-    calls.add('submitQuizAttempt($attemptId)');
+    calls.add('checkQuizAnswer($attemptId, $questionId)');
     if (failWith != null) throw failWith!;
 
-    var score = 0;
-    final review = <QuizReviewItem>[];
-    for (final entry in choiceAnswers.entries) {
-      final correctOptionId = correctChoiceOptionByQuestion[entry.key];
-      final isCorrect = correctOptionId == entry.value;
-      if (isCorrect) score++;
-      review.add(
-        QuizReviewItem(
-          quizQuestionId: entry.key,
-          question: 'Soal ${entry.key}',
-          selectedOptionId: entry.value,
-          correctOptionId: correctOptionId,
-          isCorrect: isCorrect,
-          explanation: isCorrect ? null : 'Penjelasan soal ${entry.key}.',
-        ),
-      );
+    bool? correct;
+    int? correctOptionId;
+    String? explanation;
+
+    if (type == QuizSegmentType.likert) {
+      _quizLikertAnswers.putIfAbsent(questionId, () => likertOptionId!);
+    } else {
+      correctOptionId = correctChoiceOptionByQuestion[questionId];
+      explanation = 'Penjelasan soal $questionId.';
+
+      if (_quizChoiceAnswers.containsKey(questionId)) {
+        correct = _quizChoiceCorrectness[questionId];
+      } else {
+        correct = correctOptionId == choiceOptionId;
+        _quizChoiceAnswers[questionId] = choiceOptionId!;
+        _quizChoiceCorrectness[questionId] = correct;
+      }
     }
 
-    final maxScore = choiceAnswers.length;
-    final percentage = maxScore > 0 ? (score * 100) ~/ maxScore : 0;
+    final answeredCount = _quizChoiceAnswers.length + _quizLikertAnswers.length;
+    final isCompleted = answeredCount >= totalQuizQuestions;
 
-    final likertValues = likertAnswers.values
+    final choiceScore = _quizChoiceCorrectness.values.where((v) => v).length;
+    final choiceMaxScore = _quizChoiceAnswers.length;
+    final percentage = isCompleted && choiceMaxScore > 0
+        ? (choiceScore * 100) ~/ choiceMaxScore
+        : null;
+
+    final likertValues = _quizLikertAnswers.values
         .map((optionId) => likertOptionValue[optionId] ?? 0)
         .toList();
-    final likertAverage = likertValues.isEmpty
-        ? null
-        : likertValues.reduce((a, b) => a + b) / likertValues.length;
+    final likertAverage = isCompleted && likertValues.isNotEmpty
+        ? likertValues.reduce((a, b) => a + b) / likertValues.length
+        : null;
 
-    return QuizAttempt(
-      attemptId: attemptId,
-      quizContentId: 100,
-      attemptNumber: attemptId,
-      choiceScore: score,
-      choiceMaxScore: maxScore,
-      percentage: percentage,
-      passed: percentage >= 70,
-      likertAverage: likertAverage,
-      review: review,
+    final review = isCompleted
+        ? [
+            for (final entry in _quizChoiceAnswers.entries)
+              QuizReviewItem(
+                quizQuestionId: entry.key,
+                question: 'Soal ${entry.key}',
+                selectedOptionId: entry.value,
+                correctOptionId: correctChoiceOptionByQuestion[entry.key],
+                isCorrect: _quizChoiceCorrectness[entry.key] ?? false,
+                explanation: 'Penjelasan soal ${entry.key}.',
+              ),
+          ]
+        : const <QuizReviewItem>[];
+
+    return QuizAnswerCheckResult(
+      correct: correct,
+      correctOptionId: correctOptionId,
+      explanation: explanation,
+      attempt: QuizAttempt(
+        attemptId: attemptId,
+        quizContentId: 100,
+        attemptNumber: attemptId,
+        choiceScore: isCompleted ? choiceScore : null,
+        choiceMaxScore: isCompleted ? choiceMaxScore : null,
+        percentage: percentage,
+        passed: isCompleted && percentage != null ? percentage >= 70 : null,
+        likertAverage: likertAverage,
+        review: review,
+      ),
     );
   }
 

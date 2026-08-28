@@ -6,6 +6,7 @@ import '../../../core/network/api_exception.dart';
 import 'models/module_detail.dart';
 import 'models/quiz_attempt.dart';
 import 'models/simulation_attempt.dart';
+import 'models/content/quiz_content.dart';
 import 'models/content/reflection_content.dart';
 
 class ModuleRepository {
@@ -49,36 +50,30 @@ class ModuleRepository {
     });
   }
 
-  /// [choiceAnswers]: `quiz_question_id -> quiz_choice_option_id` yang
-  /// dipilih user. [likertAnswers]: `quiz_question_id -> likert_scale_option_id`.
-  /// Backend menandai halaman ini selesai begitu attempt disubmit, apapun
-  /// hasilnya (lihat `QuizScoringService::submit`).
-  Future<QuizAttempt> submitQuizAttempt({
+  /// `POST /quiz-attempts/{id}/check` -- cek SATU pertanyaan per panggilan,
+  /// gaya ujian (BEDA dari simulasi: jawaban salah TETAP disimpan, soal
+  /// langsung terkunci untuk attempt ini, tidak boleh dicoba lagi). Attempt
+  /// otomatis selesai (+ halaman module ditandai selesai) begitu SELURUH
+  /// pertanyaan sudah pernah dicek -- lihat `QuizScoringService::checkAnswer`
+  /// di backend.
+  Future<QuizAnswerCheckResult> checkQuizAnswer({
     required int attemptId,
-    required Map<int, int> choiceAnswers,
-    required Map<int, int> likertAnswers,
+    required int questionId,
+    required QuizSegmentType type,
+    int? choiceOptionId,
+    int? likertOptionId,
   }) {
     return guardApi(() async {
       final response = await _dio.post<Map<String, dynamic>>(
-        '/quiz-attempts/$attemptId/submit',
+        '/quiz-attempts/$attemptId/check',
         data: {
-          'choice_answers': [
-            for (final entry in choiceAnswers.entries)
-              {
-                'quiz_question_id': entry.key,
-                'quiz_choice_option_id': entry.value,
-              },
-          ],
-          'likert_answers': [
-            for (final entry in likertAnswers.entries)
-              {
-                'quiz_question_id': entry.key,
-                'likert_scale_option_id': entry.value,
-              },
-          ],
+          'type': type == QuizSegmentType.likert ? 'likert' : 'multiple_choice',
+          'quiz_question_id': questionId,
+          'quiz_choice_option_id': ?choiceOptionId,
+          'likert_scale_option_id': ?likertOptionId,
         },
       );
-      return QuizAttempt.fromJson(_requireData(response.data));
+      return QuizAnswerCheckResult.fromJson(_requireData(response.data));
     });
   }
 
