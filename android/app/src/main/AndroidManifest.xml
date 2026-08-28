@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Dibutuhkan API (dio), gambar konten (Image.network), dan player
+         YouTube tertanam (webview_flutter) — sebelumnya cuma dideklarasikan
+         di manifest debug/profile (auto oleh Flutter buat hot reload), jadi
+         build release sungguhan tidak akan bisa akses internet sama sekali
+         tanpa baris ini. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Perlindungan Konsumen"
         android:name="${applicationName}"
@@ -42,7 +48,7 @@
             <data android:mimeType="text/plain"/>
         </intent>
         <!-- Dibutuhkan url_launcher (Android 11+ package visibility) supaya
-             bisa membuka video YouTube di app YouTube/browser -- lihat modul
+             bisa membuka video YouTube di app YouTube/browser — lihat modul
              tipe Video. -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
