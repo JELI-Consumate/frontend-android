@@ -3,15 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_alert_dialog.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../data/models/content/reflection_content.dart';
 import '../data/models/module_detail.dart';
 import '../data/models/module_page.dart';
 import '../data/module_repository.dart';
 import 'widgets/module_async_scaffold.dart';
-import 'widgets/module_header.dart';
+import 'widgets/module_bottom_bar.dart';
+import 'widgets/module_page_nav.dart';
+import 'widgets/module_top_bar.dart';
 
 /// Modul tipe `refleksi` -- jurnal tanpa skor benar/salah (BR-10). Selesai
 /// otomatis di server begitu SEMUA pertanyaan `open_question` terisi
@@ -20,15 +24,26 @@ import 'widgets/module_header.dart';
 /// Kontennya diambil dari `GET /reflections/{id}`, BUKAN dari
 /// `GET /modules/{id}` -- respons module tree tidak membawa jawaban
 /// tersimpan user (lihat `ModuleRepository.reflection`).
+///
+/// Tiap section ditampilkan sebagai kartu terpisah (ikon + judul + soal-soal
+/// di dalamnya), bukan lagi daftar polos memanjang. Tombolnya SATU sepanjang
+/// alurnya, cuma beda peran: "Simpan Jawaban" kalau belum lengkap, berubah
+/// jadi tombol gabungan "Selanjutnya"/"Selesai" (lihat `ModuleContinueButton`)
+/// begitu satu kali penyimpanan berhasil melengkapi semua pertanyaan (lihat
+/// `_savedComplete`) -- bukan langsung berubah begitu user selesai mengetik,
+/// supaya jawaban yang baru diketik tidak lompat ke halaman berikutnya tanpa
+/// sempat tersimpan dulu.
 class ReflectionModuleScreen extends ConsumerStatefulWidget {
   const ReflectionModuleScreen({
     super.key,
     required this.module,
     required this.page,
+    required this.nav,
   });
 
   final ModuleDetail module;
   final ModulePage page;
+  final ModulePageNav nav;
 
   @override
   ConsumerState<ReflectionModuleScreen> createState() =>
@@ -40,6 +55,12 @@ class _ReflectionModuleScreenState
   ReflectionContent? _content;
   ApiException? _loadError;
   bool _saving = false;
+
+  /// true begitu SATU KALI penyimpanan berhasil sewaktu semua pertanyaan
+  /// sudah terisi -- beda dari `_isComplete` (heuristik lokal dari teks yang
+  /// SEDANG diketik, belum tentu tersimpan). Menentukan kapan tombol berubah
+  /// peran dari "Simpan Jawaban" jadi tombol lanjut (lihat `build`).
+  late bool _savedComplete = widget.page.status.isCompleted;
 
   final Map<int, TextEditingController> _controllers = {};
   final Map<int, bool> _checklist = {};
@@ -103,9 +124,9 @@ class _ReflectionModuleScreenState
     );
   }
 
-  Future<void> _save() async {
+  Future<bool> _save() async {
     final content = _content;
-    if (content == null) return;
+    if (content == null) return false;
 
     setState(() => _saving = true);
     try {
@@ -120,20 +141,40 @@ class _ReflectionModuleScreenState
             checklistAnswers: Map.of(_checklist),
           );
       if (mounted) {
-        setState(() => _content = updated);
-        ScaffoldMessenger.of(
+        setState(() {
+          _content = updated;
+          if (_isComplete) _savedComplete = true;
+        });
+        showAppAlert(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Jawaban tersimpan.')));
+          type: AppAlertType.success,
+          title: 'Berhasil',
+          message: 'Jawaban tersimpan.',
+        );
       }
+      return true;
     } on ApiException catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        showAppAlert(
           context,
-        ).showSnackBar(SnackBar(content: Text(error.message)));
+          type: AppAlertType.error,
+          title: 'Gagal Menyimpan',
+          message: error.message,
+        );
       }
+      return false;
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// Dipanggil dari tombol begitu perannya sudah jadi "lanjut" (lihat
+  /// `build`) -- simpan dulu (jaga-jaga kalau ada perubahan setelah
+  /// `_savedComplete` jadi true) baru pindah ke halaman/module berikutnya.
+  Future<void> _continue() async {
+    final ok = await _save();
+    if (!ok || !mounted) return;
+    widget.nav.onAdvance();
   }
 
   @override
@@ -153,33 +194,57 @@ class _ReflectionModuleScreenState
         .length;
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.module.title)),
+      appBar: ModuleTopBar(
+        position: widget.nav.modulePosition,
+        total: widget.nav.moduleTotal,
+      ),
       body: SafeArea(
-        child: ListView(
+        bottom: false,
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.screenPadding),
-          children: [
-            ModuleHeader(module: widget.module),
-            const SizedBox(height: AppSpacing.sm),
-            _MessageCard(
-              icon: Icons.auto_stories_outlined,
-              color: AppColors.primary,
-              text: content.openingMessage,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            for (final section in [
-              ...content.sections,
-            ]..sort((a, b) => a.order.compareTo(b.order))) ...[
-              _SectionView(
-                section: section,
-                controllers: _controllers,
-                checklist: _checklist,
-                onChecklistToggled: (itemId, value) =>
-                    setState(() => _checklist[itemId] = value),
-                onAnswerChanged: () => setState(() {}),
-              ),
-              const SizedBox(height: AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final section in [
+                ...content.sections,
+              ]..sort((a, b) => a.order.compareTo(b.order))) ...[
+                _SectionCard(
+                  section: section,
+                  controllers: _controllers,
+                  checklist: _checklist,
+                  onChecklistToggled: (itemId, value) =>
+                      setState(() => _checklist[itemId] = value),
+                  onAnswerChanged: () => setState(() {}),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+              if (content.closingMessage case final closingMessage?
+                  when _isComplete) ...[
+                Text(
+                  content.closingTitle ?? 'Kata Penutup',
+                  style: AppTypography.displaySmall.copyWith(
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  closingMessage,
+                  style: AppTypography.bodyMedium,
+                  textAlign: TextAlign.justify,
+                ),
+              ],
             ],
-            if (openQuestions.isNotEmpty) ...[
+          ),
+        ),
+      ),
+      bottomNavigationBar: ModuleBottomBar(
+        pageCount: widget.nav.pageCount,
+        pageIndex: widget.nav.pageIndex,
+        onDotTap: widget.nav.onDotTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!_savedComplete && openQuestions.isNotEmpty) ...[
               Text(
                 '$answeredCount/${openQuestions.length} pertanyaan terisi',
                 style: AppTypography.bodySmall,
@@ -188,21 +253,15 @@ class _ReflectionModuleScreenState
               const SizedBox(height: AppSpacing.sm),
             ],
             PrimaryButton(
-              label: 'Simpan Jawaban',
-              trailingIcon: Icons.save_outlined,
+              label: _savedComplete
+                  ? (widget.nav.hasNext ? 'Selanjutnya' : 'Selesai')
+                  : 'Simpan Jawaban',
+              trailingIcon: _savedComplete
+                  ? (widget.nav.hasNext ? Icons.arrow_forward : Icons.check)
+                  : Icons.save_outlined,
               isLoading: _saving,
-              onPressed: _save,
+              onPressed: _savedComplete ? _continue : _save,
             ),
-            if (content.closingMessage case final closingMessage?
-                when _isComplete) ...[
-              const SizedBox(height: AppSpacing.lg),
-              _MessageCard(
-                icon: Icons.emoji_events_outlined,
-                color: AppColors.success,
-                title: content.closingTitle,
-                text: closingMessage,
-              ),
-            ],
           ],
         ),
       ),
@@ -210,8 +269,12 @@ class _ReflectionModuleScreenState
   }
 }
 
-class _SectionView extends StatelessWidget {
-  const _SectionView({
+/// Satu section dibungkus kartu putih dengan bayangan lembut -- ikon +
+/// judulnya di baris atas, soal-soalnya di bawahnya. Ikonnya beda tergantung
+/// isi section: kotak biru pena kalau berisi soal isian bebas, kotak abu
+/// centang kalau berisi checklist (lihat `_SectionIcon`).
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
     required this.section,
     required this.controllers,
     required this.checklist,
@@ -227,28 +290,77 @@ class _SectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(section.title, style: AppTypography.titleLarge),
-        if (section.instruction case final instruction?) ...[
-          const SizedBox(height: AppSpacing.xxs),
-          Text(instruction, style: AppTypography.bodySmall),
-        ],
-        const SizedBox(height: AppSpacing.sm),
-        for (final question in [
-          ...section.questions,
-        ]..sort((a, b) => a.order.compareTo(b.order))) ...[
-          _QuestionView(
-            question: question,
-            controllers: controllers,
-            checklist: checklist,
-            onChecklistToggled: onChecklistToggled,
-            onAnswerChanged: onAnswerChanged,
+    final isChecklistSection = section.questions.any(
+      (question) => question.questionType == ReflectionQuestionType.checklist,
+    );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: AppShadows.card,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SectionIcon(isChecklist: isChecklistSection),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(section.title, style: AppTypography.titleLarge),
+                ),
+              ),
+            ],
           ),
+          if (section.instruction case final instruction?) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(instruction, style: AppTypography.bodySmall),
+          ],
           const SizedBox(height: AppSpacing.md),
+          for (final question in [
+            ...section.questions,
+          ]..sort((a, b) => a.order.compareTo(b.order))) ...[
+            _QuestionView(
+              question: question,
+              controllers: controllers,
+              checklist: checklist,
+              onChecklistToggled: onChecklistToggled,
+              onAnswerChanged: onAnswerChanged,
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
         ],
-      ],
+      ),
+    );
+  }
+}
+
+class _SectionIcon extends StatelessWidget {
+  const _SectionIcon({required this.isChecklist});
+
+  final bool isChecklist;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: isChecklist ? AppColors.background : AppColors.primary,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: Icon(
+        isChecklist ? Icons.checklist_outlined : Icons.edit_note,
+        color: isChecklist ? AppColors.ink : AppColors.white,
+        size: 22,
+      ),
     );
   }
 }
@@ -275,18 +387,21 @@ class _QuestionView extends StatelessWidget {
       children: [
         Text(
           question.questionText,
-          style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+          style: AppTypography.bodyLarge,
+          textAlign: TextAlign.justify,
         ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         if (question.questionType == ReflectionQuestionType.checklist)
           for (final item in [
             ...question.checklistItems,
-          ]..sort((a, b) => a.order.compareTo(b.order)))
+          ]..sort((a, b) => a.order.compareTo(b.order))) ...[
             _ChecklistRow(
               label: item.label,
               checked: checklist[item.id] ?? false,
               onChanged: (value) => onChecklistToggled(item.id, value),
-            )
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ]
         else
           _JournalField(
             controller: controllers[question.id],
@@ -312,18 +427,18 @@ class _JournalField extends StatelessWidget {
       maxLines: 6,
       style: AppTypography.bodyMedium,
       decoration: InputDecoration(
-        hintText: 'Tulis jawabanmu di sini...',
+        hintText: 'Tulis pendapatmu di sini...',
         hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.muted),
         filled: true,
-        fillColor: AppColors.white,
+        fillColor: AppColors.background,
         contentPadding: const EdgeInsets.all(AppSpacing.sm),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: BorderSide(color: AppColors.border),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: BorderSide(color: AppColors.border),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -348,81 +463,37 @@ class _ChecklistRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.white,
+      color: AppColors.background,
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        side: BorderSide(color: AppColors.border),
-      ),
+      borderRadius: BorderRadius.circular(AppRadius.md),
       child: InkWell(
         onTap: () => onChanged(!checked),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Checkbox(
-                value: checked,
-                onChanged: (value) => onChanged(value ?? false),
-                activeColor: AppColors.primary,
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: Checkbox(
+                    value: checked,
+                    onChanged: (value) => onChanged(value ?? false),
+                    activeColor: AppColors.primary,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(width: AppSpacing.xxs),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(child: Text(label, style: AppTypography.bodyMedium)),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _MessageCard extends StatelessWidget {
-  const _MessageCard({
-    required this.icon,
-    required this.color,
-    required this.text,
-    this.title,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String? title;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (title case final title?) ...[
-                  Text(
-                    title,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                ],
-                Text(text, style: AppTypography.bodyMedium),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
