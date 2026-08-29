@@ -234,7 +234,13 @@ class _ListItemBlock extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        // Putih + border tipis -- BUKAN `AppColors.background` (itu persis
+        // warna latar halaman artikel ini sendiri, jadi kotaknya kebentur tak
+        // kelihatan sama sekali, lihat regresi yang dilaporkan). Border-nya
+        // yang menjaga kotak ini tetap kelihatan meski warnanya putih sama
+        // seperti latar, bukan cuma mengandalkan bedanya warna fill.
+        color: AppColors.white,
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
@@ -247,13 +253,15 @@ class _ListItemBlock extends StatelessWidget {
             height: 28,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.primarySoft,
+              // Solid, bukan `primarySoft` -- biar lingkarannya tetap kontras
+              // menonjol di atas kotak putih di sekelilingnya.
+              color: AppColors.primary,
               shape: BoxShape.circle,
             ),
             child: Text(
               '$number',
               style: AppTypography.labelMedium.copyWith(
-                color: AppColors.primary,
+                color: AppColors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
