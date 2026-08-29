@@ -22,10 +22,12 @@ class RegisterForm extends ConsumerStatefulWidget {
     super.key,
     required this.onSwitchToLogin,
     required this.onGooglePressed,
+    this.isGoogleLoading = false,
   });
 
   final VoidCallback onSwitchToLogin;
-  final VoidCallback onGooglePressed;
+  final Future<void> Function() onGooglePressed;
+  final bool isGoogleLoading;
 
   @override
   ConsumerState<RegisterForm> createState() => _RegisterFormState();
@@ -310,7 +312,12 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
           const SizedBox(height: AppSpacing.lg),
           const LabeledDivider(label: 'atau daftar dengan'),
           const SizedBox(height: AppSpacing.md),
-          GoogleButton(onPressed: isLoading ? null : widget.onGooglePressed),
+          GoogleButton(
+            onPressed: (isLoading || widget.isGoogleLoading)
+                ? null
+                : widget.onGooglePressed,
+            isLoading: widget.isGoogleLoading,
+          ),
           const SizedBox(height: AppSpacing.xs),
           AuthFooterLink(
             question: 'Sudah punya akun?',

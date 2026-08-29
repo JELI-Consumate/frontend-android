@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_alert_dialog.dart';
 import '../../../core/widgets/segmented_tabs.dart';
+import '../application/auth_controller.dart';
+import '../data/google_auth_service.dart';
 import 'forgot_password_screen.dart';
+import 'widgets/auth_error_mapper.dart';
 import 'widgets/auth_header.dart';
 import 'widgets/login_form.dart';
 import 'widgets/register_form.dart';
@@ -24,6 +27,7 @@ enum AuthTab { login, register }
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   late AuthTab _tab = widget.initialTab;
+  bool _googleSubmitting = false;
 
   void _switchTo(AuthTab tab) {
     if (_tab == tab) return;
@@ -31,13 +35,30 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _tab = tab);
   }
 
-  void _notYetAvailable(String feature) {
-    showAppAlert(
-      context,
-      type: AppAlertType.info,
-      title: 'Belum Tersedia',
-      message: '$feature belum tersedia.',
-    );
+  Future<void> _handleGoogle() async {
+    setState(() => _googleSubmitting = true);
+    try {
+      final accessToken = await ref
+          .read(googleAuthServiceProvider)
+          .signInAndGetAccessToken();
+      if (accessToken == null) return; // User batal pilih akun.
+
+      await ref
+          .read(authControllerProvider.notifier)
+          .loginWithGoogle(accessToken);
+    } catch (error) {
+      if (!mounted) return;
+
+      final presentation = presentAuthError(error, knownFields: const {});
+      showAppAlert(
+        context,
+        type: AppAlertType.error,
+        title: 'Gagal Masuk dengan Google',
+        message: presentation.message ?? 'Terjadi kesalahan. Coba lagi.',
+      );
+    } finally {
+      if (mounted) setState(() => _googleSubmitting = false);
+    }
   }
 
   @override
@@ -69,8 +90,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     switch (_tab) {
                       AuthTab.login => LoginForm(
                         onSwitchToRegister: () => _switchTo(AuthTab.register),
-                        onGooglePressed: () =>
-                            _notYetAvailable('Masuk dengan Google'),
+                        onGooglePressed: _handleGoogle,
+                        isGoogleLoading: _googleSubmitting,
                         onForgotPassword: () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
                             builder: (_) => const ForgotPasswordScreen(),
@@ -79,8 +100,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                       AuthTab.register => RegisterForm(
                         onSwitchToLogin: () => _switchTo(AuthTab.login),
-                        onGooglePressed: () =>
-                            _notYetAvailable('Daftar dengan Google'),
+                        onGooglePressed: _handleGoogle,
+                        isGoogleLoading: _googleSubmitting,
                       ),
                     },
                   ],
