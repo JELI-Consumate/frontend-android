@@ -98,13 +98,24 @@ class _SimulationModuleScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ModuleHeader(module: widget.module),
-                    const SizedBox(height: AppSpacing.lg),
-                    _ScenarioHeader(
-                      type: _content.simulationType,
-                      scenario: _content.scenario,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
+                    // Matching pakai heading polos (nama misi dari
+                    // `SimulationContent.title`) TANPA `ModuleHeader` maupun
+                    // badge tipe/skenario/kick-off -- sesuai referensi desain
+                    // yang cuma menampilkan satu judul tebal di atas grid
+                    // kartu. Ordering (dan tipe lain) tetap pakai header lama.
+                    if (_content.simulationType ==
+                        SimulationGameType.matching) ...[
+                      Text(_content.title, style: AppTypography.titleLarge),
+                      const SizedBox(height: AppSpacing.lg),
+                    ] else ...[
+                      ModuleHeader(module: widget.module),
+                      const SizedBox(height: AppSpacing.lg),
+                      _ScenarioHeader(
+                        type: _content.simulationType,
+                        scenario: _content.scenario,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
                     switch (_content.simulationType) {
                       SimulationGameType.matching => _MatchingGame(
                         attemptId: attemptId,
@@ -306,9 +317,10 @@ class _CompletionView extends StatelessWidget {
 }
 
 /// Game "pasangkan kartu" -- tap satu kartu kiri lalu satu kartu kanan untuk
-/// mencoba mencocokkan. Kolom kanan diacak sendiri di sisi Flutter supaya
-/// urutannya tidak otomatis sejajar dengan kolom kiri (backend mengirim
-/// keduanya dalam urutan `order` yang sama).
+/// mencoba mencocokkan, ditata 2 kolom berkartu (lihat `_MatchCard`). Kolom
+/// kanan diacak sendiri di sisi Flutter supaya urutannya tidak otomatis
+/// sejajar dengan kolom kiri (backend mengirim keduanya dalam urutan
+/// `order` yang sama).
 class _MatchingGame extends ConsumerStatefulWidget {
   const _MatchingGame({
     required this.attemptId,
@@ -386,64 +398,88 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
           style: AppTypography.titleMedium,
         ),
         const SizedBox(height: AppSpacing.sm),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  for (final pair in widget.pairs) ...[
-                    _MatchTile(
-                      label: pair.leftLabel,
-                      solved: _solved.contains(pair.id),
-                      selected: _selectedLeftId == pair.id,
-                      onTap: _solved.contains(pair.id) || _checking
-                          ? null
-                          : () => setState(
-                              () => _selectedLeftId = _selectedLeftId == pair.id
-                                  ? null
-                                  : pair.id,
-                            ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                children: [
-                  for (final pair in _rightItems) ...[
-                    _MatchTile(
-                      label: pair.rightLabel,
-                      solved: _solved.contains(pair.id),
-                      selected: false,
-                      onTap: _solved.contains(pair.id) || _checking
-                          ? null
-                          : () => _tryMatch(pair.id),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
+        // Satu `Row` PER PASANGAN (bukan 2 Column independen) supaya kartu
+        // kiri & kanan di baris yang sama disamakan tinggi -- `IntrinsicHeight`
+        // menghitung tinggi alami yang PALING TINGGI di antara keduanya, lalu
+        // `CrossAxisAlignment.stretch` menyamakan yang lebih pendek jadi
+        // setinggi itu. Beda dari kotak dipatok tinggi TETAP (regresi
+        // sebelumnya): di sini batasnya ikut konten TERTINGGI di baris itu,
+        // jadi deskripsi tetap tidak pernah kepotong, cuma kartu satunya yang
+        // ikut melar menyesuaikan (isinya di-tengahkan, lihat `_MatchCard`).
+        for (var i = 0; i < widget.pairs.length; i++) ...[
+          _buildPairRow(widget.pairs[i], _rightItems[i]),
+          const SizedBox(height: AppSpacing.sm),
+        ],
       ],
+    );
+  }
+
+  Widget _buildPairRow(
+    SimulationMatchingPair left,
+    SimulationMatchingPair right,
+  ) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _MatchCard(
+              label: left.leftLabel,
+              description: left.leftDescription,
+              imageUrl: left.leftImageUrl,
+              solved: _solved.contains(left.id),
+              selected: _selectedLeftId == left.id,
+              onTap: _solved.contains(left.id) || _checking
+                  ? null
+                  : () => setState(
+                      () => _selectedLeftId = _selectedLeftId == left.id
+                          ? null
+                          : left.id,
+                    ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: _MatchCard(
+              label: right.rightLabel,
+              description: right.rightDescription,
+              imageUrl: right.rightImageUrl,
+              solved: _solved.contains(right.id),
+              selected: false,
+              onTap: _solved.contains(right.id) || _checking
+                  ? null
+                  : () => _tryMatch(right.id),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _MatchTile extends StatelessWidget {
-  const _MatchTile({
+/// Kartu kiri/kanan di game matching -- gambar (opsional, `leftImageUrl`/
+/// `rightImageUrl`), judul tebal, lalu deskripsi kecil abu-abu (opsional,
+/// `leftDescription`/`rightDescription`), ditumpuk & DITENGAHKAN horizontal,
+/// TINGGINYA MENGIKUTI KONTEN SENDIRI (tidak dipatok sama seperti kartu
+/// sebelah) -- supaya deskripsi yang panjang selalu tampil penuh, tidak
+/// terpotong "..." cuma demi menyeragamkan tinggi kotak.
+///
+/// Tidak pakai `ZoomableImage` (beda dari `_ImageBlock` di layar artikel)
+/// karena tap di seluruh kartu ini sudah dipakai untuk MEMILIH/MENCOCOKKAN
+/// pasangan -- kalau gambarnya ikut bisa di-zoom, dua gestur tap itu bentrok.
+class _MatchCard extends StatelessWidget {
+  const _MatchCard({
     required this.label,
+    required this.description,
+    required this.imageUrl,
     required this.solved,
     required this.selected,
     required this.onTap,
   });
 
   final String label;
+  final String? description;
+  final String? imageUrl;
   final bool solved;
   final bool selected;
   final VoidCallback? onTap;
@@ -457,44 +493,103 @@ class _MatchTile extends StatelessWidget {
         : AppColors.border;
 
     return Opacity(
-      opacity: solved ? 0.5 : 1,
+      opacity: solved ? 0.6 : 1,
       child: Material(
         color: selected ? AppColors.primarySoft : AppColors.white,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          side: BorderSide(color: color, width: selected ? 1.4 : 1),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: BorderSide(color: color, width: selected || solved ? 1.6 : 1),
         ),
         child: InkWell(
           onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            constraints: const BoxConstraints(minHeight: 56),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                if (solved) ...[
-                  const Icon(
+          child: Stack(
+            // Kartu di baris yang sama sekarang disamakan tinggi (lihat
+            // `_MatchingGameState._buildPairRow`) -- kartu yang isinya lebih
+            // pendek dari pasangannya jadi punya ruang kosong ekstra di
+            // bawah; `alignment: center` menengahkan isinya di ruang itu,
+            // bukan nempel mepet ke atas.
+            alignment: Alignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (imageUrl case final url? when url.isNotEmpty) ...[
+                      AspectRatio(
+                        aspectRatio: 16 / 10,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                          child: Image.network(
+                            url,
+                            // Diminta lebih kecil dari resolusi aslinya
+                            // (gambar sumbernya bisa >1MB) -- decode server
+                            // Skia jadi jauh lebih ringan & cepat daripada
+                            // decode ukuran penuh lalu di-downscale di layar.
+                            cacheWidth: 400,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return const Center(
+                                child: SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              );
+                            },
+                            // Placeholder ikon yang KELIHATAN (bukan
+                            // `SizedBox.shrink()`) kalau gambar gagal
+                            // dimuat -- supaya gagal-muat gampang dibedakan
+                            // dari pasangan yang memang tidak diberi gambar.
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  color: AppColors.background,
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                    size: 20,
+                                    color: AppColors.inkMuted,
+                                  ),
+                                ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                    ],
+                    Text(
+                      label,
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (description case final desc? when desc.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        desc,
+                        style: AppTypography.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (solved)
+                const Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Icon(
                     Icons.check_circle,
-                    size: 16,
+                    size: 18,
                     color: AppColors.success,
                   ),
-                  const SizedBox(width: AppSpacing.xxs),
-                ],
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTypography.bodyMedium,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
