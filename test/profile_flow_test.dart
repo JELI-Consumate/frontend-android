@@ -47,25 +47,29 @@ void main() {
   }
 
   Future<void> openEditNameSheet(WidgetTester tester) async {
-    await tester.tap(find.text('Ubah Nama'));
+    // Tidak ada lagi tombol "Ubah Nama" terpisah -- nama di header sendiri
+    // yang jadi pemicunya (lihat `_ProfileHeader`, ada ikon pensil kecil di
+    // sebelahnya sebagai penanda visual bisa diketuk).
+    await tester.tap(find.text('Budi Santoso'));
     await tester.pumpAndSettle();
   }
 
-  testWidgets('tap Ubah Nama membuka bottom sheet berisi nama saat ini', (
-    tester,
-  ) async {
-    await pumpProfileTab(tester);
-    await openEditNameSheet(tester);
+  testWidgets(
+    'tap nama pada header membuka bottom sheet berisi nama saat ini',
+    (tester) async {
+      await pumpProfileTab(tester);
+      await openEditNameSheet(tester);
 
-    expect(
-      find.text('Nama ini akan tampil di profil dan sertifikatmu.'),
-      findsOneWidget,
-    );
-    // Header profil + field yang sudah terisi nama sekarang -- `find.text`
-    // ikut mencocokkan isi `EditableText`, jadi field terprefill juga
-    // kehitung di sini.
-    expect(find.text('Budi Santoso'), findsNWidgets(2));
-  });
+      expect(
+        find.text('Nama ini akan tampil di profil dan sertifikatmu.'),
+        findsOneWidget,
+      );
+      // Header profil + field yang sudah terisi nama sekarang -- `find.text`
+      // ikut mencocokkan isi `EditableText`, jadi field terprefill juga
+      // kehitung di sini.
+      expect(find.text('Budi Santoso'), findsNWidgets(2));
+    },
+  );
 
   testWidgets('tombol Simpan nonaktif selama nama belum diubah', (
     tester,

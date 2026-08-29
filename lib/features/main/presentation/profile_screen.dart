@@ -13,8 +13,16 @@ import '../../../core/widgets/primary_button.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/data/models/app_user.dart';
 
-/// Tab "Profil". Header identitas (avatar, nama, email) di atas kartu biru,
-/// lalu informasi akun dalam baris-baris kartu putih di bawahnya.
+/// Tab "Profil" -- header besar melengkung (avatar + badge kamera + nama)
+/// lalu field akun bergaya form (label kecil, nilai, garis bawah tipis),
+/// mengikuti referensi desain yang diberikan tapi dengan palet warna app
+/// sendiri (bukan hijau seperti referensinya).
+///
+/// Address & Gender di referensi TIDAK ditampilkan -- datanya belum ada sama
+/// sekali di sistem kita (bukan cuma belum ditampilkan, kolomnya memang
+/// belum ada di database), dan badge kamera juga BELUM benar-benar bisa
+/// ganti foto (backend belum punya endpoint upload file) -- keduanya
+/// keputusan sadar, bukan kelupaan, lihat ringkasan pekerjaan.
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -76,6 +84,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
   }
 
+  Future<void> _editBirthDate(DateTime? current) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current ?? DateTime(now.year - 20, now.month, now.day),
+      firstDate: DateTime(1900),
+      lastDate: now,
+      helpText: 'Pilih Tanggal Lahir',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: AppColors.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked == null || picked == current) return;
+
+    await _run(() async {
+      await ref
+          .read(authControllerProvider.notifier)
+          .updateProfile(dateOfBirth: picked);
+      _showSuccess('Tanggal lahir berhasil diperbarui.');
+    });
+  }
+
+  /// Badge kamera di avatar cuma tampilan mengikuti referensi -- belum ada
+  /// endpoint upload foto di backend, jadi ketuk di sini kasih tahu jujur
+  /// belum bisa dipakai, bukan diam saja tanpa respons apa-apa.
+  void _notifyPhotoUploadUnavailable() {
+    showAppAlert(
+      context,
+      type: AppAlertType.info,
+      title: 'Segera Hadir',
+      message: 'Fitur ganti foto profil belum tersedia saat ini.',
+    );
+  }
+
   Future<void> _confirmSignOut() async {
     await showAppAlert(
       context,
@@ -97,67 +147,61 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       body: RefreshIndicator(
         onRefresh: () =>
             ref.read(authControllerProvider.notifier).refreshUser(),
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            _ProfileHeader(user: user, onEditName: () => _editName(user.name)),
+            _ProfileHeader(
+              user: user,
+              onTapAvatar: _notifyPhotoUploadUnavailable,
+              onTapName: _busy ? null : () => _editName(user.name),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.screenPadding,
-                AppSpacing.lg,
+                AppSpacing.xl,
                 AppSpacing.screenPadding,
                 AppSpacing.xl,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Informasi Akun', style: AppTypography.titleMedium),
-                  const SizedBox(height: AppSpacing.sm),
-                  _InfoRow(
-                    icon: Icons.mail_outline,
+                  _ProfileField(
                     label: 'Email',
                     value: user.email,
                     trailing: _VerifiedBadge(verified: user.isEmailVerified),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  _InfoRow(
-                    icon: Icons.call_outlined,
+                  const SizedBox(height: AppSpacing.lg),
+                  _ProfileField(
                     label: 'Nomor HP',
-                    value: user.phone ?? 'Belum diisi',
+                    value: user.phone,
+                    placeholder: 'Belum diisi',
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  _InfoRow(
-                    icon: Icons.cake_outlined,
+                  const SizedBox(height: AppSpacing.lg),
+                  _ProfileField(
                     label: 'Tanggal Lahir',
                     value: user.dateOfBirth == null
-                        ? 'Belum diisi'
-                        : DateFormat(
-                            'd MMMM y',
-                            'id_ID',
-                          ).format(user.dateOfBirth!),
+                        ? null
+                        : DateFormat('dd-MM-yyyy').format(user.dateOfBirth!),
+                    placeholder: 'Pilih tanggal lahir',
+                    trailing: const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    onTap: _busy
+                        ? null
+                        : () => _editBirthDate(user.dateOfBirth),
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  PrimaryButton(
-                    label: 'Ubah Nama',
-                    trailingIcon: Icons.edit_outlined,
-                    isLoading: _busy,
-                    onPressed: () => _editName(user.name),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
+                  const SizedBox(height: AppSpacing.xxl),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _LogoutPillButton(
+                      busy: _busy,
                       onPressed: _busy ? null : _confirmSignOut,
-                      icon: const Icon(Icons.logout, size: 18),
-                      label: const Text('Keluar'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.danger,
-                        side: BorderSide(color: AppColors.danger),
-                      ),
                     ),
                   ),
                 ],
@@ -290,63 +334,102 @@ class _SheetDragHandle extends StatelessWidget {
   }
 }
 
+/// Radius bawah header -- jauh lebih besar dari `AppRadius.xl` biasa (24)
+/// supaya lengkungannya semenonjol referensi, sengaja lokal di sini karena
+/// cuma dipakai untuk header "hero" ini, bukan token yang mau dipakai
+/// berulang di tempat lain.
+const double _kHeaderCurveRadius = 64;
+
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.user, required this.onEditName});
+  const _ProfileHeader({
+    required this.user,
+    required this.onTapAvatar,
+    required this.onTapName,
+  });
 
   final AppUser user;
-  final VoidCallback onEditName;
+  final VoidCallback onTapAvatar;
+  final VoidCallback? onTapName;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    const curve = BorderRadius.vertical(
+      bottom: Radius.circular(_kHeaderCurveRadius),
+    );
+
+    return Container(
+      // Shadow di Container LUAR (tidak ikut kepotong), gradiennya sendiri
+      // di ClipRRect DALAM -- kalau digabung satu Container, `clipBehavior`
+      // ikut memotong shadow-nya juga.
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(AppRadius.xl),
-        ),
+        borderRadius: curve,
         boxShadow: AppShadows.card,
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenPadding,
-            AppSpacing.md,
-            AppSpacing.screenPadding,
-            AppSpacing.xl,
+      child: ClipRRect(
+        borderRadius: curve,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.primary, AppColors.primaryPressed],
+            ),
           ),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  onPressed: onEditName,
-                  icon: const Icon(Icons.edit_outlined, color: AppColors.white),
-                  tooltip: 'Ubah nama',
-                ),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenPadding,
+                AppSpacing.lg,
+                AppSpacing.screenPadding,
+                AppSpacing.xxl,
               ),
-              _Avatar(name: user.name, avatarUrl: user.avatarUrl),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                user.name,
-                style: AppTypography.titleLarge.copyWith(
-                  color: AppColors.white,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                children: [
+                  _AvatarWithCameraBadge(
+                    name: user.name,
+                    avatarUrl: user.avatarUrl,
+                    onTapCamera: onTapAvatar,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    onTap: onTapName,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xs,
+                        vertical: AppSpacing.xxs,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              user.name,
+                              style: AppTypography.titleLarge.copyWith(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (onTapName != null) ...[
+                            const SizedBox(width: AppSpacing.xxs),
+                            Icon(
+                              Icons.edit_outlined,
+                              size: 15,
+                              color: AppColors.white.withValues(alpha: 0.8),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                user.email,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.white.withValues(alpha: 0.75),
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -354,107 +437,194 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-class _Avatar extends StatelessWidget {
-  const _Avatar({required this.name, required this.avatarUrl});
+/// Avatar besar bercincin putih + badge kamera bulat di sudut kanan-bawah,
+/// mengikuti komposisi referensi -- badge-nya BELUM benar-benar mengganti
+/// foto (lihat `_notifyPhotoUploadUnavailable`), cuma penanda visual "ini
+/// bisa diketuk" untuk fitur yang menyusul nanti.
+class _AvatarWithCameraBadge extends StatelessWidget {
+  const _AvatarWithCameraBadge({
+    required this.name,
+    required this.avatarUrl,
+    required this.onTapCamera,
+  });
 
   final String name;
   final String? avatarUrl;
+  final VoidCallback onTapCamera;
+
+  static const double _size = 132;
 
   @override
   Widget build(BuildContext context) {
     final initial = name.trim().isEmpty ? '?' : name.trim()[0].toUpperCase();
 
-    return Container(
-      width: 88,
-      height: 88,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.white.withValues(alpha: 0.16),
-        border: Border.all(color: AppColors.white, width: 2.5),
-      ),
-      child: ClipOval(
-        child: avatarUrl == null
-            ? Text(
-                initial,
-                style: AppTypography.displayMedium.copyWith(
-                  color: AppColors.white,
-                ),
-              )
-            : Image.network(
-                avatarUrl!,
-                width: 88,
-                height: 88,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Text(
-                  initial,
-                  style: AppTypography.displayMedium.copyWith(
+    return SizedBox(
+      width: _size,
+      height: _size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: _size,
+            height: _size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.white.withValues(alpha: 0.16),
+              border: Border.all(color: AppColors.white, width: 3),
+            ),
+            child: ClipOval(
+              child: avatarUrl == null
+                  ? Text(
+                      initial,
+                      style: AppTypography.displayLarge.copyWith(
+                        color: AppColors.white,
+                      ),
+                    )
+                  : Image.network(
+                      avatarUrl!,
+                      width: _size,
+                      height: _size,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Text(
+                        initial,
+                        style: AppTypography.displayLarge.copyWith(
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          Positioned(
+            right: 0,
+            bottom: 6,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTapCamera,
+                customBorder: const CircleBorder(),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primary,
+                    border: Border.all(color: AppColors.white, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt_outlined,
+                    size: 17,
                     color: AppColors.white,
                   ),
                 ),
               ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.icon,
+/// Satu baris field akun bergaya form -- label kecil di atas, nilai di
+/// bawahnya, lalu garis tipis sebagai pemisah (BUKAN kotak bertepi seperti
+/// desain lama) supaya sepadan sama referensi. `onTap` opsional -- dipakai
+/// field yang genuinely bisa diedit (mis. Tanggal Lahir), field lain
+/// (mis. Email) dibiarkan tanpa `onTap` karena memang belum bisa diubah.
+class _ProfileField extends StatelessWidget {
+  const _ProfileField({
     required this.label,
     required this.value,
+    this.placeholder,
     this.trailing,
+    this.onTap,
   });
 
-  final IconData icon;
   final String label;
-  final String value;
+  final String? value;
+  final String? placeholder;
   final Widget? trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-            child: Icon(icon, color: AppColors.primary, size: 20),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: AppTypography.labelSmall),
-                Text(
-                  value,
-                  style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.ink,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+    final hasValue = value != null && value!.trim().isNotEmpty;
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTypography.labelSmall),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                hasValue ? value! : (placeholder ?? '-'),
+                style: AppTypography.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: hasValue ? AppColors.ink : AppColors.muted,
                 ),
-              ],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-          if (trailing != null) ...[
-            const SizedBox(width: AppSpacing.xs),
-            trailing!,
+            if (trailing != null) ...[
+              const SizedBox(width: AppSpacing.xs),
+              trailing!,
+            ],
           ],
-        ],
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Container(height: 1, color: AppColors.border),
+      ],
+    );
+
+    if (onTap == null) return content;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      onTap: onTap,
+      child: content,
+    );
+  }
+}
+
+/// Tombol keluar bergaya pil (bukan lagi outline lebar penuh) diposisikan
+/// di kanan, warnanya `AppColors.danger` -- mengikuti posisi & bentuk
+/// tombol "Log Out" di referensi.
+class _LogoutPillButton extends StatelessWidget {
+  const _LogoutPillButton({required this.busy, required this.onPressed});
+
+  final bool busy;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: busy
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.white,
+              ),
+            )
+          : const Icon(Icons.logout, size: 18),
+      label: const Text('Keluar'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.danger,
+        foregroundColor: AppColors.white,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+        ),
+        textStyle: AppTypography.labelLarge,
       ),
     );
   }
