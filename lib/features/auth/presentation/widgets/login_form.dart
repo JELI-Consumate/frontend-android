@@ -20,11 +20,13 @@ class LoginForm extends ConsumerStatefulWidget {
     super.key,
     required this.onSwitchToRegister,
     required this.onGooglePressed,
+    this.isGoogleLoading = false,
     required this.onForgotPassword,
   });
 
   final VoidCallback onSwitchToRegister;
-  final VoidCallback onGooglePressed;
+  final Future<void> Function() onGooglePressed;
+  final bool isGoogleLoading;
   final VoidCallback onForgotPassword;
 
   @override
@@ -165,7 +167,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           const SizedBox(height: AppSpacing.lg),
           const LabeledDivider(label: 'atau masuk dengan'),
           const SizedBox(height: AppSpacing.md),
-          GoogleButton(onPressed: isLoading ? null : widget.onGooglePressed),
+          GoogleButton(
+            onPressed: (isLoading || widget.isGoogleLoading)
+                ? null
+                : widget.onGooglePressed,
+            isLoading: widget.isGoogleLoading,
+          ),
           const SizedBox(height: AppSpacing.xs),
           AuthFooterLink(
             question: 'Belum punya akun?',
