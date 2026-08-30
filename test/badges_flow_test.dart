@@ -150,6 +150,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('DESKRIPSI BADGE'), findsOneWidget);
 
+    // Sheet-nya scrollable sekarang (lihat badge_detail_sheet.dart) -- badge
+    // yang sudah diraih plus pesan ucapan selamat & motivasi bikin "Tutup"
+    // ada di bawah lipatan, perlu discroll ke pandangan dulu sebelum tap.
+    await tester.ensureVisible(find.text('Tutup'));
     await tester.tap(find.text('Tutup'));
     await tester.pumpAndSettle();
 

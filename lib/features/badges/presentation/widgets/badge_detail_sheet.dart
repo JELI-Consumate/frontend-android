@@ -30,57 +30,69 @@ class _BadgeDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenPadding,
-            AppSpacing.sm,
-            AppSpacing.screenPadding,
-            AppSpacing.lg,
+    // Deskripsi + pesan ucapan selamat + pesan motivasi sekaligus bisa lebih
+    // tinggi dari layar (terutama badge yang sudah diraih, ketiganya
+    // tampil) -- dibatasi ke persentase tinggi layar lalu dibungkus
+    // `SingleChildScrollView` supaya sisanya discroll di dalam sheet,
+    // bukan overflow ke luar layar.
+    final maxHeight = MediaQuery.of(context).size.height * 0.85;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Center(child: _SheetDragHandle()),
-              const SizedBox(height: AppSpacing.md),
-              Center(child: BadgeAvatar(badge: badge, size: 96)),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                badge.name,
-                style: AppTypography.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              _StatusLine(badge: badge),
-              const SizedBox(height: AppSpacing.lg),
-              _Section(label: 'Deskripsi Badge', body: badge.description),
-              if (badge.earned && _hasText(badge.congratulationMessage)) ...[
+        ),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenPadding,
+              AppSpacing.sm,
+              AppSpacing.screenPadding,
+              AppSpacing.lg,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Center(child: _SheetDragHandle()),
                 const SizedBox(height: AppSpacing.md),
-                _Section(
-                  label: 'Pesan Saat Diraih',
-                  body: badge.congratulationMessage!,
+                Center(child: BadgeAvatar(badge: badge, size: 96)),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  badge.name,
+                  style: AppTypography.titleLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                _StatusLine(badge: badge),
+                const SizedBox(height: AppSpacing.lg),
+                _Section(label: 'Deskripsi Badge', body: badge.description),
+                if (badge.earned && _hasText(badge.congratulationMessage)) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _Section(
+                    label: 'Pesan Saat Diraih',
+                    body: badge.congratulationMessage!,
+                  ),
+                ],
+                if (badge.earned && _hasText(badge.motivationalMessage)) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _Section(
+                    label: 'Pesan Motivasi',
+                    body: badge.motivationalMessage!,
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.lg),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Tutup'),
                 ),
               ],
-              if (badge.earned && _hasText(badge.motivationalMessage)) ...[
-                const SizedBox(height: AppSpacing.md),
-                _Section(
-                  label: 'Pesan Motivasi',
-                  body: badge.motivationalMessage!,
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Tutup'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -155,7 +167,11 @@ class _Section extends StatelessWidget {
       children: [
         Text(label.toUpperCase(), style: AppTypography.labelSmall),
         const SizedBox(height: AppSpacing.xxs),
-        Text(body, style: AppTypography.bodyMedium),
+        Text(
+          body,
+          style: AppTypography.bodyMedium,
+          textAlign: TextAlign.justify,
+        ),
       ],
     );
   }
