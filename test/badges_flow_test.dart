@@ -61,6 +61,8 @@ void main() {
           journeyId: 99,
           name: 'Badge Sektor Lain',
           description: 'Tidak boleh muncul.',
+          congratulationMessage: null,
+          motivationalMessage: null,
           iconUrl: null,
           earned: false,
           earnedAt: null,
@@ -101,5 +103,56 @@ void main() {
     await pump(tester, badgeRepository: badgeRepository);
 
     expect(find.textContaining('Gagal memuat lencana'), findsOneWidget);
+  });
+
+  testWidgets(
+    'tap badge yang sudah diraih membuka detail berisi pesan ucapan selamat & motivasi',
+    (tester) async {
+      await pump(tester);
+
+      await tester.tap(find.text('Consumer Rights Explorer'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('DESKRIPSI BADGE'), findsOneWidget);
+      expect(find.text('PESAN SAAT DIRAIH'), findsOneWidget);
+      expect(
+        find.textContaining('Kenali Hakmu sebagai Konsumen'),
+        findsOneWidget,
+      );
+      expect(find.text('PESAN MOTIVASI'), findsOneWidget);
+      expect(find.textContaining('Journey 2'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'tap badge yang belum diraih membuka detail tanpa pesan ucapan selamat',
+    (tester) async {
+      await pump(tester);
+
+      await tester.tap(find.text('Smart Shopper'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('DESKRIPSI BADGE'), findsOneWidget);
+      expect(find.text('PESAN SAAT DIRAIH'), findsNothing);
+      expect(find.text('PESAN MOTIVASI'), findsNothing);
+      // Baris status di dalam sheet menambah 1 lagi dari yang di list.
+      expect(
+        find.text('Selesaikan journey terkait untuk meraih ini'),
+        findsNWidgets(4),
+      );
+    },
+  );
+
+  testWidgets('tombol Tutup menutup detail sheet', (tester) async {
+    await pump(tester);
+
+    await tester.tap(find.text('Consumer Rights Explorer'));
+    await tester.pumpAndSettle();
+    expect(find.text('DESKRIPSI BADGE'), findsOneWidget);
+
+    await tester.tap(find.text('Tutup'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('DESKRIPSI BADGE'), findsNothing);
   });
 }

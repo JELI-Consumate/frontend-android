@@ -21,6 +21,12 @@ class FakeBadgeRepository implements BadgeRepository {
       journeyId: 1,
       name: 'Consumer Rights Explorer',
       description: 'Memahami dasar-dasar hak dan kewajiban konsumen.',
+      congratulationMessage:
+          'Selamat! Kamu telah berhasil menuntaskan seluruh tantangan pada '
+          'Journey 1: Kenali Hakmu sebagai Konsumen.',
+      motivationalMessage:
+          'Yuk, ambil langkah selanjutnya dan mari pelajari strategi jitu '
+          'menyaring reputasi toko digital pada Journey 2!',
       iconUrl: 'https://placehold.co/256x256?text=Consumer+Rights+Explorer',
       earned: true,
       earnedAt: DateTime.utc(2026, 1, 10),
@@ -30,6 +36,10 @@ class FakeBadgeRepository implements BadgeRepository {
       journeyId: 2,
       name: 'Smart Shopper',
       description: 'Mampu membuat keputusan belanja yang tepat.',
+      // Belum diraih -- pesan ucapan selamat & motivasi cuma relevan begitu
+      // badge diraih (lihat BadgeDetailSheet), jadi wajar null di sini.
+      congratulationMessage: null,
+      motivationalMessage: null,
       iconUrl: 'https://placehold.co/256x256?text=Smart+Shopper',
       earned: false,
       earnedAt: null,
@@ -39,6 +49,8 @@ class FakeBadgeRepository implements BadgeRepository {
       journeyId: 3,
       name: 'Digital Safety Guardian',
       description: 'Mampu melindungi diri dari risiko digital.',
+      congratulationMessage: null,
+      motivationalMessage: null,
       iconUrl: 'https://placehold.co/256x256?text=Digital+Safety+Guardian',
       earned: false,
       earnedAt: null,
@@ -48,6 +60,8 @@ class FakeBadgeRepository implements BadgeRepository {
       journeyId: 4,
       name: 'Consumer Champion',
       description: 'Berani memperjuangkan hak sebagai konsumen.',
+      congratulationMessage: null,
+      motivationalMessage: null,
       iconUrl: 'https://placehold.co/256x256?text=Consumer+Champion',
       earned: false,
       earnedAt: null,

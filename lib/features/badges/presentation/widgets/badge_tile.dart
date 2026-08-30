@@ -5,9 +5,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../data/models/badge.dart';
+import 'badge_avatar.dart';
+import 'badge_detail_sheet.dart';
 
 /// Satu baris lencana di tab "Pencapaian" -- ikon berwarna + tanggal raih
 /// kalau sudah didapat, ikon pudar + petunjuk cara meraihnya kalau belum.
+/// Bisa diketuk untuk lihat detail lengkapnya (lihat [showBadgeDetailSheet]),
+/// termasuk pesan ucapan selamat & motivasi yang tidak muat di baris ini.
 class BadgeTile extends StatelessWidget {
   const BadgeTile({super.key, required this.badge});
 
@@ -22,99 +26,65 @@ class BadgeTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         side: BorderSide(color: AppColors.border),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _BadgeIcon(badge: badge),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    badge.name,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: badge.earned ? AppColors.ink : AppColors.inkMuted,
+      child: InkWell(
+        onTap: () => showBadgeDetailSheet(context, badge),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BadgeAvatar(badge: badge),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      badge.name,
+                      style: AppTypography.titleMedium.copyWith(
+                        color: badge.earned
+                            ? AppColors.ink
+                            : AppColors.inkMuted,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    badge.description,
-                    style: AppTypography.bodySmall,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  if (badge.earned)
-                    _EarnedLabel(earnedAt: badge.earnedAt)
-                  else
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.lock_outline,
-                          size: 14,
-                          color: AppColors.inkMuted,
-                        ),
-                        const SizedBox(width: AppSpacing.xxs),
-                        Expanded(
-                          child: Text(
-                            'Selesaikan journey terkait untuk meraih ini',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.inkMuted,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      badge.description,
+                      style: AppTypography.bodySmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    if (badge.earned)
+                      _EarnedLabel(earnedAt: badge.earnedAt)
+                    else
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.lock_outline,
+                            size: 14,
+                            color: AppColors.inkMuted,
                           ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BadgeIcon extends StatelessWidget {
-  const _BadgeIcon({required this.badge});
-
-  final Badge badge;
-
-  @override
-  Widget build(BuildContext context) {
-    final iconUrl = badge.iconUrl;
-    final fallback = Icon(
-      Icons.workspace_premium,
-      color: badge.earned ? AppColors.primary : AppColors.inkMuted,
-    );
-
-    return Opacity(
-      opacity: badge.earned ? 1 : 0.5,
-      child: Container(
-        width: 56,
-        height: 56,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: badge.earned ? AppColors.primarySoft : AppColors.border,
-          shape: BoxShape.circle,
-        ),
-        child: ClipOval(
-          child: iconUrl == null || iconUrl.isEmpty
-              ? fallback
-              : Image.network(
-                  iconUrl,
-                  width: 56,
-                  height: 56,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => fallback,
+                          const SizedBox(width: AppSpacing.xxs),
+                          Expanded(
+                            child: Text(
+                              'Selesaikan journey terkait untuk meraih ini',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.inkMuted,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
                 ),
+              ),
+            ],
+          ),
         ),
       ),
     );
