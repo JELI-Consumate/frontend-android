@@ -303,7 +303,9 @@ bukan gambar dari server.
 ## Yang Perlu Dikonfigurasi
 
 - [ ] Ganti default `API_BASE_URL` di `lib/core/network/api_client.dart` saat deploy.
-- [ ] Ganti app icon di `android/app/src/main/res/mipmap-*` (masih default Flutter).
+- [x] Ganti app icon di `android/app/src/main/res/mipmap-*` — sekarang pakai
+      `assets/images/logo.svg` (PNG sumber di-embed sebagai data URI; gambarnya
+      gradient kompleks jadi tidak di-vectorize otomatis, hasilnya pecah).
 - [ ] Sambungkan `onFinished` di `OnboardingScreen` ke layar pre-test yang sebenarnya.
 - [ ] Google Sign-In: butuh OAuth client ID + `google-services.json`, lalu kirim
       `access_token` ke `loginWithGoogle()`. Tombolnya sekarang masih pesan
