@@ -16,11 +16,18 @@ import 'package:perlindungan_konsumen/features/module/data/module_repository.dar
 /// satu hasil tetap -- supaya test bisa menjawab benar/salah dan lihat
 /// hasilnya beda.
 class FakeModuleRepository implements ModuleRepository {
-  FakeModuleRepository({Map<int, ModuleDetail>? modules})
+  FakeModuleRepository({Map<int, ModuleDetail>? modules, this.onComplete})
     : modules = modules ?? {};
 
   final Map<int, ModuleDetail> modules;
   ApiException? failWith;
+
+  /// Dipanggil begitu [completeModulePage] sukses -- test yang perlu
+  /// mensimulasikan efek sampingnya di sisi server (mis. journey jadi
+  /// completed di `FakeLearningRepository`, lihat
+  /// `journey_celebration_flow_test.dart`) taruh mutasinya di sini alih-alih
+  /// bikin fake ini tahu soal fake lain secara langsung.
+  final void Function(int modulePageId)? onComplete;
 
   final List<String> calls = [];
 
@@ -58,6 +65,7 @@ class FakeModuleRepository implements ModuleRepository {
   Future<void> completeModulePage(int modulePageId) async {
     calls.add('completeModulePage($modulePageId)');
     if (failWith != null) throw failWith!;
+    onComplete?.call(modulePageId);
   }
 
   @override

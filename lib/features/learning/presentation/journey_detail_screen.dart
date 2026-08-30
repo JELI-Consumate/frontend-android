@@ -1,12 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../badges/application/badge_providers.dart';
+import '../../badges/data/models/badge.dart';
 import '../../module/presentation/module_screen.dart';
 import '../application/learning_providers.dart';
 import '../data/models/journey_detail.dart';
+import 'journey_celebration_screen.dart';
 import 'widgets/module_row.dart';
 
 class JourneyDetailScreen extends ConsumerWidget {
@@ -46,11 +49,18 @@ class _JourneyDetailBody extends ConsumerWidget {
   final int journeyId;
   final JourneyDetail detail;
 
+  /// Baru pernah completed status-nya sebelum sesi buka-module ini dimulai?
+  /// Dibandingkan lagi dengan status TERBARU sesudah kembali (lihat bawah)
+  /// buat mendeteksi transisi "baru saja selesai" -- bukan cuma "sedang
+  /// selesai", supaya layar perayaan tidak muncul berulang tiap kali user
+  /// sekadar membuka ulang journey yang memang sudah lama tuntas.
   Future<void> _openModule(
     BuildContext context,
     WidgetRef ref,
     int moduleId,
   ) async {
+    final wasCompleted = detail.journey.progress.status.isCompleted;
+
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ModuleScreen(
@@ -59,8 +69,83 @@ class _JourneyDetailBody extends ConsumerWidget {
         ),
       ),
     );
+
     ref.invalidate(journeyDetailProvider(journeyId));
     ref.invalidate(primarySectorDetailProvider);
+
+    if (wasCompleted || !context.mounted) return;
+
+    final refreshed = await ref.read(journeyDetailProvider(journeyId).future);
+    if (!refreshed.journey.progress.status.isCompleted) return;
+    if (!context.mounted) return;
+
+    await _showCelebration(context, ref, refreshed);
+  }
+
+  /// Journey ini baru saja tuntas (dicek pemanggil) -- kumpulkan badge-nya
+  /// (fetch ulang lewat [badgesProvider], sengaja di-invalidate dulu supaya
+  /// tidak kepakai cache dari sebelum `AwardJourneyBadge` sempat jalan di
+  /// backend) + journey berikutnya di sektor yang sama, lalu buka layar
+  /// perayaan.
+  Future<void> _showCelebration(
+    BuildContext context,
+    WidgetRef ref,
+    JourneyDetail refreshed,
+  ) async {
+    ref.invalidate(badgesProvider);
+    final badges = await ref.read(badgesProvider.future);
+    if (!context.mounted) return;
+
+    Badge? earnedBadge;
+    for (final candidate in badges) {
+      if (candidate.journeyId == journeyId) {
+        earnedBadge = candidate;
+        break;
+      }
+    }
+
+    final sectorDetail = await ref.read(primarySectorDetailProvider.future);
+    if (!context.mounted) return;
+
+    int? nextJourneyId;
+    for (final journey in sectorDetail?.journeys ?? const []) {
+      if (journey.order == refreshed.journey.order + 1) {
+        nextJourneyId = journey.id;
+        break;
+      }
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => JourneyCelebrationScreen(
+          journeyOrder: refreshed.journey.order,
+          badge: earnedBadge ?? _fallbackBadge(refreshed),
+          modulesCompleted: refreshed.completedModuleCount,
+          modulesTotal: refreshed.modules.length,
+          quizScore: refreshed.quizScore,
+          nextJourneyId: nextJourneyId,
+        ),
+      ),
+    );
+  }
+
+  /// Badge generik dipakai kalau admin belum sempat mengisi badge journey
+  /// ini di Filament (lihat BadgeRelationManager di backend) -- journey
+  /// yang selesai TETAP layak dirayakan walau belum ada badge resminya,
+  /// bukan diam-diam melompati layar perayaan sama sekali.
+  Badge _fallbackBadge(JourneyDetail refreshed) {
+    return Badge(
+      id: 0,
+      journeyId: journeyId,
+      name: '${refreshed.journey.title} Selesai',
+      description: 'Kamu telah menuntaskan seluruh materi journey ini.',
+      congratulationMessage:
+          'Selamat! Kamu telah menuntaskan seluruh materi journey ini.',
+      motivationalMessage: null,
+      iconUrl: null,
+      earned: true,
+      earnedAt: DateTime.now(),
+    );
   }
 
   @override

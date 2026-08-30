@@ -14,11 +14,17 @@ class FakeLearningRepository implements LearningRepository {
   FakeLearningRepository({
     List<Journey>? journeys,
     List<LearningModule>? modules,
+    this.quizScore,
   }) : journeys = journeys ?? defaultJourneys,
        modules = modules ?? _defaultModules;
 
   List<Journey> journeys;
   List<LearningModule> modules;
+
+  /// Mutable -- test bisa mengubahnya di tengah jalan (mis. sesudah
+  /// men-simulasikan kuis selesai lewat `FakeModuleRepository.onComplete`)
+  /// supaya panggilan `journeyDetail` BERIKUTNYA memuat nilai barunya.
+  int? quizScore;
 
   ApiException? failWith;
 
@@ -165,6 +171,10 @@ class FakeLearningRepository implements LearningRepository {
     calls.add('journeyDetail($journeyId)');
     if (failWith != null) throw failWith!;
     final journey = journeys.firstWhere((j) => j.id == journeyId);
-    return JourneyDetail(journey: journey, modules: modules);
+    return JourneyDetail(
+      journey: journey,
+      modules: modules,
+      quizScore: quizScore,
+    );
   }
 }

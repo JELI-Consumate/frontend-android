@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_shadows.dart';
@@ -8,20 +9,17 @@ import '../features/badges/presentation/badges_screen.dart';
 import '../features/main/presentation/dashboard_screen.dart';
 import '../features/main/presentation/journeys_screen.dart';
 import '../features/main/presentation/profile_screen.dart';
+import 'main_tab_provider.dart';
 
 /// Rangka navigasi utama setelah login: empat tab di bawah, masing-masing
 /// Scaffold sendiri. `IndexedStack` menjaga state tiap tab tetap hidup saat
 /// pindah-pindah (mis. posisi scroll di Perjalanan tidak reset ke atas
 /// waktu balik dari tab lain).
-class MainShell extends StatefulWidget {
+///
+/// Index tab aktif dipegang [mainTabIndexProvider] (bukan `State` lokal) --
+/// lihat doc comment provider itu untuk alasannya.
+class MainShell extends ConsumerWidget {
   const MainShell({super.key});
-
-  @override
-  State<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<MainShell> {
-  int _index = 0;
 
   static const _tabs = [
     DashboardScreen(),
@@ -38,13 +36,15 @@ class _MainShellState extends State<MainShell> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final index = ref.watch(mainTabIndexProvider);
+
     return Scaffold(
-      body: IndexedStack(index: _index, children: _tabs),
+      body: IndexedStack(index: index, children: _tabs),
       bottomNavigationBar: _BottomNavBar(
         items: _items,
-        selectedIndex: _index,
-        onSelected: (index) => setState(() => _index = index),
+        selectedIndex: index,
+        onSelected: (i) => ref.read(mainTabIndexProvider.notifier).select(i),
       ),
     );
   }
