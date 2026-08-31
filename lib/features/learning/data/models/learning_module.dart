@@ -40,6 +40,7 @@ class LearningModule {
     required this.isRequired,
     required this.progress,
     required this.locked,
+    this.pageIds = const [],
   });
 
   final int id;
@@ -51,6 +52,13 @@ class LearningModule {
   final bool isRequired;
   final LearningProgress progress;
 
+  /// Id seluruh halaman (`module_page`) di module ini, urut sesuai
+  /// backend -- dipakai untuk mencocokkan `module_page_id` dari
+  /// `GET /progress/next` ke module induknya (lihat
+  /// `NotificationListenerController`), bukan buat ditampilkan di UI mana
+  /// pun sekarang.
+  final List<int> pageIds;
+
   /// true kalau module SEBELUMNYA (order - 1) di journey yang sama belum
   /// completed -- module pertama di journey selalu `false` (lihat
   /// `JourneyController::attachModuleProgress` di backend). Menentukan
@@ -58,6 +66,7 @@ class LearningModule {
   final bool locked;
 
   factory LearningModule.fromJson(Map<String, dynamic> json) {
+    final rawPages = json['pages'];
     return LearningModule(
       id: (json['id'] as num).toInt(),
       type: ModuleContentType.fromJson(json['type']),
@@ -70,6 +79,12 @@ class LearningModule {
         json['progress'] as Map<String, dynamic>?,
       ),
       locked: json['locked'] as bool? ?? false,
+      pageIds: rawPages is List
+          ? rawPages
+                .cast<Map<String, dynamic>>()
+                .map((page) => (page['id'] as num).toInt())
+                .toList()
+          : const [],
     );
   }
 }

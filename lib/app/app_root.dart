@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,7 +27,7 @@ class _AppRootState extends ConsumerState<AppRoot> {
     // sendiri sudah idempoten (lihat NotificationListenerController), tapi
     // initState tetap tempat yang tepat karena AppRoot tidak pernah
     // dibuang selama app hidup.
-    ref.read(notificationListenerControllerProvider).attach();
+    unawaited(ref.read(notificationListenerControllerProvider).attach());
   }
 
   @override
