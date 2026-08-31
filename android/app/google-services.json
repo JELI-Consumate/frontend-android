@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "605918444826",
+    "project_id": "jeli-cb37b",
+    "storage_bucket": "jeli-cb37b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:605918444826:android:cb1a687e617b940bca40a3",
+        "android_client_info": {
+          "package_name": "com.argy.perlindungankonsumen"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIO-6qpGRW-M8lB6j2pfZoRPPXEbw9h48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
