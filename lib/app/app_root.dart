@@ -3,17 +3,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/auth/application/auth_controller.dart';
 import '../features/auth/presentation/auth_screen.dart';
+import '../features/notification/application/notification_listener_controller.dart';
 import '../features/onboarding/application/sector_selection_provider.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/onboarding/presentation/sector_selection_screen.dart';
 import 'main_shell.dart';
 import 'splash_screen.dart';
 
-class AppRoot extends ConsumerWidget {
+class AppRoot extends ConsumerStatefulWidget {
   const AppRoot({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppRoot> createState() => _AppRootState();
+}
+
+class _AppRootState extends ConsumerState<AppRoot> {
+  @override
+  void initState() {
+    super.initState();
+    // Sekali seumur hidup widget tree, bukan per rebuild -- attach()
+    // sendiri sudah idempoten (lihat NotificationListenerController), tapi
+    // initState tetap tempat yang tepat karena AppRoot tidak pernah
+    // dibuang selama app hidup.
+    ref.read(notificationListenerControllerProvider).attach();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final auth = ref.watch(authControllerProvider);
 
     if (auth.isLoading && !auth.hasValue) return const SplashScreen();
