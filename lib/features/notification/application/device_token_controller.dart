@@ -19,10 +19,13 @@ class DeviceTokenController {
   /// belum terdaftar cuma berarti user itu tidak kebagian notif
   /// inactivity, bukan alasan untuk menggagalkan login.
   Future<void> registerCurrentDevice() async {
-    final service = _ref.read(pushNotificationServiceProvider);
-    _attachRefreshListener(service);
-
     try {
+      // `pushNotificationServiceProvider` sendiri bisa gagal dibuat (mis.
+      // `Firebase.initializeApp()` belum dipanggil di test harness) --
+      // harus di dalam try juga, bukan cuma pemanggilan FCM-nya.
+      final service = _ref.read(pushNotificationServiceProvider);
+      _attachRefreshListener(service);
+
       await service.requestPermission();
       final token = await service.getToken();
       if (token == null) return;
