@@ -57,11 +57,9 @@ void main() {
     await pumpApp(tester, FakeAuthRepository());
     await tester.pumpAndSettle();
 
+    // Onboarding sekarang cuma satu slide sambutan -- pre-test sudah jadi
+    // kartu survei di Beranda, bukan slide onboarding.
     await tester.tap(find.text('Mulai'));
-    await tester.pumpAndSettle();
-    expect(find.text('Pre-Test'), findsOneWidget);
-
-    await tester.tap(find.text('Mulai Pre-Test'));
     await tester.pumpAndSettle();
 
     expect(find.text('Daftar'), findsOneWidget);
@@ -120,8 +118,6 @@ void main() {
       // Lewati onboarding dulu supaya konteksnya AuthScreen, seperti alur
       // nyata sebelum RegisterForm mendorong layar OTP.
       await tester.tap(find.text('Mulai'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Mulai Pre-Test'));
       await tester.pumpAndSettle();
 
       final navigator = tester.state<NavigatorState>(find.byType(Navigator));
