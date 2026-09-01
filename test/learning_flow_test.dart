@@ -11,6 +11,8 @@ import 'package:perlindungan_konsumen/features/auth/data/models/app_user.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/journey.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
+import 'package:perlindungan_konsumen/features/learning/data/models/sector.dart';
+import 'package:perlindungan_konsumen/features/learning/data/models/sector_survey.dart';
 import 'package:perlindungan_konsumen/features/main/presentation/dashboard_screen.dart';
 import 'package:perlindungan_konsumen/features/main/presentation/journeys_screen.dart';
 import 'package:perlindungan_konsumen/features/module/data/module_repository.dart';
@@ -157,6 +159,133 @@ void main() {
 
       expect(find.text('Progres Belajar'), findsNothing);
     });
+  });
+
+  group('JourneysScreen survei sektor', () {
+    Sector sectorWithSurveys({SectorSurvey? pretest, SectorSurvey? posttest}) {
+      final defaultSector = FakeLearningRepository.defaultSector;
+      return Sector(
+        id: defaultSector.id,
+        slug: defaultSector.slug,
+        name: defaultSector.name,
+        description: defaultSector.description,
+        iconUrl: defaultSector.iconUrl,
+        color: defaultSector.color,
+        order: defaultSector.order,
+        progress: defaultSector.progress,
+        surveys: SectorSurveys(
+          pretest: pretest ?? SectorSurvey.empty,
+          posttest: posttest ?? SectorSurvey.empty,
+        ),
+      );
+    }
+
+    testWidgets(
+      'kartu pretest tampil kalau link dikonfigurasi & belum selesai',
+      (tester) async {
+        final repository = FakeLearningRepository(
+          sector: sectorWithSurveys(
+            pretest: const SectorSurvey(
+              link: 'https://forms.gle/pretest-abc',
+              completedAt: null,
+            ),
+          ),
+        );
+        await pump(tester, const JourneysScreen(), repository);
+
+        expect(find.text('Survei Pretest Sektor'), findsOneWidget);
+      },
+    );
+
+    testWidgets('kartu pretest tidak tampil kalau link belum dikonfigurasi', (
+      tester,
+    ) async {
+      final repository = FakeLearningRepository(sector: sectorWithSurveys());
+      await pump(tester, const JourneysScreen(), repository);
+
+      expect(find.text('Survei Pretest Sektor'), findsNothing);
+    });
+
+    testWidgets(
+      'kartu pretest tidak tampil kalau sudah pernah ditandai selesai',
+      (tester) async {
+        final repository = FakeLearningRepository(
+          sector: sectorWithSurveys(
+            pretest: SectorSurvey(
+              link: 'https://forms.gle/pretest-abc',
+              completedAt: DateTime(2026),
+            ),
+          ),
+        );
+        await pump(tester, const JourneysScreen(), repository);
+
+        expect(find.text('Survei Pretest Sektor'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'kartu posttest TIDAK tampil selama belum seluruh journey selesai',
+      (tester) async {
+        // Fixture default: journey 1 in_progress, 3 lainnya terkunci --
+        // belum "seluruh journey selesai".
+        final repository = FakeLearningRepository(
+          sector: sectorWithSurveys(
+            posttest: const SectorSurvey(
+              link: 'https://forms.gle/posttest-abc',
+              completedAt: null,
+            ),
+          ),
+        );
+        await pump(tester, const JourneysScreen(), repository);
+
+        expect(find.text('Survei Posttest Sektor'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'kartu posttest tampil begitu seluruh journey selesai & link dikonfigurasi',
+      (tester) async {
+        final allCompleted = FakeLearningRepository.defaultJourneys
+            .map(
+              (journey) => Journey(
+                id: journey.id,
+                slug: journey.slug,
+                title: journey.title,
+                description: journey.description,
+                order: journey.order,
+                estimatedMinutes: journey.estimatedMinutes,
+                isUnlocked: true,
+                modulesCount: journey.modulesCount,
+                progress: const LearningProgress(
+                  status: LearningStatus.completed,
+                  percent: 100,
+                ),
+              ),
+            )
+            .toList();
+
+        final repository = FakeLearningRepository(
+          journeys: allCompleted,
+          sector: sectorWithSurveys(
+            posttest: const SectorSurvey(
+              link: 'https://forms.gle/posttest-abc',
+              completedAt: null,
+            ),
+          ),
+        );
+        await pump(tester, const JourneysScreen(), repository);
+
+        // 4 journey card + kartu survei sekaligus tidak muat di satu layar --
+        // ListView men-virtualisasi item di luar viewport+cache, jadi harus
+        // digulir dulu sebelum finder-nya ketemu (bukan cuma soal terlihat).
+        await tester.scrollUntilVisible(
+          find.text('Survei Posttest Sektor'),
+          300,
+        );
+
+        expect(find.text('Survei Posttest Sektor'), findsOneWidget);
+      },
+    );
   });
 
   group('JourneyDetailScreen', () {

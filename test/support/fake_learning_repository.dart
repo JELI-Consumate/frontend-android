@@ -6,6 +6,7 @@ import 'package:perlindungan_konsumen/features/learning/data/models/learning_mod
 import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/sector.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/sector_detail.dart';
+import 'package:perlindungan_konsumen/features/learning/data/models/sector_survey.dart';
 
 /// Data tiruan yang bentuknya persis hasil `curl` sungguhan ke
 /// `GET /sectors/e-commerce` dan `GET /journeys/1` saat menyusun fitur ini
@@ -14,12 +15,18 @@ class FakeLearningRepository implements LearningRepository {
   FakeLearningRepository({
     List<Journey>? journeys,
     List<LearningModule>? modules,
+    Sector? sector,
     this.quizScore,
   }) : journeys = journeys ?? defaultJourneys,
-       modules = modules ?? _defaultModules;
+       modules = modules ?? _defaultModules,
+       sector = sector ?? defaultSector;
 
   List<Journey> journeys;
   List<LearningModule> modules;
+
+  /// Mutable seperti [journeys]/[modules] -- test survei mengganti ini
+  /// dengan varian yang punya `surveys.pretest`/`posttest` terkonfigurasi.
+  Sector sector;
 
   /// Mutable -- test bisa mengubahnya di tengah jalan (mis. sesudah
   /// men-simulasikan kuis selesai lewat `FakeModuleRepository.onComplete`)
@@ -30,7 +37,7 @@ class FakeLearningRepository implements LearningRepository {
 
   final List<String> calls = [];
 
-  static const sector = Sector(
+  static const defaultSector = Sector(
     id: 1,
     slug: 'e-commerce',
     name: 'E-Commerce',
@@ -175,6 +182,52 @@ class FakeLearningRepository implements LearningRepository {
       journey: journey,
       modules: modules,
       quizScore: quizScore,
+    );
+  }
+
+  @override
+  Future<void> completePretestSurvey(String slug) async {
+    calls.add('completePretestSurvey($slug)');
+    if (failWith != null) throw failWith!;
+    sector = Sector(
+      id: sector.id,
+      slug: sector.slug,
+      name: sector.name,
+      description: sector.description,
+      iconUrl: sector.iconUrl,
+      color: sector.color,
+      order: sector.order,
+      progress: sector.progress,
+      surveys: SectorSurveys(
+        pretest: SectorSurvey(
+          link: sector.surveys.pretest.link,
+          completedAt: DateTime(2026),
+        ),
+        posttest: sector.surveys.posttest,
+      ),
+    );
+  }
+
+  @override
+  Future<void> completePosttestSurvey(String slug) async {
+    calls.add('completePosttestSurvey($slug)');
+    if (failWith != null) throw failWith!;
+    sector = Sector(
+      id: sector.id,
+      slug: sector.slug,
+      name: sector.name,
+      description: sector.description,
+      iconUrl: sector.iconUrl,
+      color: sector.color,
+      order: sector.order,
+      progress: sector.progress,
+      surveys: SectorSurveys(
+        pretest: sector.surveys.pretest,
+        posttest: SectorSurvey(
+          link: sector.surveys.posttest.link,
+          completedAt: DateTime(2026),
+        ),
+      ),
     );
   }
 }
