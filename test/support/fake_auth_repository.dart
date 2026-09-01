@@ -13,7 +13,7 @@ class FakeAuthRepository implements AuthRepository {
   // kebanyakan test di sini. Test yang khusus menguji gerbang verifikasi
   // email meng-override `user` ini dengan `emailVerifiedAt: null`.
   AppUser user = AppUser(
-    id: 1,
+    id: '1',
     name: 'Budi Santoso',
     email: 'budi@example.com',
     phone: '081234567890',
