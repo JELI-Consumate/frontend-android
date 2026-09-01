@@ -28,7 +28,7 @@ void main() {
   // ArticleModuleScreen langsung membuat journey 1 selesai juga -- tanpa
   // perlu menyusun seluruh 12 module asli journey 1 di fixture.
   Journey inProgressJourney1() => const Journey(
-    id: 1,
+    id: '1',
     slug: 'kenali-hakmu-sebagai-konsumen',
     title: 'Kenali Hakmu sebagai Konsumen',
     description: null,
@@ -40,7 +40,7 @@ void main() {
   );
 
   Journey completedJourney1() => const Journey(
-    id: 1,
+    id: '1',
     slug: 'kenali-hakmu-sebagai-konsumen',
     title: 'Kenali Hakmu sebagai Konsumen',
     description: null,
@@ -52,7 +52,7 @@ void main() {
   );
 
   Journey lockedJourney2() => const Journey(
-    id: 2,
+    id: '2',
     slug: 'belanja-online-dengan-lebih-cerdas',
     title: 'Belanja Online dengan Lebih Cerdas',
     description: null,
@@ -64,7 +64,7 @@ void main() {
   );
 
   Journey unlockedJourney2() => const Journey(
-    id: 2,
+    id: '2',
     slug: 'belanja-online-dengan-lebih-cerdas',
     title: 'Belanja Online dengan Lebih Cerdas',
     description: null,
@@ -76,7 +76,7 @@ void main() {
   );
 
   const soloModule = LearningModule(
-    id: 12,
+    id: '12',
     type: ModuleContentType.materi,
     title: 'Mengenal Aturan Hukum Saat Belanja Online',
     description: null,
@@ -88,7 +88,7 @@ void main() {
   );
 
   const completedSoloModule = LearningModule(
-    id: 12,
+    id: '12',
     type: ModuleContentType.materi,
     title: 'Mengenal Aturan Hukum Saat Belanja Online',
     description: null,
@@ -118,8 +118,8 @@ void main() {
     final badgeRepository = FakeBadgeRepository(
       items: [
         Badge(
-          id: 1,
-          journeyId: 1,
+          id: '1',
+          journeyId: '1',
           name: 'Consumer Rights Explorer',
           description: 'Memahami dasar-dasar hak dan kewajiban konsumen.',
           congratulationMessage: 'Selamat! Kamu telah menuntaskan Journey 1.',
@@ -137,7 +137,7 @@ void main() {
     // lewat mutasi manual ke fixture, karena fake ini tidak punya mesin
     // kalkulasi progress sungguhan.
     final moduleRepository = FakeModuleRepository(
-      modules: {12: articleModuleFixture()},
+      modules: {'12': articleModuleFixture()},
       onComplete: (_) {
         learningRepository.modules = [completedSoloModule];
         learningRepository.journeys = [completedJourney1(), unlockedJourney2()];
@@ -155,7 +155,7 @@ void main() {
             FakeSectorStorage(initialSlug: 'e-commerce'),
           ),
         ],
-        child: const MaterialApp(home: JourneyDetailScreen(journeyId: 1)),
+        child: const MaterialApp(home: JourneyDetailScreen(journeyId: '1')),
       ),
     );
     await tester.pumpAndSettle();
@@ -226,7 +226,7 @@ void main() {
         modules: [completedSoloModule],
       );
       final moduleRepository = FakeModuleRepository(
-        modules: {12: articleModuleFixture(status: LearningStatus.completed)},
+        modules: {'12': articleModuleFixture(status: LearningStatus.completed)},
       );
 
       tester.view.physicalSize = const Size(1080, 2400);
@@ -243,7 +243,7 @@ void main() {
               FakeSectorStorage(initialSlug: 'e-commerce'),
             ),
           ],
-          child: const MaterialApp(home: JourneyDetailScreen(journeyId: 1)),
+          child: const MaterialApp(home: JourneyDetailScreen(journeyId: '1')),
         ),
       );
       await tester.pumpAndSettle();

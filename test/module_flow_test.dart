@@ -588,7 +588,7 @@ void main() {
       final video = videoModuleFixture();
       final article = articleModuleFixture();
       return ModuleDetail(
-        id: 99,
+        id: '99',
         type: video.type,
         title: video.title,
         description: video.description,
@@ -601,8 +601,8 @@ void main() {
       'halaman ke-2 baru terlihat setelah swipe, bukan tersembunyi selamanya',
       (tester) async {
         final module = multiPageModuleFixture();
-        final repository = FakeModuleRepository(modules: {99: module});
-        await pump(tester, const ModuleScreen(moduleId: 99), repository);
+        final repository = FakeModuleRepository(modules: {'99': module});
+        await pump(tester, const ModuleScreen(moduleId: '99'), repository);
 
         // Halaman 1 (video) tampil duluan, halaman 2 (artikel) belum.
         expect(find.text('Tonton di YouTube'), findsOneWidget);
@@ -627,11 +627,11 @@ void main() {
         // vs tombol "Modul Selanjutnya" yang cuma muncul di halaman terakhir).
         final module = multiPageModuleFixture();
         final repository = FakeModuleRepository(
-          modules: {99: module, 100: module},
+          modules: {'99': module, '100': module},
         );
         await pump(
           tester,
-          const ModuleScreen(moduleId: 99, journeyModuleIds: [99, 100]),
+          const ModuleScreen(moduleId: '99', journeyModuleIds: ['99', '100']),
           repository,
         );
 
@@ -660,8 +660,8 @@ void main() {
       'tanpa journeyModuleIds, halaman terakhir menampilkan Selesai (bukan Selanjutnya)',
       (tester) async {
         final module = multiPageModuleFixture();
-        final repository = FakeModuleRepository(modules: {99: module});
-        await pump(tester, const ModuleScreen(moduleId: 99), repository);
+        final repository = FakeModuleRepository(modules: {'99': module});
+        await pump(tester, const ModuleScreen(moduleId: '99'), repository);
 
         await tester.tap(find.text('Selanjutnya'));
         await tester.pumpAndSettle();
