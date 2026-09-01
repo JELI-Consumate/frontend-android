@@ -33,6 +33,26 @@ class LearningRepository {
     });
   }
 
+  /// Self-report: user sudah mengisi Google Form survei pretest sektor ini.
+  /// Layar pemanggil bertanggung jawab me-refresh [primarySectorDetailProvider]
+  /// sesudahnya supaya status `surveys.pretest.completedAt` ikut terbaru.
+  Future<void> completePretestSurvey(String slug) {
+    return guardApi(() async {
+      await _dio.post<Map<String, dynamic>>(
+        '/sectors/$slug/pretest-survey/complete',
+      );
+    });
+  }
+
+  /// Sama seperti [completePretestSurvey], untuk survei posttest.
+  Future<void> completePosttestSurvey(String slug) {
+    return guardApi(() async {
+      await _dio.post<Map<String, dynamic>>(
+        '/sectors/$slug/posttest-survey/complete',
+      );
+    });
+  }
+
   Future<JourneyDetail> journeyDetail(int journeyId) {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>(

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'learning_status.dart';
+import 'sector_survey.dart';
 
 /// Satu sektor pembelajaran (mis. "E-Commerce"). Saat ini backend baru
 /// punya satu sektor aktif, tapi model ini tetap dibuat generik.
@@ -15,6 +16,7 @@ class Sector {
     required this.color,
     required this.order,
     required this.progress,
+    this.surveys = SectorSurveys.empty,
   });
 
   final int id;
@@ -25,6 +27,7 @@ class Sector {
   final String? color;
   final int order;
   final LearningProgress progress;
+  final SectorSurveys surveys;
 
   factory Sector.fromJson(Map<String, dynamic> json) {
     return Sector(
@@ -38,6 +41,7 @@ class Sector {
       progress: LearningProgress.fromJson(
         json['progress'] as Map<String, dynamic>?,
       ),
+      surveys: SectorSurveys.fromJson(json['surveys'] as Map<String, dynamic>?),
     );
   }
 }
