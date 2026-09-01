@@ -14,19 +14,19 @@ class QuizReviewItem {
     required this.explanation,
   });
 
-  final int quizQuestionId;
+  final String quizQuestionId;
   final String question;
-  final int selectedOptionId;
-  final int? correctOptionId;
+  final String selectedOptionId;
+  final String? correctOptionId;
   final bool isCorrect;
   final String? explanation;
 
   factory QuizReviewItem.fromJson(Map<String, dynamic> json) {
     return QuizReviewItem(
-      quizQuestionId: (json['quiz_question_id'] as num).toInt(),
+      quizQuestionId: json['quiz_question_id'] as String,
       question: json['question'] as String,
-      selectedOptionId: (json['selected_option_id'] as num).toInt(),
-      correctOptionId: (json['correct_option_id'] as num?)?.toInt(),
+      selectedOptionId: json['selected_option_id'] as String,
+      correctOptionId: json['correct_option_id'] as String?,
       isCorrect: json['is_correct'] as bool? ?? false,
       explanation: json['explanation'] as String?,
     );
@@ -52,8 +52,8 @@ class QuizAttempt {
     required this.review,
   });
 
-  final int attemptId;
-  final int quizContentId;
+  final String attemptId;
+  final String quizContentId;
   final int attemptNumber;
   final int? choiceScore;
   final int? choiceMaxScore;
@@ -65,8 +65,8 @@ class QuizAttempt {
   factory QuizAttempt.fromJson(Map<String, dynamic> json) {
     final rawReview = json['review'];
     return QuizAttempt(
-      attemptId: (json['attempt_id'] as num).toInt(),
-      quizContentId: (json['quiz_content_id'] as num).toInt(),
+      attemptId: json['attempt_id'] as String,
+      quizContentId: json['quiz_content_id'] as String,
       attemptNumber: (json['attempt_number'] as num?)?.toInt() ?? 1,
       choiceScore: (json['choice_score'] as num?)?.toInt(),
       choiceMaxScore: (json['choice_max_score'] as num?)?.toInt(),
@@ -102,14 +102,14 @@ class QuizAnswerCheckResult {
   });
 
   final bool? correct;
-  final int? correctOptionId;
+  final String? correctOptionId;
   final String? explanation;
   final QuizAttempt attempt;
 
   factory QuizAnswerCheckResult.fromJson(Map<String, dynamic> json) {
     return QuizAnswerCheckResult(
       correct: json['correct'] as bool?,
-      correctOptionId: (json['correct_option_id'] as num?)?.toInt(),
+      correctOptionId: json['correct_option_id'] as String?,
       explanation: json['explanation'] as String?,
       attempt: QuizAttempt.fromJson(json['attempt'] as Map<String, dynamic>),
     );

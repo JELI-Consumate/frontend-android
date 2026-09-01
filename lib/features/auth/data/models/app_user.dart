@@ -12,7 +12,7 @@ class AppUser {
     this.emailVerifiedAt,
   });
 
-  final int id;
+  final String id;
   final String name;
   final String email;
   final String? phone;
@@ -24,7 +24,7 @@ class AppUser {
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
     return AppUser(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String?,

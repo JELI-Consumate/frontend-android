@@ -40,7 +40,7 @@ final primarySectorDetailProvider = FutureProvider<SectorDetail?>((ref) async {
 /// [primarySectorDetailProvider].
 final journeyDetailProvider = FutureProvider.autoDispose.family((
   ref,
-  int journeyId,
+  String journeyId,
 ) {
   final repository = ref.watch(learningRepositoryProvider);
   return repository.journeyDetail(journeyId);

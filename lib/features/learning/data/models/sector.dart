@@ -19,7 +19,7 @@ class Sector {
     this.surveys = SectorSurveys.empty,
   });
 
-  final int id;
+  final String id;
   final String slug;
   final String name;
   final String? description;
@@ -31,7 +31,7 @@ class Sector {
 
   factory Sector.fromJson(Map<String, dynamic> json) {
     return Sector(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       slug: json['slug'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,

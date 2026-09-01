@@ -43,7 +43,7 @@ class LearningModule {
     this.pageIds = const [],
   });
 
-  final int id;
+  final String id;
   final ModuleContentType type;
   final String title;
   final String? description;
@@ -57,7 +57,7 @@ class LearningModule {
   /// `GET /progress/next` ke module induknya (lihat
   /// `NotificationListenerController`), bukan buat ditampilkan di UI mana
   /// pun sekarang.
-  final List<int> pageIds;
+  final List<String> pageIds;
 
   /// true kalau module SEBELUMNYA (order - 1) di journey yang sama belum
   /// completed -- module pertama di journey selalu `false` (lihat
@@ -68,7 +68,7 @@ class LearningModule {
   factory LearningModule.fromJson(Map<String, dynamic> json) {
     final rawPages = json['pages'];
     return LearningModule(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       type: ModuleContentType.fromJson(json['type']),
       title: json['title'] as String,
       description: json['description'] as String?,
@@ -82,7 +82,7 @@ class LearningModule {
       pageIds: rawPages is List
           ? rawPages
                 .cast<Map<String, dynamic>>()
-                .map((page) => (page['id'] as num).toInt())
+                .map((page) => page['id'] as String)
                 .toList()
           : const [],
     );

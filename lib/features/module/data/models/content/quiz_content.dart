@@ -23,13 +23,13 @@ class QuizChoiceOption {
     required this.order,
   });
 
-  final int id;
+  final String id;
   final String optionText;
   final int order;
 
   factory QuizChoiceOption.fromJson(Map<String, dynamic> json) {
     return QuizChoiceOption(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       optionText: json['option_text'] as String,
       order: (json['order'] as num?)?.toInt() ?? 0,
     );
@@ -45,14 +45,14 @@ class LikertScaleOption {
     required this.order,
   });
 
-  final int id;
+  final String id;
   final int value;
   final String label;
   final int order;
 
   factory LikertScaleOption.fromJson(Map<String, dynamic> json) {
     return LikertScaleOption(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       value: (json['value'] as num).toInt(),
       label: json['label'] as String,
       order: (json['order'] as num?)?.toInt() ?? 0,
@@ -69,7 +69,7 @@ class QuizQuestion {
     required this.choiceOptions,
   });
 
-  final int id;
+  final String id;
   final String question;
   final int order;
 
@@ -80,7 +80,7 @@ class QuizQuestion {
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
     final rawOptions = json['choice_options'];
     return QuizQuestion(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       question: json['question'] as String,
       order: (json['order'] as num?)?.toInt() ?? 0,
       choiceOptions: rawOptions is List
@@ -105,7 +105,7 @@ class QuizSegment {
     required this.likertScaleOptions,
   });
 
-  final int id;
+  final String id;
   final QuizSegmentType segmentType;
   final String title;
   final String? instruction;
@@ -120,7 +120,7 @@ class QuizSegment {
     final rawQuestions = json['questions'];
     final rawLikertOptions = json['likert_scale_options'];
     return QuizSegment(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       segmentType: QuizSegmentType.fromJson(json['segment_type']),
       title: json['title'] as String,
       instruction: json['instruction'] as String?,
@@ -153,7 +153,7 @@ class QuizContent {
     required this.segments,
   });
 
-  final int id;
+  final String id;
   final int passingScore;
   final bool shuffleQuestions;
   final List<QuizSegment> segments;
@@ -161,7 +161,7 @@ class QuizContent {
   factory QuizContent.fromJson(Map<String, dynamic> json) {
     final rawSegments = json['segments'];
     return QuizContent(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       passingScore: (json['passing_score'] as num?)?.toInt() ?? 70,
       shuffleQuestions: json['shuffle_questions'] as bool? ?? false,
       segments: rawSegments is List

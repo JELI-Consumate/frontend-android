@@ -28,7 +28,7 @@ class SimulationMatchingPair {
     required this.order,
   });
 
-  final int id;
+  final String id;
   final String leftLabel;
   final String? leftDescription;
   final String? leftImageUrl;
@@ -39,7 +39,7 @@ class SimulationMatchingPair {
 
   factory SimulationMatchingPair.fromJson(Map<String, dynamic> json) {
     return SimulationMatchingPair(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       leftLabel: json['left_label'] as String,
       leftDescription: json['left_description'] as String?,
       leftImageUrl: json['left_image_url'] as String?,
@@ -60,7 +60,7 @@ class SimulationOrderingStep {
     required this.order,
   });
 
-  final int id;
+  final String id;
   final String label;
   final String? imageUrl;
 
@@ -72,7 +72,7 @@ class SimulationOrderingStep {
 
   factory SimulationOrderingStep.fromJson(Map<String, dynamic> json) {
     return SimulationOrderingStep(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       label: json['label'] as String,
       imageUrl: json['image_url'] as String?,
       order: (json['order'] as num?)?.toInt() ?? 0,
@@ -94,7 +94,7 @@ class SimulationContent {
     required this.orderingSteps,
   });
 
-  final int id;
+  final String id;
   final String title;
   final SimulationGameType simulationType;
   final String scenario;
@@ -105,7 +105,7 @@ class SimulationContent {
     final rawPairs = json['matching_pairs'];
     final rawSteps = json['ordering_steps'];
     return SimulationContent(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       title: json['title'] as String,
       simulationType: SimulationGameType.fromJson(json['simulation_type']),
       scenario: json['scenario'] as String? ?? '',

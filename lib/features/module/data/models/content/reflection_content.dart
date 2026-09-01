@@ -24,7 +24,7 @@ class ReflectionChecklistItem {
     required this.isChecked,
   });
 
-  final int id;
+  final String id;
   final String label;
   final int order;
 
@@ -34,7 +34,7 @@ class ReflectionChecklistItem {
 
   factory ReflectionChecklistItem.fromJson(Map<String, dynamic> json) {
     return ReflectionChecklistItem(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       label: json['label'] as String,
       order: (json['order'] as num?)?.toInt() ?? 0,
       isChecked: json['is_checked'] as bool? ?? false,
@@ -53,7 +53,7 @@ class ReflectionQuestion {
     required this.checklistItems,
   });
 
-  final int id;
+  final String id;
   final ReflectionQuestionType questionType;
   final String questionText;
   final int order;
@@ -67,7 +67,7 @@ class ReflectionQuestion {
   factory ReflectionQuestion.fromJson(Map<String, dynamic> json) {
     final rawItems = json['checklist_items'];
     return ReflectionQuestion(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       questionType: ReflectionQuestionType.fromJson(json['question_type']),
       questionText: json['question_text'] as String,
       order: (json['order'] as num?)?.toInt() ?? 0,
@@ -92,7 +92,7 @@ class ReflectionSection {
     required this.questions,
   });
 
-  final int id;
+  final String id;
   final String title;
   final String? instruction;
   final int order;
@@ -101,7 +101,7 @@ class ReflectionSection {
   factory ReflectionSection.fromJson(Map<String, dynamic> json) {
     final rawQuestions = json['questions'];
     return ReflectionSection(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       title: json['title'] as String,
       instruction: json['instruction'] as String?,
       order: (json['order'] as num?)?.toInt() ?? 0,
@@ -129,7 +129,7 @@ class ReflectionContent {
     required this.sections,
   });
 
-  final int id;
+  final String id;
   final String title;
   final String openingMessage;
   final String? closingTitle;
@@ -150,7 +150,7 @@ class ReflectionContent {
   factory ReflectionContent.fromJson(Map<String, dynamic> json) {
     final rawSections = json['sections'];
     return ReflectionContent(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       title: json['title'] as String,
       openingMessage: json['opening_message'] as String? ?? '',
       closingTitle: json['closing_title'] as String?,
