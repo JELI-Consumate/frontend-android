@@ -57,8 +57,8 @@ void main() {
       items: [
         ...FakeBadgeRepository.defaultBadges,
         const Badge(
-          id: 5,
-          journeyId: 99,
+          id: '5',
+          journeyId: '99',
           name: 'Badge Sektor Lain',
           description: 'Tidak boleh muncul.',
           congratulationMessage: null,

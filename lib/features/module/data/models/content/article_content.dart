@@ -34,7 +34,7 @@ class ArticleBlock {
     required this.order,
   });
 
-  final int id;
+  final String id;
   final ArticleBlockType blockType;
   final String? text;
   final String? imageUrl;
@@ -43,7 +43,7 @@ class ArticleBlock {
 
   factory ArticleBlock.fromJson(Map<String, dynamic> json) {
     return ArticleBlock(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       blockType: ArticleBlockType.fromJson(json['block_type']),
       text: json['text_article'] as String?,
       imageUrl: json['image_url'] as String?,
@@ -63,14 +63,14 @@ class ArticleContent {
     required this.blocks,
   });
 
-  final int id;
+  final String id;
   final String title;
   final List<ArticleBlock> blocks;
 
   factory ArticleContent.fromJson(Map<String, dynamic> json) {
     final rawBlocks = json['blocks'];
     return ArticleContent(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       title: json['title'] as String,
       blocks: rawBlocks is List
           ? rawBlocks

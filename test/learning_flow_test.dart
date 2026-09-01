@@ -38,7 +38,7 @@ void main() {
         overrides: [
           learningRepositoryProvider.overrideWithValue(repository),
           currentUserProvider.overrideWithValue(
-            const AppUser(id: 1, name: 'Argy', email: 'argy@example.com'),
+            const AppUser(id: '1', name: 'Argy', email: 'argy@example.com'),
           ),
           // DashboardScreen/JourneysScreen sekarang lewat
           // primarySectorDetailProvider -> selectedSectorSlugProvider ->
@@ -90,7 +90,7 @@ void main() {
     ) async {
       final journeys = FakeLearningRepository.defaultJourneys
           .map(
-            (j) => j.id == 1
+            (j) => j.id == '1'
                 ? Journey(
                     id: j.id,
                     slug: j.slug,
@@ -316,7 +316,7 @@ void main() {
       // konten di `module_flow_test.dart`, di sini cukup pastikan
       // navigasinya benar-benar terjadi ke layar yang sesuai.
       final moduleRepository = FakeModuleRepository(
-        modules: {2: videoModuleFixture()},
+        modules: {'2': videoModuleFixture()},
       );
       await pump(
         tester,
@@ -356,7 +356,7 @@ void main() {
       // Module id 3 di fixture default ("Mengenal Aturan Hukum Saat Belanja
       // Online") terkunci -- module 2 sebelumnya belum completed.
       final moduleRepository = FakeModuleRepository(
-        modules: {3: articleModuleFixture()},
+        modules: {'3': articleModuleFixture()},
       );
       await pump(
         tester,

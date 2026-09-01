@@ -45,7 +45,7 @@ class SimulationModuleScreen extends ConsumerStatefulWidget {
 
 class _SimulationModuleScreenState
     extends ConsumerState<SimulationModuleScreen> {
-  int? _attemptId;
+  String? _attemptId;
   ApiException? _startError;
   SimulationAttempt? _latestAttempt;
 
@@ -328,7 +328,7 @@ class _MatchingGame extends ConsumerStatefulWidget {
     required this.onChecked,
   });
 
-  final int attemptId;
+  final String attemptId;
   final List<SimulationMatchingPair> pairs;
   final ValueChanged<SimulationAttempt> onChecked;
 
@@ -340,11 +340,11 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
   late final List<SimulationMatchingPair> _rightItems = [...widget.pairs]
     ..shuffle();
 
-  final Set<int> _solved = {};
-  int? _selectedLeftId;
+  final Set<String> _solved = {};
+  String? _selectedLeftId;
   bool _checking = false;
 
-  Future<void> _tryMatch(int rightPairId) async {
+  Future<void> _tryMatch(String rightPairId) async {
     final leftId = _selectedLeftId;
     if (leftId == null || _checking) return;
 
@@ -615,7 +615,7 @@ class _OrderingGame extends ConsumerStatefulWidget {
     required this.onChecked,
   });
 
-  final int attemptId;
+  final String attemptId;
   final List<SimulationOrderingStep> steps;
   final ValueChanged<SimulationAttempt> onChecked;
 

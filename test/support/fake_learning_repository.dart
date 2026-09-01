@@ -38,7 +38,7 @@ class FakeLearningRepository implements LearningRepository {
   final List<String> calls = [];
 
   static const defaultSector = Sector(
-    id: 1,
+    id: '1',
     slug: 'e-commerce',
     name: 'E-Commerce',
     description:
@@ -51,7 +51,7 @@ class FakeLearningRepository implements LearningRepository {
 
   static const defaultJourneys = [
     Journey(
-      id: 1,
+      id: '1',
       slug: 'kenali-hakmu-sebagai-konsumen',
       title: 'Kenali Hakmu sebagai Konsumen',
       description:
@@ -64,7 +64,7 @@ class FakeLearningRepository implements LearningRepository {
       progress: LearningProgress(status: LearningStatus.inProgress, percent: 2),
     ),
     Journey(
-      id: 2,
+      id: '2',
       slug: 'belanja-online-dengan-lebih-cerdas',
       title: 'Belanja Online dengan Lebih Cerdas',
       description: 'Panduan praktis mengenali toko asli dan aman bertransaksi.',
@@ -75,7 +75,7 @@ class FakeLearningRepository implements LearningRepository {
       progress: LearningProgress.zero,
     ),
     Journey(
-      id: 3,
+      id: '3',
       slug: 'lindungi-dirimu-dari-risiko-digital',
       title: 'Lindungi Dirimu dari Risiko Digital',
       description: 'Edukasi pencegahan kejahatan siber dan phishing.',
@@ -86,7 +86,7 @@ class FakeLearningRepository implements LearningRepository {
       progress: LearningProgress.zero,
     ),
     Journey(
-      id: 4,
+      id: '4',
       slug: 'berani-memperjuangkan-hakmu',
       title: 'Berani Memperjuangkan Hakmu',
       description: 'Langkah penyelesaian sengketa transaksi secara legal.',
@@ -100,7 +100,7 @@ class FakeLearningRepository implements LearningRepository {
 
   static const _defaultModules = [
     LearningModule(
-      id: 1,
+      id: '1',
       type: ModuleContentType.opening,
       title: 'Pembuka Journey',
       description: null,
@@ -114,7 +114,7 @@ class FakeLearningRepository implements LearningRepository {
       locked: false,
     ),
     LearningModule(
-      id: 2,
+      id: '2',
       type: ModuleContentType.video,
       title: 'Pentingnya Perlindungan Konsumen dalam E-Commerce',
       description: null,
@@ -125,7 +125,7 @@ class FakeLearningRepository implements LearningRepository {
       locked: false, // module 1 (sebelumnya) sudah completed
     ),
     LearningModule(
-      id: 3,
+      id: '3',
       type: ModuleContentType.materi,
       title: 'Mengenal Aturan Hukum Saat Belanja Online',
       description: null,
@@ -136,7 +136,7 @@ class FakeLearningRepository implements LearningRepository {
       locked: true, // module 2 (sebelumnya) belum completed
     ),
     LearningModule(
-      id: 11,
+      id: '11',
       type: ModuleContentType.kuis,
       title: 'Kuis Evaluasi Journey 1',
       description: null,
@@ -147,7 +147,7 @@ class FakeLearningRepository implements LearningRepository {
       locked: true,
     ),
     LearningModule(
-      id: 12,
+      id: '12',
       type: ModuleContentType.refleksi,
       title: 'Lembar Pemahaman Hak Dasar',
       description: null,
@@ -174,7 +174,7 @@ class FakeLearningRepository implements LearningRepository {
   }
 
   @override
-  Future<JourneyDetail> journeyDetail(int journeyId) async {
+  Future<JourneyDetail> journeyDetail(String journeyId) async {
     calls.add('journeyDetail($journeyId)');
     if (failWith != null) throw failWith!;
     final journey = journeys.firstWhere((j) => j.id == journeyId);

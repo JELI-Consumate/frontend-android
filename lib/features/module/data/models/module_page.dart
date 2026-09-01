@@ -98,7 +98,7 @@ class ModulePage {
     required this.lastPosition,
   });
 
-  final int id;
+  final String id;
   final int order;
   final ContentType contentType;
   final ModulePageContent content;
@@ -111,7 +111,7 @@ class ModulePage {
     final rawProgress = json['progress'] as Map<String, dynamic>?;
 
     return ModulePage(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       order: (json['order'] as num?)?.toInt() ?? 0,
       contentType: contentType,
       content: ModulePageContent.fromJson(contentType, rawContent),

@@ -7,6 +7,6 @@ import '../data/models/module_detail.dart';
 /// spesifik satu layar (`ModuleScreen`) yang di-push/pop, sama seperti
 /// `journeyDetailProvider` di fitur learning.
 final moduleDetailProvider = FutureProvider.autoDispose
-    .family<ModuleDetail, int>((ref, moduleId) {
+    .family<ModuleDetail, String>((ref, moduleId) {
       return ref.watch(moduleRepositoryProvider).module(moduleId);
     });

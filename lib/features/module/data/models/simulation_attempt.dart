@@ -7,12 +7,12 @@ import 'package:flutter/foundation.dart';
 class MatchingReviewItem {
   const MatchingReviewItem({required this.pairId, required this.isCorrect});
 
-  final int pairId;
+  final String pairId;
   final bool isCorrect;
 
   factory MatchingReviewItem.fromJson(Map<String, dynamic> json) {
     return MatchingReviewItem(
-      pairId: (json['simulation_matching_pair_id'] as num).toInt(),
+      pairId: json['simulation_matching_pair_id'] as String,
       isCorrect: json['is_correct'] as bool? ?? false,
     );
   }
@@ -27,13 +27,13 @@ class OrderingReviewItem {
     required this.isCorrect,
   });
 
-  final int stepId;
+  final String stepId;
   final int submittedPosition;
   final bool isCorrect;
 
   factory OrderingReviewItem.fromJson(Map<String, dynamic> json) {
     return OrderingReviewItem(
-      stepId: (json['simulation_ordering_step_id'] as num).toInt(),
+      stepId: json['simulation_ordering_step_id'] as String,
       submittedPosition: (json['submitted_position'] as num).toInt(),
       isCorrect: json['is_correct'] as bool? ?? false,
     );
@@ -57,8 +57,8 @@ class SimulationAttempt {
     required this.orderingReview,
   });
 
-  final int attemptId;
-  final int simulationContentId;
+  final String attemptId;
+  final String simulationContentId;
   final int? score;
   final int? maxScore;
   final bool? isPassed;
@@ -70,8 +70,8 @@ class SimulationAttempt {
     final rawMatching = json['matching_review'];
     final rawOrdering = json['ordering_review'];
     return SimulationAttempt(
-      attemptId: (json['attempt_id'] as num).toInt(),
-      simulationContentId: (json['simulation_content_id'] as num).toInt(),
+      attemptId: json['attempt_id'] as String,
+      simulationContentId: json['simulation_content_id'] as String,
       score: (json['score'] as num?)?.toInt(),
       maxScore: (json['max_score'] as num?)?.toInt(),
       isPassed: json['is_passed'] as bool?,

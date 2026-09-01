@@ -13,7 +13,7 @@ class VideoContent {
     required this.promptQuestion,
   });
 
-  final int id;
+  final String id;
   final String title;
   final String? description;
   final String youtubeUrl;
@@ -26,7 +26,7 @@ class VideoContent {
 
   factory VideoContent.fromJson(Map<String, dynamic> json) {
     return VideoContent(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,
       youtubeUrl: json['youtube_url'] as String? ?? '',

@@ -11,8 +11,8 @@ import 'package:perlindungan_konsumen/features/learning/presentation/journey_cel
 
 void main() {
   const badgeWithMotivation = Badge(
-    id: 1,
-    journeyId: 1,
+    id: '1',
+    journeyId: '1',
     name: 'Consumer Rights Explorer',
     description: 'Memahami dasar-dasar hak dan kewajiban konsumen.',
     congratulationMessage: 'Selamat! Kamu telah menuntaskan Journey 1.',
@@ -64,8 +64,8 @@ void main() {
     tester,
   ) async {
     const badgeWithoutMotivation = Badge(
-      id: 1,
-      journeyId: 1,
+      id: '1',
+      journeyId: '1',
       name: 'Consumer Rights Explorer',
       description: 'Memahami dasar-dasar hak dan kewajiban konsumen.',
       congratulationMessage: 'Selamat! Kamu telah menuntaskan Journey 1.',
@@ -83,7 +83,7 @@ void main() {
         modulesCompleted: 1,
         modulesTotal: 1,
         quizScore: null,
-        nextJourneyId: 2,
+        nextJourneyId: '2',
       ),
     );
 
@@ -119,7 +119,7 @@ void main() {
                           modulesCompleted: 1,
                           modulesTotal: 1,
                           quizScore: 100,
-                          nextJourneyId: 2,
+                          nextJourneyId: '2',
                         ),
                       ),
                     ),

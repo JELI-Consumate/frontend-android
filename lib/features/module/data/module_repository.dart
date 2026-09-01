@@ -17,7 +17,7 @@ class ModuleRepository {
   /// `GET /modules/{id}` -- module + seluruh halaman + konten polimorfiknya
   /// sudah ter-resolve dalam satu panggilan (lihat `ContentTreeService` di
   /// backend, eager load semuanya sekaligus).
-  Future<ModuleDetail> module(int moduleId) {
+  Future<ModuleDetail> module(String moduleId) {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>(
         '/modules/$moduleId',
@@ -30,7 +30,7 @@ class ModuleRepository {
   /// mekanisme "selesai otomatis" di server seperti kuis/simulasi/refleksi
   /// -- harus ditandai eksplisit lewat endpoint ini begitu user menuntaskan
   /// bacaan/tontonannya.
-  Future<void> completeModulePage(int modulePageId) {
+  Future<void> completeModulePage(String modulePageId) {
     return guardApi(() async {
       await _dio.post<Map<String, dynamic>>(
         '/module-pages/$modulePageId/complete',
@@ -40,13 +40,13 @@ class ModuleRepository {
 
   /// `POST /quizzes/{id}/attempts` -- selalu membuat attempt baru, tidak ada
   /// batas jumlah percobaan untuk kuis journey (BR-06 di backend).
-  Future<int> startQuizAttempt(int quizContentId) {
+  Future<String> startQuizAttempt(String quizContentId) {
     return guardApi(() async {
       final response = await _dio.post<Map<String, dynamic>>(
         '/quizzes/$quizContentId/attempts',
       );
       final data = _requireData(response.data);
-      return (data['attempt_id'] as num).toInt();
+      return data['attempt_id'] as String;
     });
   }
 
@@ -57,11 +57,11 @@ class ModuleRepository {
   /// pertanyaan sudah pernah dicek -- lihat `QuizScoringService::checkAnswer`
   /// di backend.
   Future<QuizAnswerCheckResult> checkQuizAnswer({
-    required int attemptId,
-    required int questionId,
+    required String attemptId,
+    required String questionId,
     required QuizSegmentType type,
-    int? choiceOptionId,
-    int? likertOptionId,
+    String? choiceOptionId,
+    String? likertOptionId,
   }) {
     return guardApi(() async {
       final response = await _dio.post<Map<String, dynamic>>(
@@ -79,22 +79,22 @@ class ModuleRepository {
 
   /// `POST /simulations/{id}/attempts` -- selalu attempt baru tiap kali
   /// simulasi dibuka (tidak ada riwayat attempt yang di-resume di API ini).
-  Future<int> startSimulationAttempt(int simulationContentId) {
+  Future<String> startSimulationAttempt(String simulationContentId) {
     return guardApi(() async {
       final response = await _dio.post<Map<String, dynamic>>(
         '/simulations/$simulationContentId/attempts',
       );
       final data = _requireData(response.data);
-      return (data['attempt_id'] as num).toInt();
+      return data['attempt_id'] as String;
     });
   }
 
   /// Cek satu pasangan game `matching` -- gaya Duolingo: SATU request per
   /// percobaan, jawaban salah tidak disimpan jadi boleh dicoba lagi.
   Future<SimulationCheckResult> checkMatchingAnswer({
-    required int attemptId,
-    required int pairId,
-    required int submittedRightPairId,
+    required String attemptId,
+    required String pairId,
+    required String submittedRightPairId,
   }) {
     return _checkSimulationAnswer(attemptId, {
       'type': 'matching',
@@ -106,8 +106,8 @@ class ModuleRepository {
   /// Cek satu langkah game `ordering` di posisi [submittedPosition]
   /// (1-based -- lihat `CheckSimulationAnswerRequest` di backend: `min:1`).
   Future<SimulationCheckResult> checkOrderingAnswer({
-    required int attemptId,
-    required int stepId,
+    required String attemptId,
+    required String stepId,
     required int submittedPosition,
   }) {
     return _checkSimulationAnswer(attemptId, {
@@ -118,7 +118,7 @@ class ModuleRepository {
   }
 
   Future<SimulationCheckResult> _checkSimulationAnswer(
-    int attemptId,
+    String attemptId,
     Map<String, dynamic> data,
   ) {
     return guardApi(() async {
@@ -134,7 +134,7 @@ class ModuleRepository {
   /// `GET /modules/{id}`: endpoint ini (`ReflectionDetailResource`) sudah
   /// digabung dengan jawaban tersimpan user (`answer_text`/`is_checked`),
   /// yang tidak pernah disertakan di respons module tree.
-  Future<ReflectionContent> reflection(int reflectionContentId) {
+  Future<ReflectionContent> reflection(String reflectionContentId) {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>(
         '/reflections/$reflectionContentId',
@@ -148,9 +148,9 @@ class ModuleRepository {
   /// Selalu kirim seluruh state form saat ini (bukan cuma yang berubah) --
   /// upsert-nya idempotent di backend jadi aman dipanggil berulang.
   Future<ReflectionContent> saveReflectionEntries({
-    required int reflectionContentId,
-    required Map<int, String> answers,
-    required Map<int, bool> checklistAnswers,
+    required String reflectionContentId,
+    required Map<String, String> answers,
+    required Map<String, bool> checklistAnswers,
   }) {
     return guardApi(() async {
       final response = await _dio.put<Map<String, dynamic>>(

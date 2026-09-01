@@ -17,8 +17,8 @@ class FakeBadgeRepository implements BadgeRepository {
 
   static final defaultBadges = [
     Badge(
-      id: 1,
-      journeyId: 1,
+      id: '1',
+      journeyId: '1',
       name: 'Consumer Rights Explorer',
       description: 'Memahami dasar-dasar hak dan kewajiban konsumen.',
       congratulationMessage:
@@ -32,8 +32,8 @@ class FakeBadgeRepository implements BadgeRepository {
       earnedAt: DateTime.utc(2026, 1, 10),
     ),
     const Badge(
-      id: 2,
-      journeyId: 2,
+      id: '2',
+      journeyId: '2',
       name: 'Smart Shopper',
       description: 'Mampu membuat keputusan belanja yang tepat.',
       // Belum diraih -- pesan ucapan selamat & motivasi cuma relevan begitu
@@ -45,8 +45,8 @@ class FakeBadgeRepository implements BadgeRepository {
       earnedAt: null,
     ),
     const Badge(
-      id: 3,
-      journeyId: 3,
+      id: '3',
+      journeyId: '3',
       name: 'Digital Safety Guardian',
       description: 'Mampu melindungi diri dari risiko digital.',
       congratulationMessage: null,
@@ -56,8 +56,8 @@ class FakeBadgeRepository implements BadgeRepository {
       earnedAt: null,
     ),
     const Badge(
-      id: 4,
-      journeyId: 4,
+      id: '4',
+      journeyId: '4',
       name: 'Consumer Champion',
       description: 'Berani memperjuangkan hak sebagai konsumen.',
       congratulationMessage: null,

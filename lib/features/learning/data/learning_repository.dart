@@ -53,7 +53,7 @@ class LearningRepository {
     });
   }
 
-  Future<JourneyDetail> journeyDetail(int journeyId) {
+  Future<JourneyDetail> journeyDetail(String journeyId) {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>(
         '/journeys/$journeyId',

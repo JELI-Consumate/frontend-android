@@ -91,7 +91,7 @@ class _ArticleModuleScreenState extends ConsumerState<ArticleModuleScreen> {
     // antaranya tidak ikut menaikkan nomornya (sama seperti
     // `ArticleBlock::listItemNumber` di preview panel admin).
     var listItemCounter = 0;
-    final listItemNumbers = <int, int>{};
+    final listItemNumbers = <String, int>{};
     for (final block in blocks) {
       if (block.blockType == ArticleBlockType.listItem) {
         listItemCounter++;
@@ -136,7 +136,7 @@ class _ArticleModuleScreenState extends ConsumerState<ArticleModuleScreen> {
   /// tautan + italic per baris).
   List<Widget> _buildBlockWidgets(
     List<ArticleBlock> blocks,
-    Map<int, int> listItemNumbers,
+    Map<String, int> listItemNumbers,
   ) {
     final widgets = <Widget>[];
     var referenceHeadingShown = false;

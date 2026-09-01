@@ -16,10 +16,10 @@ import 'package:perlindungan_konsumen/features/module/data/module_repository.dar
 /// satu hasil tetap -- supaya test bisa menjawab benar/salah dan lihat
 /// hasilnya beda.
 class FakeModuleRepository implements ModuleRepository {
-  FakeModuleRepository({Map<int, ModuleDetail>? modules, this.onComplete})
+  FakeModuleRepository({Map<String, ModuleDetail>? modules, this.onComplete})
     : modules = modules ?? {};
 
-  final Map<int, ModuleDetail> modules;
+  final Map<String, ModuleDetail> modules;
   ApiException? failWith;
 
   /// Dipanggil begitu [completeModulePage] sukses -- test yang perlu
@@ -27,31 +27,37 @@ class FakeModuleRepository implements ModuleRepository {
   /// completed di `FakeLearningRepository`, lihat
   /// `journey_celebration_flow_test.dart`) taruh mutasinya di sini alih-alih
   /// bikin fake ini tahu soal fake lain secara langsung.
-  final void Function(int modulePageId)? onComplete;
+  final void Function(String modulePageId)? onComplete;
 
   final List<String> calls = [];
 
   // --- Kuis: journey_id 1 -> kuis id 100, 2 soal pilihan ganda (option
   // pertama tiap soal "benar") + 1 soal likert (semua opsi "benar" secara
   // definisi -- likert tidak ada benar/salah). ---
-  static const correctChoiceOptionByQuestion = {201: 301, 202: 304};
-  static const likertOptionValue = {401: 1, 402: 2, 403: 3, 404: 4, 405: 5};
+  static const correctChoiceOptionByQuestion = {'201': '301', '202': '304'};
+  static const likertOptionValue = {
+    '401': 1,
+    '402': 2,
+    '403': 3,
+    '404': 4,
+    '405': 5,
+  };
   static const totalQuizQuestions = 3; // 201, 202 (choice) + 203 (likert)
   int quizAttemptCounter = 0;
-  final Map<int, int> _quizChoiceAnswers = {};
-  final Map<int, bool> _quizChoiceCorrectness = {};
-  final Map<int, int> _quizLikertAnswers = {};
+  final Map<String, String> _quizChoiceAnswers = {};
+  final Map<String, bool> _quizChoiceCorrectness = {};
+  final Map<String, String> _quizLikertAnswers = {};
 
   // --- Simulasi ordering: langkah id 601..603 -> posisi benar 1,2,3. ---
-  static const correctOrderingPosition = {601: 1, 602: 2, 603: 3};
+  static const correctOrderingPosition = {'601': 1, '602': 2, '603': 3};
   int simulationAttemptCounter = 0;
-  final Set<int> _matchingSolved = {};
-  final Set<int> _orderingSolved = {};
+  final Set<String> _matchingSolved = {};
+  final Set<String> _orderingSolved = {};
 
   ReflectionContent? reflectionFixture;
 
   @override
-  Future<ModuleDetail> module(int moduleId) async {
+  Future<ModuleDetail> module(String moduleId) async {
     calls.add('module($moduleId)');
     if (failWith != null) throw failWith!;
     final module = modules[moduleId];
@@ -62,21 +68,21 @@ class FakeModuleRepository implements ModuleRepository {
   }
 
   @override
-  Future<void> completeModulePage(int modulePageId) async {
+  Future<void> completeModulePage(String modulePageId) async {
     calls.add('completeModulePage($modulePageId)');
     if (failWith != null) throw failWith!;
     onComplete?.call(modulePageId);
   }
 
   @override
-  Future<int> startQuizAttempt(int quizContentId) async {
+  Future<String> startQuizAttempt(String quizContentId) async {
     calls.add('startQuizAttempt($quizContentId)');
     if (failWith != null) throw failWith!;
     quizAttemptCounter++;
     _quizChoiceAnswers.clear();
     _quizChoiceCorrectness.clear();
     _quizLikertAnswers.clear();
-    return quizAttemptCounter;
+    return '$quizAttemptCounter';
   }
 
   /// Meniru `QuizScoringService::checkAnswer` -- gaya ujian: soal pilihan
@@ -86,17 +92,17 @@ class FakeModuleRepository implements ModuleRepository {
   /// pertanyaan (choice + likert) sudah pernah dicek.
   @override
   Future<QuizAnswerCheckResult> checkQuizAnswer({
-    required int attemptId,
-    required int questionId,
+    required String attemptId,
+    required String questionId,
     required QuizSegmentType type,
-    int? choiceOptionId,
-    int? likertOptionId,
+    String? choiceOptionId,
+    String? likertOptionId,
   }) async {
     calls.add('checkQuizAnswer($attemptId, $questionId)');
     if (failWith != null) throw failWith!;
 
     bool? correct;
-    int? correctOptionId;
+    String? correctOptionId;
     String? explanation;
 
     if (type == QuizSegmentType.likert) {
@@ -150,8 +156,8 @@ class FakeModuleRepository implements ModuleRepository {
       explanation: explanation,
       attempt: QuizAttempt(
         attemptId: attemptId,
-        quizContentId: 100,
-        attemptNumber: attemptId,
+        quizContentId: '100',
+        attemptNumber: int.parse(attemptId),
         choiceScore: isCompleted ? choiceScore : null,
         choiceMaxScore: isCompleted ? choiceMaxScore : null,
         percentage: percentage,
@@ -163,20 +169,20 @@ class FakeModuleRepository implements ModuleRepository {
   }
 
   @override
-  Future<int> startSimulationAttempt(int simulationContentId) async {
+  Future<String> startSimulationAttempt(String simulationContentId) async {
     calls.add('startSimulationAttempt($simulationContentId)');
     if (failWith != null) throw failWith!;
     simulationAttemptCounter++;
     _matchingSolved.clear();
     _orderingSolved.clear();
-    return simulationAttemptCounter;
+    return '$simulationAttemptCounter';
   }
 
   @override
   Future<SimulationCheckResult> checkMatchingAnswer({
-    required int attemptId,
-    required int pairId,
-    required int submittedRightPairId,
+    required String attemptId,
+    required String pairId,
+    required String submittedRightPairId,
   }) async {
     calls.add(
       'checkMatchingAnswer($attemptId, $pairId, $submittedRightPairId)',
@@ -198,8 +204,8 @@ class FakeModuleRepository implements ModuleRepository {
 
   @override
   Future<SimulationCheckResult> checkOrderingAnswer({
-    required int attemptId,
-    required int stepId,
+    required String attemptId,
+    required String stepId,
     required int submittedPosition,
   }) async {
     calls.add('checkOrderingAnswer($attemptId, $stepId, $submittedPosition)');
@@ -219,7 +225,7 @@ class FakeModuleRepository implements ModuleRepository {
   }
 
   SimulationAttempt _simulationAttemptSnapshot(
-    int attemptId, {
+    String attemptId, {
     required int totalMatching,
     required int totalOrdering,
   }) {
@@ -229,7 +235,7 @@ class FakeModuleRepository implements ModuleRepository {
 
     return SimulationAttempt(
       attemptId: attemptId,
-      simulationContentId: 500,
+      simulationContentId: '500',
       score: isCompleted ? totalItems : null,
       maxScore: isCompleted ? totalItems : null,
       isPassed: isCompleted ? true : null,
@@ -240,7 +246,7 @@ class FakeModuleRepository implements ModuleRepository {
   }
 
   @override
-  Future<ReflectionContent> reflection(int reflectionContentId) async {
+  Future<ReflectionContent> reflection(String reflectionContentId) async {
     calls.add('reflection($reflectionContentId)');
     if (failWith != null) throw failWith!;
     final fixture = reflectionFixture;
@@ -252,9 +258,9 @@ class FakeModuleRepository implements ModuleRepository {
 
   @override
   Future<ReflectionContent> saveReflectionEntries({
-    required int reflectionContentId,
-    required Map<int, String> answers,
-    required Map<int, bool> checklistAnswers,
+    required String reflectionContentId,
+    required Map<String, String> answers,
+    required Map<String, bool> checklistAnswers,
   }) async {
     calls.add('saveReflectionEntries($reflectionContentId)');
     if (failWith != null) throw failWith!;

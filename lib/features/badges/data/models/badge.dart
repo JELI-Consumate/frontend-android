@@ -23,11 +23,11 @@ class Badge {
     required this.earnedAt,
   });
 
-  final int id;
+  final String id;
 
   /// Satu badge terikat ke satu journey (relasi 1-1 di backend). Dipakai
   /// buat mencocokkan badge ke sektor -- lihat `sectorBadgesProvider`.
-  final int journeyId;
+  final String journeyId;
   final String name;
   final String description;
 
@@ -46,8 +46,8 @@ class Badge {
   factory Badge.fromJson(Map<String, dynamic> json) {
     final rawEarnedAt = json['earned_at'];
     return Badge(
-      id: (json['id'] as num).toInt(),
-      journeyId: (json['journey_id'] as num).toInt(),
+      id: json['id'] as String,
+      journeyId: json['journey_id'] as String,
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
       congratulationMessage: json['congratulation_message'] as String?,

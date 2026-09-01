@@ -18,7 +18,7 @@ class Journey {
     required this.progress,
   });
 
-  final int id;
+  final String id;
   final String slug;
   final String title;
   final String? description;
@@ -30,7 +30,7 @@ class Journey {
 
   factory Journey.fromJson(Map<String, dynamic> json) {
     return Journey(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       slug: json['slug'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,

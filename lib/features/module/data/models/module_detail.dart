@@ -18,7 +18,7 @@ class ModuleDetail {
     required this.pages,
   });
 
-  final int id;
+  final String id;
   final ModuleContentType type;
   final String title;
   final String? description;
@@ -32,7 +32,7 @@ class ModuleDetail {
   factory ModuleDetail.fromJson(Map<String, dynamic> json) {
     final rawPages = json['pages'];
     return ModuleDetail(
-      id: (json['id'] as num).toInt(),
+      id: json['id'] as String,
       type: ModuleContentType.fromJson(json['type']),
       title: json['title'] as String,
       description: json['description'] as String?,

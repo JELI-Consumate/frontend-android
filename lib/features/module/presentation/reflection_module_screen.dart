@@ -62,10 +62,10 @@ class _ReflectionModuleScreenState
   /// peran dari "Simpan Jawaban" jadi tombol lanjut (lihat `build`).
   late bool _savedComplete = widget.page.status.isCompleted;
 
-  final Map<int, TextEditingController> _controllers = {};
-  final Map<int, bool> _checklist = {};
+  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, bool> _checklist = {};
 
-  int get _reflectionId =>
+  String get _reflectionId =>
       (widget.page.content as ReflectionPageContent).content.id;
 
   @override
@@ -283,9 +283,9 @@ class _SectionCard extends StatelessWidget {
   });
 
   final ReflectionSection section;
-  final Map<int, TextEditingController> controllers;
-  final Map<int, bool> checklist;
-  final void Function(int itemId, bool value) onChecklistToggled;
+  final Map<String, TextEditingController> controllers;
+  final Map<String, bool> checklist;
+  final void Function(String itemId, bool value) onChecklistToggled;
   final VoidCallback onAnswerChanged;
 
   @override
@@ -375,9 +375,9 @@ class _QuestionView extends StatelessWidget {
   });
 
   final ReflectionQuestion question;
-  final Map<int, TextEditingController> controllers;
-  final Map<int, bool> checklist;
-  final void Function(int itemId, bool value) onChecklistToggled;
+  final Map<String, TextEditingController> controllers;
+  final Map<String, bool> checklist;
+  final void Function(String itemId, bool value) onChecklistToggled;
   final VoidCallback onAnswerChanged;
 
   @override
