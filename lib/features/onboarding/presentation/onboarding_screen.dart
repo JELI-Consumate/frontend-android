@@ -74,12 +74,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     label: _pages[_index].ctaLabel,
                     onPressed: _onCtaPressed,
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  PageDots(
-                    count: _pages.length,
-                    activeIndex: _index,
-                    onDotTap: _goTo,
-                  ),
+                  // Cuma tampilkan penanda halaman kalau memang ada lebih
+                  // dari satu -- satu titik sendirian di bawah tombol tidak
+                  // memberi informasi apa-apa.
+                  if (_pages.length > 1) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    PageDots(
+                      count: _pages.length,
+                      activeIndex: _index,
+                      onDotTap: _goTo,
+                    ),
+                  ],
                 ],
               ),
             ),

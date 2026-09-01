@@ -19,6 +19,10 @@ class OnboardingPageData {
   final String ctaLabel;
 }
 
+/// Pre-test sektor tidak jadi slide di sini — ia kartu survei di Beranda
+/// yang mengunci journey pertama sampai diisi (lihat
+/// `SectorDetail.pretestGateActive` dan `DashboardScreen`), karena butuh
+/// slug sektor untuk tahu link Google Form-nya.
 const List<OnboardingPageData> onboardingPages = [
   OnboardingPageData(
     title: 'Selamat Datang!',
@@ -30,15 +34,5 @@ const List<OnboardingPageData> onboardingPages = [
         'Tingkatkan pengetahuanmu dan jadilah **konsumen cerdas** '
         'di berbagai sektor kehidupan.',
     ctaLabel: 'Mulai',
-  ),
-  OnboardingPageData(
-    title: 'Pre-Test',
-    subtitle: 'Langkah awal menjadi konsumen yang cerdas dan berdaya.',
-    illustrationAsset: 'assets/images/pretest_checklist.png',
-    illustrationLabel: 'Ilustrasi lembar soal dengan pensil.',
-    body:
-        'Selesaikan tes singkat ini untuk memetakan **wawasanmu** '
-        'seputar hak konsumen.',
-    ctaLabel: 'Mulai Pre-Test',
   ),
 ];

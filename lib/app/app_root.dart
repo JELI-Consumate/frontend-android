@@ -61,6 +61,9 @@ class _AppRootState extends ConsumerState<AppRoot> {
       return const SectorSelectionScreen();
     }
 
+    // Survei pre-test bukan gerbang di sini lagi -- ia sekarang kartu di
+    // Beranda yang mengunci journey pertama sampai diisi (lihat
+    // `SectorDetail.pretestGateActive`).
     return const MainShell();
   }
 }
