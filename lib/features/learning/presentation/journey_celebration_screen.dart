@@ -45,7 +45,7 @@ class JourneyCelebrationScreen extends ConsumerWidget {
   /// Id journey berikutnya di sektor yang sama, `null` kalau ini journey
   /// terakhir -- tombol "Lanjut ke Journey Berikutnya" disembunyikan waktu
   /// null, bukan ditampilkan nonaktif.
-  final int? nextJourneyId;
+  final String? nextJourneyId;
 
   void _goToNextJourney(BuildContext context) {
     final id = nextJourneyId;

@@ -123,7 +123,7 @@ class _DashboardBody extends ConsumerWidget {
 class _ContinueLearningSection extends ConsumerWidget {
   const _ContinueLearningSection({required this.journeyId});
 
-  final int journeyId;
+  final String journeyId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

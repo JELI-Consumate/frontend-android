@@ -29,7 +29,7 @@ class ModuleScreen extends ConsumerWidget {
     this.journeyModuleIds,
   });
 
-  final int moduleId;
+  final String moduleId;
 
   /// Urutan id seluruh module di journey yang sama (lihat pemanggilnya di
   /// `JourneyDetailScreen`) -- dipakai buat badge "Modul X/Y" di
@@ -38,7 +38,7 @@ class ModuleScreen extends ConsumerWidget {
   /// rantainya jalan sampai akhir journey, bukan cuma sekali lompat. `null`
   /// kalau module ini dibuka tanpa konteks journey -- badge & tombol
   /// lanjutnya cuma turun ke tampilan "akhir" (tanpa nomor, label "Selesai").
-  final List<int>? journeyModuleIds;
+  final List<String>? journeyModuleIds;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,7 +59,7 @@ class _ModuleContentRouter extends StatefulWidget {
   const _ModuleContentRouter({required this.module, this.journeyModuleIds});
 
   final ModuleDetail module;
-  final List<int>? journeyModuleIds;
+  final List<String>? journeyModuleIds;
 
   @override
   State<_ModuleContentRouter> createState() => _ModuleContentRouterState();
@@ -84,7 +84,7 @@ class _ModuleContentRouterState extends State<_ModuleContentRouter> {
 
   int? get _moduleTotal => widget.journeyModuleIds?.length;
 
-  int? get _nextModuleId {
+  String? get _nextModuleId {
     final ids = widget.journeyModuleIds;
     if (ids == null) return null;
 

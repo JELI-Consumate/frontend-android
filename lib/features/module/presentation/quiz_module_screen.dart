@@ -46,18 +46,18 @@ class QuizModuleScreen extends ConsumerStatefulWidget {
 }
 
 class _QuizModuleScreenState extends ConsumerState<QuizModuleScreen> {
-  int? _attemptId;
+  String? _attemptId;
   ApiException? _startError;
 
-  final Map<int, int> _choiceAnswers = {};
-  final Map<int, int> _likertAnswers = {};
+  final Map<String, String> _choiceAnswers = {};
+  final Map<String, String> _likertAnswers = {};
 
   /// Hasil cek per pertanyaan (keyed by quiz_question_id) -- SEKALI
   /// pertanyaan tercatat di sini, tampilannya terkunci ke umpan balik
   /// (benar/salah + pembahasan), tidak bisa jawab ulang. Pertanyaan likert
   /// juga masuk sini (cuma buat menandai "sudah dicek", `correct`-nya
   /// selalu null -- lihat `QuizAnswerCheckResult`).
-  final Map<int, QuizAnswerCheckResult> _checkedResults = {};
+  final Map<String, QuizAnswerCheckResult> _checkedResults = {};
 
   bool _checking = false;
   QuizAttempt? _result;
@@ -541,8 +541,8 @@ class _LikertRow extends StatelessWidget {
   });
 
   final List<LikertScaleOption> options;
-  final int? selectedOptionId;
-  final ValueChanged<int> onSelected;
+  final String? selectedOptionId;
+  final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -723,7 +723,7 @@ class _ReviewCard extends StatelessWidget {
 }
 
 extension _FirstWhereOrNullId on List<QuizChoiceOption> {
-  QuizChoiceOption? firstWhereOrNullId(int? id) {
+  QuizChoiceOption? firstWhereOrNullId(String? id) {
     if (id == null) return null;
     for (final option in this) {
       if (option.id == id) return option;

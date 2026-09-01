@@ -15,7 +15,7 @@ import 'widgets/module_row.dart';
 class JourneyDetailScreen extends ConsumerWidget {
   const JourneyDetailScreen({super.key, required this.journeyId});
 
-  final int journeyId;
+  final String journeyId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,7 +46,7 @@ class JourneyDetailScreen extends ConsumerWidget {
 class _JourneyDetailBody extends ConsumerWidget {
   const _JourneyDetailBody({required this.journeyId, required this.detail});
 
-  final int journeyId;
+  final String journeyId;
   final JourneyDetail detail;
 
   /// Baru pernah completed status-nya sebelum sesi buka-module ini dimulai?
@@ -57,7 +57,7 @@ class _JourneyDetailBody extends ConsumerWidget {
   Future<void> _openModule(
     BuildContext context,
     WidgetRef ref,
-    int moduleId,
+    String moduleId,
   ) async {
     final wasCompleted = detail.journey.progress.status.isCompleted;
 
@@ -107,7 +107,7 @@ class _JourneyDetailBody extends ConsumerWidget {
     final sectorDetail = await ref.read(primarySectorDetailProvider.future);
     if (!context.mounted) return;
 
-    int? nextJourneyId;
+    String? nextJourneyId;
     for (final journey in sectorDetail?.journeys ?? const []) {
       if (journey.order == refreshed.journey.order + 1) {
         nextJourneyId = journey.id;
@@ -135,7 +135,7 @@ class _JourneyDetailBody extends ConsumerWidget {
   /// bukan diam-diam melompati layar perayaan sama sekali.
   Badge _fallbackBadge(JourneyDetail refreshed) {
     return Badge(
-      id: 0,
+      id: '',
       journeyId: journeyId,
       name: '${refreshed.journey.title} Selesai',
       description: 'Kamu telah menuntaskan seluruh materi journey ini.',
