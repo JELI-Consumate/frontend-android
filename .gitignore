@@ -44,3 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/build/
+
+# Claude Code (local tooling, docs, slash commands -- not shared via git)
+.claude/

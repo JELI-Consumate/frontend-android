@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/storage/sector_storage.dart';
+import '../../notification/application/device_token_controller.dart';
 import '../../onboarding/application/sector_selection_provider.dart';
 import '../data/auth_repository.dart';
 import '../data/models/app_user.dart';
@@ -15,7 +18,9 @@ class AuthController extends AsyncNotifier<AppUser?> {
     if (token == null) return null;
 
     try {
-      return await _repository.me();
+      final user = await _repository.me();
+      _registerDeviceToken();
+      return user;
     } on ApiException catch (error) {
       if (error.isUnauthorized) return null;
       rethrow;
@@ -25,6 +30,7 @@ class AuthController extends AsyncNotifier<AppUser?> {
   Future<void> login({required String email, required String password}) async {
     final user = await _repository.login(email: email, password: password);
     state = AsyncValue.data(user);
+    _registerDeviceToken();
   }
 
   /// Sengaja tidak menyentuh `state` — akun baru belum punya sesi sampai
@@ -49,11 +55,13 @@ class AuthController extends AsyncNotifier<AppUser?> {
   Future<void> verifyOtp({required String email, required String otp}) async {
     final user = await _repository.verifyOtp(email: email, otp: otp);
     state = AsyncValue.data(user);
+    _registerDeviceToken();
   }
 
   Future<void> loginWithGoogle(String accessToken) async {
     final user = await _repository.loginWithGoogle(accessToken);
     state = AsyncValue.data(user);
+    _registerDeviceToken();
   }
 
   Future<void> refreshUser() async {
@@ -109,6 +117,14 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<String> resendOtp(String email) {
     return _repository.resendOtp(email);
+  }
+
+  /// Fire-and-forget dengan sengaja -- gagal daftar token FCM (izin
+  /// ditolak, tidak ada Play Services, dsb.) bukan alasan untuk
+  /// menggagalkan alur login. Error-nya sendiri sudah ditangani di
+  /// [DeviceTokenController].
+  void _registerDeviceToken() {
+    unawaited(ref.read(deviceTokenControllerProvider).registerCurrentDevice());
   }
 }
 

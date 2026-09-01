@@ -1,13 +1,19 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app/app_root.dart';
+import 'core/navigation/app_navigator.dart';
 import 'core/theme/app_theme.dart';
+import 'features/notification/data/firebase_messaging_background_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   // Dibutuhkan agar DateFormat('...', 'id_ID') (dipakai di form registrasi
   // untuk menampilkan tanggal lahir) tidak melempar LocaleDataException.
   await initializeDateFormatting('id_ID');
@@ -15,12 +21,13 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
+      navigatorKey: ref.watch(navigatorKeyProvider),
       title: 'Perlindungan Konsumen',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
