@@ -7,8 +7,10 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_alert_dialog.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../learning/application/learning_providers.dart';
+import '../../learning/data/learning_repository.dart';
 import '../../learning/data/models/sector_detail.dart';
 import '../../learning/presentation/journey_detail_screen.dart';
+import '../../learning/presentation/widgets/sector_survey_card.dart';
 import 'widgets/continue_learning_card.dart';
 import 'widgets/journey_card.dart';
 
@@ -93,16 +95,66 @@ class _DashboardBody extends ConsumerWidget {
     final inProgress = detail.inProgressJourney;
     final nextJourney = detail.nextJourney;
 
+    final pretest = detail.sector.surveys.pretest;
+    final showPretestSurvey = detail.pretestGateActive;
+
+    final posttest = detail.sector.surveys.posttest;
+    final allJourneysCompleted = detail.journeys.every(
+      (journey) => journey.progress.status.isCompleted,
+    );
+    final showPosttestSurvey =
+        allJourneysCompleted &&
+        posttest.isConfigured &&
+        !posttest.isCompleted;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (showPretestSurvey) ...[
+          SectorSurveyCard(
+            title: 'Survei Pre-Test Sektor',
+            description:
+                'Isi survei singkat ini lewat Google Form dulu untuk membuka '
+                'journey pertama dan memetakan wawasanmu seputar hak konsumen.',
+            link: pretest.link!,
+            onComplete: () async {
+              await ref
+                  .read(learningRepositoryProvider)
+                  .completePretestSurvey(detail.sector.slug);
+              ref.invalidate(primarySectorDetailProvider);
+              await ref.read(primarySectorDetailProvider.future);
+            },
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+        if (showPosttestSurvey) ...[
+          SectorSurveyCard(
+            title: 'Survei Post-Test Sektor',
+            description:
+                'Kamu sudah menyelesaikan semua journey di sektor ini — isi '
+                'survei penutup lewat Google Form untuk mengukur perkembangan '
+                'pemahamanmu.',
+            link: posttest.link!,
+            onComplete: () async {
+              await ref
+                  .read(learningRepositoryProvider)
+                  .completePosttestSurvey(detail.sector.slug);
+              ref.invalidate(primarySectorDetailProvider);
+              await ref.read(primarySectorDetailProvider.future);
+            },
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         if (inProgress != null) ...[
           Text('Lanjutkan Belajar', style: AppTypography.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           _ContinueLearningSection(journeyId: inProgress.id),
           const SizedBox(height: AppSpacing.lg),
         ],
-        if (nextJourney != null) ...[
+        // Selama gerbang pre-test aktif, journey pertama belum boleh dibuka
+        // -- cukup tampilkan kartu survei di atas, jangan pratinjau journey
+        // yang terkunci.
+        if (nextJourney != null && !showPretestSurvey) ...[
           Text('Perjalanan', style: AppTypography.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           JourneyCard(

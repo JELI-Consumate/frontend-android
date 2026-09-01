@@ -15,6 +15,8 @@ class JourneyCard extends StatelessWidget {
     required this.journey,
     required this.label,
     required this.onTap,
+    this.forceLocked = false,
+    this.lockReason,
   });
 
   final Journey journey;
@@ -25,9 +27,18 @@ class JourneyCard extends StatelessWidget {
 
   final VoidCallback onTap;
 
+  /// Kunci kartu ini walau backend bilang `is_unlocked` — dipakai gerbang
+  /// pre-test di aplikasi (journey 1 terkunci sampai survei pre-test diisi,
+  /// lihat `SectorDetail.pretestGateActive`).
+  final bool forceLocked;
+
+  /// Teks kecil di bawah judul saat terkunci. Default:
+  /// "Selesaikan journey sebelumnya".
+  final String? lockReason;
+
   @override
   Widget build(BuildContext context) {
-    final isLocked = !journey.isUnlocked;
+    final isLocked = forceLocked || !journey.isUnlocked;
 
     return Material(
       color: AppColors.white,
@@ -71,7 +82,7 @@ class JourneyCard extends StatelessWidget {
                             const SizedBox(width: AppSpacing.xxs),
                             Expanded(
                               child: Text(
-                                'Selesaikan journey sebelumnya',
+                                lockReason ?? 'Selesaikan journey sebelumnya',
                                 style: AppTypography.bodySmall,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,

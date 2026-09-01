@@ -11,6 +11,7 @@ enum LearningStatus {
 
   bool get isCompleted => this == LearningStatus.completed;
   bool get isInProgress => this == LearningStatus.inProgress;
+  bool get isNotStarted => this == LearningStatus.notStarted;
 
   static LearningStatus fromJson(Object? value) {
     return LearningStatus.values.firstWhere(
