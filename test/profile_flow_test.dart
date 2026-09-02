@@ -3,16 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:perlindungan_konsumen/core/storage/sector_storage.dart';
 import 'package:perlindungan_konsumen/features/auth/data/auth_repository.dart';
 import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 import 'package:perlindungan_konsumen/main.dart';
 
+import 'support/active_sector_override.dart';
 import 'support/fake_auth_repository.dart';
 import 'support/fake_badge_repository.dart';
 import 'support/fake_learning_repository.dart';
-import 'support/fake_sector_storage.dart';
 
 void main() {
   Future<FakeAuthRepository> pumpProfileTab(WidgetTester tester) async {
@@ -31,9 +30,7 @@ void main() {
             FakeLearningRepository(),
           ),
           badgeRepositoryProvider.overrideWithValue(FakeBadgeRepository()),
-          sectorStorageProvider.overrideWithValue(
-            FakeSectorStorage(initialSlug: 'e-commerce'),
-          ),
+          activeSectorOverride('e-commerce'),
         ],
         child: const MyApp(),
       ),

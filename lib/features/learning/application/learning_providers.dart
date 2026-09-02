@@ -11,7 +11,7 @@ final sectorsProvider = FutureProvider<List<Sector>>((ref) {
 
 final primarySectorDetailProvider = FutureProvider<SectorDetail?>((ref) async {
   final repository = ref.watch(learningRepositoryProvider);
-  final selectedSlug = await ref.watch(selectedSectorSlugProvider.future);
+  final selectedSlug = ref.watch(activeSectorSlugProvider);
 
   if (selectedSlug != null) {
     return repository.sectorDetail(selectedSlug);

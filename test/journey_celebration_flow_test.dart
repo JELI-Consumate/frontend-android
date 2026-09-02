@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:perlindungan_konsumen/core/storage/sector_storage.dart';
 import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
 import 'package:perlindungan_konsumen/features/badges/data/models/badge.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
@@ -15,10 +14,10 @@ import 'package:perlindungan_konsumen/features/learning/data/models/learning_sta
 import 'package:perlindungan_konsumen/features/learning/presentation/journey_detail_screen.dart';
 import 'package:perlindungan_konsumen/features/module/data/module_repository.dart';
 
+import 'support/active_sector_override.dart';
 import 'support/fake_badge_repository.dart';
 import 'support/fake_learning_repository.dart';
 import 'support/fake_module_repository.dart';
-import 'support/fake_sector_storage.dart';
 import 'support/module_fixtures.dart';
 
 void main() {
@@ -151,9 +150,7 @@ void main() {
           learningRepositoryProvider.overrideWithValue(learningRepository),
           badgeRepositoryProvider.overrideWithValue(badgeRepository),
           moduleRepositoryProvider.overrideWithValue(moduleRepository),
-          sectorStorageProvider.overrideWithValue(
-            FakeSectorStorage(initialSlug: 'e-commerce'),
-          ),
+          activeSectorOverride('e-commerce'),
         ],
         child: const MaterialApp(home: JourneyDetailScreen(journeyId: '1')),
       ),
@@ -239,9 +236,7 @@ void main() {
             learningRepositoryProvider.overrideWithValue(learningRepository),
             badgeRepositoryProvider.overrideWithValue(FakeBadgeRepository()),
             moduleRepositoryProvider.overrideWithValue(moduleRepository),
-            sectorStorageProvider.overrideWithValue(
-              FakeSectorStorage(initialSlug: 'e-commerce'),
-            ),
+            activeSectorOverride('e-commerce'),
           ],
           child: const MaterialApp(home: JourneyDetailScreen(journeyId: '1')),
         ),

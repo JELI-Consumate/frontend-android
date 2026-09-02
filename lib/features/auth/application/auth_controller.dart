@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
-import '../../../core/storage/sector_storage.dart';
 import '../../notification/application/device_token_controller.dart';
 import '../../onboarding/application/sector_selection_provider.dart';
 import '../data/auth_repository.dart';
@@ -29,8 +28,7 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<void> login({required String email, required String password}) async {
     final user = await _repository.login(email: email, password: password);
-    state = AsyncValue.data(user);
-    _registerDeviceToken();
+    _startFreshSession(user);
   }
 
   Future<void> register({
@@ -51,12 +49,18 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<void> verifyOtp({required String email, required String otp}) async {
     final user = await _repository.verifyOtp(email: email, otp: otp);
-    state = AsyncValue.data(user);
-    _registerDeviceToken();
+    _startFreshSession(user);
   }
 
   Future<void> loginWithGoogle(String accessToken) async {
     final user = await _repository.loginWithGoogle(accessToken);
+    _startFreshSession(user);
+  }
+
+  /// Tiap autentikasi baru mulai dari layar pilih sektor lagi (satu user bisa
+  /// banyak sektor) -- reset sektor aktif sesi sebelumnya kalau ada.
+  void _startFreshSession(AppUser user) {
+    ref.read(activeSectorSlugProvider.notifier).clear();
     state = AsyncValue.data(user);
     _registerDeviceToken();
   }
@@ -81,8 +85,7 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<void> signOut() async {
     await _repository.logout();
-    await ref.read(sectorStorageProvider).clear();
-    ref.invalidate(selectedSectorSlugProvider);
+    ref.read(activeSectorSlugProvider.notifier).clear();
     state = const AsyncValue.data(null);
   }
 

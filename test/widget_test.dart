@@ -3,27 +3,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:perlindungan_konsumen/core/storage/sector_storage.dart';
 import 'package:perlindungan_konsumen/features/auth/data/auth_repository.dart';
 import 'package:perlindungan_konsumen/features/auth/presentation/otp_verification_screen.dart';
 import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 import 'package:perlindungan_konsumen/main.dart';
 
+import 'support/active_sector_override.dart';
 import 'support/fake_auth_repository.dart';
 import 'support/fake_badge_repository.dart';
 import 'support/fake_learning_repository.dart';
-import 'support/fake_sector_storage.dart';
 
 void main() {
-  // `sectorStorage` default-nya sudah "sudah pilih sektor" (slug
-  // 'e-commerce') supaya test yang cuma mau menguji hal lain tetap
-  // langsung tembus ke MainShell tanpa mampir ke SectorSelectionScreen.
-  // Test yang justru menguji layar itu mengoper storage kosong sendiri.
+  // Sektor aktif default-nya sudah di-seed 'e-commerce' supaya test yang
+  // cuma mau menguji hal lain tetap langsung tembus ke MainShell tanpa
+  // mampir ke SectorSelectionScreen. Test yang justru menguji layar itu
+  // mengoper `startAtSectorPicker: true`.
   Future<void> pumpApp(
     WidgetTester tester,
     FakeAuthRepository repository, {
-    FakeSectorStorage? sectorStorage,
+    bool startAtSectorPicker = false,
   }) {
     return tester.pumpWidget(
       ProviderScope(
@@ -37,9 +36,7 @@ void main() {
             FakeLearningRepository(),
           ),
           badgeRepositoryProvider.overrideWithValue(FakeBadgeRepository()),
-          sectorStorageProvider.overrideWithValue(
-            sectorStorage ?? FakeSectorStorage(initialSlug: 'e-commerce'),
-          ),
+          activeSectorOverride(startAtSectorPicker ? null : 'e-commerce'),
         ],
         child: const MyApp(),
       ),
@@ -88,29 +85,38 @@ void main() {
     (tester) async {
       final repository = FakeAuthRepository(storedToken: 'token-123');
 
-      await pumpApp(tester, repository, sectorStorage: FakeSectorStorage());
+      await pumpApp(tester, repository, startAtSectorPicker: true);
       await tester.pumpAndSettle();
 
-      expect(find.text('Pilih Sektor Belajarmu'), findsOneWidget);
-      expect(find.text('E-Commerce'), findsOneWidget);
+      expect(
+        find.text('Pilih sektor yang akan kamu pelajari'),
+        findsOneWidget,
+      );
+      // Nama sektor tampil di kartu grid DAN di panel konfirmasi bawah.
+      expect(find.text('E-Commerce'), findsWidgets);
       expect(find.text('Lanjutkan Belajar'), findsNothing);
 
-      await tester.tap(find.text('E-Commerce'));
+      // E-Commerce sudah terpilih otomatis (sektor pertama) -- tinggal
+      // konfirmasi lewat tombol "Mulai Belajar".
+      await tester.tap(find.text('Mulai Belajar'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Pilih Sektor Belajarmu'), findsNothing);
+      expect(
+        find.text('Pilih sektor yang akan kamu pelajari'),
+        findsNothing,
+      );
       expect(find.text('Lanjutkan Belajar'), findsOneWidget);
     },
   );
 
   testWidgets(
-    'OTP benar setelah didorong dari alur nyata langsung masuk ke MainShell',
+    'OTP benar setelah didorong dari alur nyata tidak terjebak di layar OTP',
     (tester) async {
       // Regresi: OtpVerificationScreen sampai ke sini lewat Navigator.push
       // (persis seperti RegisterForm/LoginForm melakukannya) -- dulu, begitu
-      // verifyOtp sukses, AppRoot di baliknya rebuild ke MainShell tapi
-      // layar OTP tetap tertumpuk di atas Navigator dan tidak pernah di-pop,
-      // jadi pengguna terjebak di layar OTP walau kodenya benar.
+      // verifyOtp sukses, AppRoot di baliknya rebuild tapi layar OTP tetap
+      // tertumpuk di atas Navigator dan tidak pernah di-pop, jadi pengguna
+      // terjebak di layar OTP walau kodenya benar.
       final repository = FakeAuthRepository();
       await pumpApp(tester, repository);
       await tester.pumpAndSettle();
@@ -135,6 +141,15 @@ void main() {
 
       expect(repository.calls, contains('verifyOtp(budi@example.com, 123456)'));
       expect(find.text('Masukkan Kode OTP'), findsNothing);
+      // Autentikasi baru -> mendarat di "Pilih Sektor" dulu (bukan langsung
+      // Home), lalu tembus ke MainShell setelah memilih.
+      expect(
+        find.text('Pilih sektor yang akan kamu pelajari'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Mulai Belajar'));
+      await tester.pumpAndSettle();
       expect(find.text('Lanjutkan Belajar'), findsOneWidget);
     },
   );

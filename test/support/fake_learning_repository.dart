@@ -16,6 +16,7 @@ class FakeLearningRepository implements LearningRepository {
     List<Journey>? journeys,
     List<LearningModule>? modules,
     Sector? sector,
+    this.sectorList,
     this.quizScore,
   }) : journeys = journeys ?? defaultJourneys,
        modules = modules ?? _defaultModules,
@@ -27,6 +28,10 @@ class FakeLearningRepository implements LearningRepository {
   /// Mutable seperti [journeys]/[modules] -- test survei mengganti ini
   /// dengan varian yang punya `surveys.pretest`/`posttest` terkonfigurasi.
   Sector sector;
+
+  /// Kalau diisi, `sectors()` mengembalikan daftar ini (dipakai tes layar
+  /// "Pilih Sektor" yang butuh lebih dari satu sektor). Default: `[sector]`.
+  final List<Sector>? sectorList;
 
   /// Mutable -- test bisa mengubahnya di tengah jalan (mis. sesudah
   /// men-simulasikan kuis selesai lewat `FakeModuleRepository.onComplete`)
@@ -163,7 +168,7 @@ class FakeLearningRepository implements LearningRepository {
   Future<List<Sector>> sectors() async {
     calls.add('sectors');
     if (failWith != null) throw failWith!;
-    return [sector];
+    return sectorList ?? [sector];
   }
 
   @override

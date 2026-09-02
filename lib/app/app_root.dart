@@ -35,15 +35,8 @@ class _AppRootState extends ConsumerState<AppRoot> {
     final user = auth.value;
     if (user == null) return const _UnauthenticatedFlow();
 
-    final selectedSector = ref.watch(selectedSectorSlugProvider);
-    final hasSelectedSector = selectedSector.maybeWhen(
-      data: (slug) => slug != null,
-      orElse: () => false,
-    );
-    if (!hasSelectedSector) {
-      if (selectedSector.isLoading) return const SplashScreen();
-      return const SectorSelectionScreen();
-    }
+    final activeSector = ref.watch(activeSectorSlugProvider);
+    if (activeSector == null) return const SectorSelectionScreen();
 
     return const MainShell();
   }

@@ -5,16 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/core/storage/sector_storage.dart';
 import 'package:perlindungan_konsumen/core/theme/app_theme.dart';
 import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
 import 'package:perlindungan_konsumen/features/badges/data/models/badge.dart';
 import 'package:perlindungan_konsumen/features/badges/presentation/badges_screen.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 
+import 'support/active_sector_override.dart';
 import 'support/fake_badge_repository.dart';
 import 'support/fake_learning_repository.dart';
-import 'support/fake_sector_storage.dart';
 
 void main() {
   setUpAll(() => initializeDateFormatting('id_ID'));
@@ -37,9 +36,7 @@ void main() {
           badgeRepositoryProvider.overrideWithValue(
             badgeRepository ?? FakeBadgeRepository(),
           ),
-          sectorStorageProvider.overrideWithValue(
-            FakeSectorStorage(initialSlug: 'e-commerce'),
-          ),
+          activeSectorOverride('e-commerce'),
         ],
         child: MaterialApp(theme: AppTheme.light, home: const BadgesScreen()),
       ),

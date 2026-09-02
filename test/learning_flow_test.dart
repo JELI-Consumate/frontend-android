@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/core/storage/sector_storage.dart';
 import 'package:perlindungan_konsumen/core/theme/app_theme.dart';
 import 'package:perlindungan_konsumen/features/auth/application/auth_controller.dart';
 import 'package:perlindungan_konsumen/features/auth/data/models/app_user.dart';
@@ -17,9 +16,9 @@ import 'package:perlindungan_konsumen/features/main/presentation/dashboard_scree
 import 'package:perlindungan_konsumen/features/main/presentation/journeys_screen.dart';
 import 'package:perlindungan_konsumen/features/module/data/module_repository.dart';
 
+import 'support/active_sector_override.dart';
 import 'support/fake_learning_repository.dart';
 import 'support/fake_module_repository.dart';
-import 'support/fake_sector_storage.dart';
 import 'support/module_fixtures.dart';
 
 void main() {
@@ -40,14 +39,10 @@ void main() {
           currentUserProvider.overrideWithValue(
             const AppUser(id: '1', name: 'Argy', email: 'argy@example.com'),
           ),
-          // DashboardScreen/JourneysScreen sekarang lewat
-          // primarySectorDetailProvider -> selectedSectorSlugProvider ->
-          // sectorStorageProvider -- tanpa override ini providernya akan
-          // coba baca flutter_secure_storage sungguhan (tidak ada plugin
-          // di widget test).
-          sectorStorageProvider.overrideWithValue(
-            FakeSectorStorage(initialSlug: 'e-commerce'),
-          ),
+          // DashboardScreen/JourneysScreen lewat primarySectorDetailProvider
+          // -> activeSectorSlugProvider. Seed 'e-commerce' supaya langsung ke
+          // kontennya, tidak mampir ke SectorSelectionScreen.
+          activeSectorOverride('e-commerce'),
           // Cuma benar-benar dibaca kalau test menavigasi ke ModuleScreen
           // (lihat grup JourneyDetailScreen di bawah) -- provider Riverpod
           // malas, jadi aman dioverride di semua test lewat helper ini.
