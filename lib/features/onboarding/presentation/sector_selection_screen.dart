@@ -9,14 +9,6 @@ import '../../learning/application/learning_providers.dart';
 import '../../learning/data/models/sector.dart';
 import '../application/sector_selection_provider.dart';
 
-/// Langkah terakhir sebelum masuk ke [MainShell]: pengguna yang baru login
-/// dan belum pernah memilih sektor (lihat [selectedSectorSlugProvider])
-/// memilih topik perlindungan konsumen yang mau dipelajari lebih dulu.
-///
-/// Tidak menavigasi kemana-mana secara manual saat sukses -- [AppRoot]
-/// nge-watch [selectedSectorSlugProvider] dan rebuild sendiri ke MainShell
-/// begitu tersimpan (layar ini dikembalikan langsung oleh AppRoot, bukan
-/// di-push lewat Navigator, jadi tidak ada stack yang perlu di-pop).
 class SectorSelectionScreen extends ConsumerStatefulWidget {
   const SectorSelectionScreen({super.key});
 
@@ -33,8 +25,6 @@ class _SectorSelectionScreenState extends ConsumerState<SectorSelectionScreen> {
     setState(() => _savingSlug = sector.slug);
     try {
       await selectSector(ref, sector.slug);
-      // Sukses: AppRoot rebuild ke MainShell dan layar ini dibuang, tidak
-      // perlu setState lagi -- widget ini mungkin sudah tidak ada.
     } catch (_) {
       if (!mounted) return;
       setState(() => _savingSlug = null);
@@ -160,9 +150,6 @@ class _SectorCard extends StatelessWidget {
   }
 }
 
-/// Lingkaran ikon sektor. Backend belum mengisi `icon_url`/`color` untuk
-/// sektor manapun saat ini, jadi selalu ada fallback yang layak tampil --
-/// bukan kotak kosong kalau field-nya null.
 class _SectorIcon extends StatelessWidget {
   const _SectorIcon({required this.sector});
 

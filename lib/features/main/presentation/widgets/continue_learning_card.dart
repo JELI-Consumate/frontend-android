@@ -6,9 +6,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../learning/data/models/journey_detail.dart';
 
-/// Kartu "Lanjutkan Belajar" di dashboard. Judulnya diambil dari module
-/// yang sedang dikerjakan (bukan judul journey) — itu yang secara konkret
-/// mau dilanjutkan pengguna, sesuai desain.
 class ContinueLearningCard extends StatelessWidget {
   const ContinueLearningCard({
     super.key,
@@ -38,10 +35,6 @@ class ContinueLearningCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Belum ada foto/banner per module dari backend (cuma teks +
-            // durasi), jadi ilustrasi journey yang sama dipakai lagi di
-            // sini diperbesar mengisi lebar kartu -- konsisten dengan
-            // ilustrasi di kartu journey di bawahnya.
             Container(
               height: 130,
               width: double.infinity,

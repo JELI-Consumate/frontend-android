@@ -12,9 +12,6 @@ class LearningRepository {
 
   final Dio _dio;
 
-  /// Backend baru punya satu sektor aktif, tapi endpoint ini tetap dipanggil
-  /// (bukan slug yang di-hardcode) supaya kalau nanti nambah sektor lagi,
-  /// Flutter tidak perlu diubah.
   Future<List<Sector>> sectors() {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>('/sectors');
@@ -33,9 +30,6 @@ class LearningRepository {
     });
   }
 
-  /// Self-report: user sudah mengisi Google Form survei pretest sektor ini.
-  /// Layar pemanggil bertanggung jawab me-refresh [primarySectorDetailProvider]
-  /// sesudahnya supaya status `surveys.pretest.completedAt` ikut terbaru.
   Future<void> completePretestSurvey(String slug) {
     return guardApi(() async {
       await _dio.post<Map<String, dynamic>>(
@@ -44,7 +38,6 @@ class LearningRepository {
     });
   }
 
-  /// Sama seperti [completePretestSurvey], untuk survei posttest.
   Future<void> completePosttestSurvey(String slug) {
     return guardApi(() async {
       await _dio.post<Map<String, dynamic>>(

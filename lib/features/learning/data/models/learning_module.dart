@@ -2,9 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import 'learning_status.dart';
 
-/// Cermin dari `ModuleType` enum di backend. Nilai mentahnya (`opening`,
-/// `video`, dst.) sudah dalam Bahasa Indonesia, jadi cukup dikapitalkan
-/// untuk ditampilkan — lihat [ModuleTypeX.shortLabel].
 enum ModuleContentType {
   opening,
   video,
@@ -24,10 +21,6 @@ enum ModuleContentType {
   }
 }
 
-/// Satu langkah di dalam journey (mis. "2. Pentingnya Perlindungan Konsumen
-/// dalam E-Commerce" bertipe video). Progress-nya dihitung backend dari
-/// seluruh halaman di dalam module ini — lihat catatan di
-/// `JourneyController::attachModuleProgress`.
 @immutable
 class LearningModule {
   const LearningModule({
@@ -52,17 +45,8 @@ class LearningModule {
   final bool isRequired;
   final LearningProgress progress;
 
-  /// Id seluruh halaman (`module_page`) di module ini, urut sesuai
-  /// backend -- dipakai untuk mencocokkan `module_page_id` dari
-  /// `GET /progress/next` ke module induknya (lihat
-  /// `NotificationListenerController`), bukan buat ditampilkan di UI mana
-  /// pun sekarang.
   final List<String> pageIds;
 
-  /// true kalau module SEBELUMNYA (order - 1) di journey yang sama belum
-  /// completed -- module pertama di journey selalu `false` (lihat
-  /// `JourneyController::attachModuleProgress` di backend). Menentukan
-  /// apakah baris ini masih bisa disentuh di `ModuleRow`.
   final bool locked;
 
   factory LearningModule.fromJson(Map<String, dynamic> json) {
@@ -90,7 +74,6 @@ class LearningModule {
 }
 
 extension ModuleContentTypeX on ModuleContentType {
-  /// Label pendek Bahasa Indonesia yang ditampilkan di UI, mis. "Video".
   String get shortLabel => switch (this) {
     ModuleContentType.opening => 'Opening',
     ModuleContentType.video => 'Video',

@@ -42,11 +42,6 @@ class PrimaryButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // `Flexible` + ellipsis, bukan `Text(label)` polos -- label
-                // panjang (mis. "Kumpulkan Jawaban", "Tonton di YouTube") di
-                // tombol sempit (layar kecil, atau `expand: false`) kalau
-                // tidak akan melempar RenderFlex overflow, bukan terpotong
-                // rapi.
                 Flexible(
                   child: Text(
                     label,

@@ -10,18 +10,6 @@ import '../../badges/data/models/badge.dart';
 import '../../badges/presentation/widgets/badge_avatar.dart';
 import 'journey_detail_screen.dart';
 
-/// Layar perayaan begitu satu journey selesai -- dibuka dari
-/// [JourneyDetailScreen] tepat sesudah module terakhirnya ditandai selesai
-/// DAN status journey ini baru saja (bukan sebelumnya) berubah jadi
-/// completed (lihat `_JourneyDetailBody._openModule`), supaya tidak muncul
-/// berulang tiap kali user sekadar membuka ulang journey yang sudah lama
-/// selesai.
-///
-/// [badge] SELALU non-null di sini -- kalau admin belum sempat mengisi
-/// badge journey ini di Filament, pemanggil sudah menyiapkan badge
-/// pengganti generik (lihat `_JourneyDetailBody._fallbackBadge`) supaya
-/// layar ini tidak perlu tahu soal kemungkinan "badge belum ada" sama
-/// sekali.
 class JourneyCelebrationScreen extends ConsumerWidget {
   const JourneyCelebrationScreen({
     super.key,
@@ -38,21 +26,14 @@ class JourneyCelebrationScreen extends ConsumerWidget {
   final int modulesCompleted;
   final int modulesTotal;
 
-  /// Persen 0-100, `null` kalau journey ini tidak punya kuis evaluasi atau
-  /// belum pernah dikerjakan.
   final int? quizScore;
 
-  /// Id journey berikutnya di sektor yang sama, `null` kalau ini journey
-  /// terakhir -- tombol "Lanjut ke Journey Berikutnya" disembunyikan waktu
-  /// null, bukan ditampilkan nonaktif.
   final String? nextJourneyId;
 
   void _goToNextJourney(BuildContext context) {
     final id = nextJourneyId;
     if (id == null) return;
 
-    // pushReplacement -- kartu perayaan ini sudah tidak relevan lagi begitu
-    // user memilih lanjut, jadi tidak perlu ikut tertumpuk di back stack.
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
         builder: (_) => JourneyDetailScreen(journeyId: id),
@@ -154,10 +135,6 @@ class JourneyCelebrationScreen extends ConsumerWidget {
   bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
 }
 
-/// Cincin emas melingkar di sekeliling gambar badge -- glow lembut di
-/// lapisan paling luar, garis cincin solid di tengah, lalu badge sendiri
-/// (lewat [BadgeAvatar] yang sama dipakai tab "Pencapaian") di lapisan
-/// paling dalam. Dua bintang kecil di tepi cincin murni dekorasi.
 class _CelebrationBadgeRing extends StatelessWidget {
   const _CelebrationBadgeRing({required this.badge});
 
@@ -224,9 +201,6 @@ class _StarDot extends StatelessWidget {
   }
 }
 
-/// Kartu "Ringkasan Journey N" -- gaya sama seperti kartu progres di
-/// `JourneyDetailScreen` (putih, border tipis, radius medium), isinya dua
-/// `_StatTile` berdampingan alih-alih progress bar.
 class _JourneySummaryCard extends StatelessWidget {
   const _JourneySummaryCard({
     required this.journeyOrder,

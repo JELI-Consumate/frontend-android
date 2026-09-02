@@ -12,10 +12,6 @@ class AuthRepository {
   final Dio _dio;
   final TokenStorage _tokenStorage;
 
-  /// Tidak ada token/sesi di sini dengan sengaja — akun baru cuma bisa
-  /// dipakai setelah OTP yang baru saja dikirim ke email dikonfirmasi lewat
-  /// [verifyOtp]. Pemanggil menavigasi ke layar OTP, bukan menunggu
-  /// [authControllerProvider] berubah.
   Future<void> register({
     required String name,
     required String email,
@@ -96,8 +92,6 @@ class AuthRepository {
     }
   }
 
-  /// Selalu sukses dengan pesan generik ("kalau email terdaftar...") supaya
-  /// tidak membocorkan apakah suatu email punya akun.
   Future<String> forgotPassword(String email) {
     return guardApi(() async {
       final response = await _dio.post<Map<String, dynamic>>(
@@ -109,9 +103,6 @@ class AuthRepository {
     });
   }
 
-  /// [otp] adalah kode 6 digit yang dikirim lewat email — pengguna
-  /// menyalinnya manual ke aplikasi karena belum ada deep link yang membuka
-  /// layar ini langsung dari email.
   Future<String> resetPassword({
     required String email,
     required String otp,
@@ -132,9 +123,6 @@ class AuthRepository {
     });
   }
 
-  /// Endpoint publik — dipakai dari layar OTP (baik saat baru daftar maupun
-  /// setelah login gagal karena `EMAIL_NOT_VERIFIED`), jadi tidak butuh
-  /// sesi/token sama sekali.
   Future<String> resendOtp(String email) {
     return guardApi(() async {
       final response = await _dio.post<Map<String, dynamic>>(
@@ -146,9 +134,6 @@ class AuthRepository {
     });
   }
 
-  /// Endpoint publik yang mengembalikan token — inilah yang benar-benar
-  /// membuat sesi baru untuk akun yang baru saja daftar (atau yang login-nya
-  /// ditolak karena `EMAIL_NOT_VERIFIED`).
   Future<AppUser> verifyOtp({required String email, required String otp}) {
     return guardApi(() async {
       final response = await _dio.post<Map<String, dynamic>>(
@@ -187,8 +172,6 @@ class AuthRepository {
     return data;
   }
 
-  /// Endpoint aksi (forgot/reset password, resend verifikasi) mengirim
-  /// `data: null` dan menaruh pesan yang sudah dilokalkan di `meta.message`.
   String? _messageOf(Map<String, dynamic>? body) {
     final meta = body?['meta'];
     if (meta is Map && meta['message'] is String) {

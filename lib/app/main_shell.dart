@@ -11,13 +11,6 @@ import '../features/main/presentation/journeys_screen.dart';
 import '../features/main/presentation/profile_screen.dart';
 import 'main_tab_provider.dart';
 
-/// Rangka navigasi utama setelah login: empat tab di bawah, masing-masing
-/// Scaffold sendiri. `IndexedStack` menjaga state tiap tab tetap hidup saat
-/// pindah-pindah (mis. posisi scroll di Perjalanan tidak reset ke atas
-/// waktu balik dari tab lain).
-///
-/// Index tab aktif dipegang [mainTabIndexProvider] (bukan `State` lokal) --
-/// lihat doc comment provider itu untuk alasannya.
 class MainShell extends ConsumerWidget {
   const MainShell({super.key});
 
@@ -57,10 +50,6 @@ class _NavItemData {
   final String label;
 }
 
-/// Bar navigasi bawah custom -- bukan `NavigationBar` bawaan Material.
-/// Bedanya dari default Material 3: tab aktif ditandai garis kecil di ATAS
-/// ikon (bukan pil/latar biru di belakang ikon), dan pemisah dari konten di
-/// atasnya berupa shadow tipis (lihat AppShadows.navBar), bukan border.
 class _BottomNavBar extends StatelessWidget {
   const _BottomNavBar({
     required this.items,
@@ -119,11 +108,6 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       child: Stack(
         children: [
-          // Garis indikator tab aktif, nempel pas di tepi paling atas bar.
-          // Cuma digambar kalau tab ini aktif -- bukan kotak transparan yang
-          // selalu ada di baliknya -- supaya tab yang tidak aktif benar-benar
-          // tidak menggambar apa pun di situ (kotak transparan yang "selalu
-          // ada" sebelumnya meninggalkan garis samar di atas ikon).
           if (selected)
             Positioned(
               top: 0,
@@ -162,11 +146,6 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-/// Ikon tab bawah pakai `Icon` bawaan Flutter (font glyph), bukan PNG lagi --
-/// PNG kustom sebelumnya selalu ada garis samar di tepinya waktu di-scale +
-/// di-tint (artefak rendering bitmap), sedangkan glyph font digambar
-/// vector/langsung di warna yang diminta tanpa proses scale+tint bitmap,
-/// jadi tidak kena masalah itu sama sekali.
 class _NavIcon extends StatelessWidget {
   const _NavIcon({required this.icon, this.selected = false});
 

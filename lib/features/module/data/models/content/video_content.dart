@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Konten tipe `video` (`ContentableType::Video` di backend) — satu link
-/// YouTube + pertanyaan pemantik opsional yang ditampilkan setelah nonton.
 @immutable
 class VideoContent {
   const VideoContent({
@@ -18,9 +16,6 @@ class VideoContent {
   final String? description;
   final String youtubeUrl;
 
-  /// Sudah diekstrak backend dari [youtubeUrl] (lihat `VideoContent::youtubeVideoId`
-  /// di backend) -- dipakai untuk thumbnail (`img.youtube.com/vi/{id}/...`).
-  /// `null` kalau URL-nya tidak dikenali polanya.
   final String? youtubeVideoId;
   final String? promptQuestion;
 

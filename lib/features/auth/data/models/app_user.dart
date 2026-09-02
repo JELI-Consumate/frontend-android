@@ -39,13 +39,6 @@ class AppUser {
     return DateTime.tryParse(value);
   }
 
-  // Kesetaraan berbasis semua field (bukan cuma `id`) -- ini yang membuat
-  // Riverpod tahu ada perubahan berarti (mis. email baru saja diverifikasi,
-  // atau nama diganti lewat updateProfile) walau `id` user tetap sama.
-  // Kalau cuma `id` yang dibandingkan, AsyncNotifier menganggap state
-  // "tidak berubah" dan diam-diam tidak memberi tahu widget yang nonton
-  // (lihat AuthController.refreshUser -- inilah yang dipakai layar
-  // verifikasi email untuk mendeteksi status terbaru).
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

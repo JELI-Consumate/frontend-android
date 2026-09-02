@@ -7,13 +7,6 @@ import '../../../../core/theme/app_typography.dart';
 import '../../data/models/badge.dart';
 import 'badge_avatar.dart';
 
-/// Bottom sheet detail satu badge, dibuka lewat tap di [BadgeTile] pada tab
-/// "Pencapaian" -- menampilkan gambar & deskripsi lengkap, plus (kalau
-/// sudah diraih) pesan ucapan selamat & motivasi yang diisi admin lewat tab
-/// "Badge" di Filament (lihat BadgeRelationManager di backend). Badge yang
-/// belum diraih tidak menampilkan kedua pesan itu -- isinya menyapa seolah
-/// pengguna baru saja meraihnya, jadi tidak masuk akal ditampilkan sebelum
-/// benar-benar diraih.
 Future<void> showBadgeDetailSheet(BuildContext context, Badge badge) {
   return showModalBottomSheet<void>(
     context: context,
@@ -30,11 +23,6 @@ class _BadgeDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Deskripsi + pesan ucapan selamat + pesan motivasi sekaligus bisa lebih
-    // tinggi dari layar (terutama badge yang sudah diraih, ketiganya
-    // tampil) -- dibatasi ke persentase tinggi layar lalu dibungkus
-    // `SingleChildScrollView` supaya sisanya discroll di dalam sheet,
-    // bukan overflow ke luar layar.
     final maxHeight = MediaQuery.of(context).size.height * 0.85;
 
     return ConstrainedBox(
@@ -102,10 +90,6 @@ class _BadgeDetailSheet extends StatelessWidget {
   bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
 }
 
-/// Baris status di-`Row` biasa (bukan di-`Center`) supaya teksnya yang
-/// panjang ("Selesaikan journey terkait...") bisa bungkus ke baris
-/// berikutnya lewat `Flexible` alih-alih meluber ke luar sheet -- lebar
-/// penuh + `MainAxisAlignment.center` cukup buat tetap kelihatan center.
 class _StatusLine extends StatelessWidget {
   const _StatusLine({required this.badge});
 
@@ -177,10 +161,6 @@ class _Section extends StatelessWidget {
   }
 }
 
-/// Garis kecil di puncak bottom sheet -- penanda visual umum bahwa ini
-/// panel yang bisa ditutup swipe-down. Duplikat kecil dari `_SheetDragHandle`
-/// di profile_screen.dart (privat di sana, belum ada widget bersama untuk
-/// ini di app).
 class _SheetDragHandle extends StatelessWidget {
   const _SheetDragHandle();
 

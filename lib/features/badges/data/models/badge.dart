@@ -1,14 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Satu lencana, hasil `GET /badges` (lihat `BadgeController::index` +
-/// `BadgeResource` di backend). Endpoint itu mengembalikan SEMUA badge yang
-/// ada lintas sektor sekaligus, masing-masing dengan status raihan user yang
-/// sedang login (`earned`, `earnedAt`) — badge yang belum diraih tetap ikut
-/// terkirim (`user_badge` null), bukan cuma yang sudah diraih.
-///
-/// Nama class-nya `Badge`, bentrok dengan widget `Badge` bawaan
-/// `material.dart` — file yang butuh keduanya import material dengan
-/// `hide Badge`.
 @immutable
 class Badge {
   const Badge({
@@ -25,22 +16,15 @@ class Badge {
 
   final String id;
 
-  /// Satu badge terikat ke satu journey (relasi 1-1 di backend). Dipakai
-  /// buat mencocokkan badge ke sektor -- lihat `sectorBadgesProvider`.
   final String journeyId;
   final String name;
   final String description;
 
-  /// Pesan ucapan selamat & motivasi yang tampil begitu badge ini diraih
-  /// (diisi lewat tab "Badge" di Filament, lihat BadgeRelationManager) --
-  /// bisa null untuk badge lama yang belum diisi admin. Cuma masuk akal
-  /// ditampilkan kalau [earned], lihat `BadgeDetailSheet`.
   final String? congratulationMessage;
   final String? motivationalMessage;
   final String? iconUrl;
   final bool earned;
 
-  /// Kapan badge ini diraih. Selalu null kalau [earned] false.
   final DateTime? earnedAt;
 
   factory Badge.fromJson(Map<String, dynamic> json) {

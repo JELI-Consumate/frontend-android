@@ -14,8 +14,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  // Dibutuhkan agar DateFormat('...', 'id_ID') (dipakai di form registrasi
-  // untuk menampilkan tanggal lahir) tidak melempar LocaleDataException.
   await initializeDateFormatting('id_ID');
 
   runApp(const ProviderScope(child: MyApp()));

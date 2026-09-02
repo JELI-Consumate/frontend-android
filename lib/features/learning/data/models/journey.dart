@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import 'learning_status.dart';
 
-/// Representasi ringan journey, dipakai di dalam daftar sektor
-/// (`GET /sectors/{slug}`). Tanpa daftar module — lihat [JourneyDetail].
 @immutable
 class Journey {
   const Journey({

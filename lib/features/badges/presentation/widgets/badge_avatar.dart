@@ -3,10 +3,6 @@ import 'package:flutter/material.dart' hide Badge;
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/badge.dart';
 
-/// Lingkaran ikon satu badge -- dipudarkan kalau belum diraih, jatuh balik
-/// ke ikon generik kalau tidak ada gambar / gagal dimuat. [size] dipisah
-/// jadi parameter (bukan hardcode) karena dipakai dua ukuran: kecil di
-/// [BadgeTile] (list "Pencapaian"), besar di badge detail sheet.
 class BadgeAvatar extends StatelessWidget {
   const BadgeAvatar({super.key, required this.badge, this.size = 56});
 

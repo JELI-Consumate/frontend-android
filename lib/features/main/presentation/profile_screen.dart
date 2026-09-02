@@ -13,16 +13,6 @@ import '../../../core/widgets/primary_button.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/data/models/app_user.dart';
 
-/// Tab "Profil" -- header besar melengkung (avatar + badge kamera + nama)
-/// lalu field akun bergaya form (label kecil, nilai, garis bawah tipis),
-/// mengikuti referensi desain yang diberikan tapi dengan palet warna app
-/// sendiri (bukan hijau seperti referensinya).
-///
-/// Address & Gender di referensi TIDAK ditampilkan -- datanya belum ada sama
-/// sekali di sistem kita (bukan cuma belum ditampilkan, kolomnya memang
-/// belum ada di database), dan badge kamera juga BELUM benar-benar bisa
-/// ganti foto (backend belum punya endpoint upload file) -- keduanya
-/// keputusan sadar, bukan kelupaan, lihat ringkasan pekerjaan.
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -114,9 +104,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
   }
 
-  /// Badge kamera di avatar cuma tampilan mengikuti referensi -- belum ada
-  /// endpoint upload foto di backend, jadi ketuk di sini kasih tahu jujur
-  /// belum bisa dipakai, bukan diam saja tanpa respons apa-apa.
   void _notifyPhotoUploadUnavailable() {
     showAppAlert(
       context,
@@ -214,10 +201,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 }
 
-/// Bottom sheet ubah nama -- dulunya `AlertDialog`, ganti ke bottom sheet
-/// supaya field-nya tidak ketutupan keyboard di layar kecil (dialog di
-/// tengah layar mepet ke keyboard, sheet ini justru naik mengikutinya) dan
-/// terasa lebih natural untuk aksi cepat sekali field begini di mobile.
 class _EditNameSheet extends StatefulWidget {
   const _EditNameSheet({required this.currentName});
 
@@ -244,7 +227,6 @@ class _EditNameSheetState extends State<_EditNameSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      // Naik mengikuti tinggi keyboard supaya field-nya tidak ketutupan.
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
@@ -316,8 +298,6 @@ class _EditNameSheetState extends State<_EditNameSheet> {
   }
 }
 
-/// Garis kecil di puncak bottom sheet -- penanda visual umum bahwa ini
-/// panel yang bisa ditutup swipe-down, bukan bagian dari layar utama.
 class _SheetDragHandle extends StatelessWidget {
   const _SheetDragHandle();
 
@@ -334,10 +314,6 @@ class _SheetDragHandle extends StatelessWidget {
   }
 }
 
-/// Radius bawah header -- jauh lebih besar dari `AppRadius.xl` biasa (24)
-/// supaya lengkungannya semenonjol referensi, sengaja lokal di sini karena
-/// cuma dipakai untuk header "hero" ini, bukan token yang mau dipakai
-/// berulang di tempat lain.
 const double _kHeaderCurveRadius = 64;
 
 class _ProfileHeader extends StatelessWidget {
@@ -358,9 +334,6 @@ class _ProfileHeader extends StatelessWidget {
     );
 
     return Container(
-      // Shadow di Container LUAR (tidak ikut kepotong), gradiennya sendiri
-      // di ClipRRect DALAM -- kalau digabung satu Container, `clipBehavior`
-      // ikut memotong shadow-nya juga.
       decoration: BoxDecoration(
         borderRadius: curve,
         boxShadow: AppShadows.card,
@@ -437,10 +410,6 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-/// Avatar besar bercincin putih + badge kamera bulat di sudut kanan-bawah,
-/// mengikuti komposisi referensi -- badge-nya BELUM benar-benar mengganti
-/// foto (lihat `_notifyPhotoUploadUnavailable`), cuma penanda visual "ini
-/// bisa diketuk" untuk fitur yang menyusul nanti.
 class _AvatarWithCameraBadge extends StatelessWidget {
   const _AvatarWithCameraBadge({
     required this.name,
@@ -527,11 +496,6 @@ class _AvatarWithCameraBadge extends StatelessWidget {
   }
 }
 
-/// Satu baris field akun bergaya form -- label kecil di atas, nilai di
-/// bawahnya, lalu garis tipis sebagai pemisah (BUKAN kotak bertepi seperti
-/// desain lama) supaya sepadan sama referensi. `onTap` opsional -- dipakai
-/// field yang genuinely bisa diedit (mis. Tanggal Lahir), field lain
-/// (mis. Email) dibiarkan tanpa `onTap` karena memang belum bisa diubah.
 class _ProfileField extends StatelessWidget {
   const _ProfileField({
     required this.label,
@@ -590,9 +554,6 @@ class _ProfileField extends StatelessWidget {
   }
 }
 
-/// Tombol keluar bergaya pil (bukan lagi outline lebar penuh) diposisikan
-/// di kanan, warnanya `AppColors.danger` -- mengikuti posisi & bentuk
-/// tombol "Log Out" di referensi.
 class _LogoutPillButton extends StatelessWidget {
   const _LogoutPillButton({required this.busy, required this.onPressed});
 

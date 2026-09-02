@@ -11,10 +11,6 @@ import '../application/auth_controller.dart';
 import 'reset_password_screen.dart';
 import 'widgets/auth_error_mapper.dart';
 
-/// Layar "Lupa Kata Sandi": minta email, lalu backend mengirim kode reset
-/// lewat email. Selalu menampilkan pesan sukses yang sama baik email itu
-/// terdaftar atau tidak — itu keputusan sengaja dari backend supaya
-/// endpoint ini tidak bisa dipakai menebak email mana yang punya akun.
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 

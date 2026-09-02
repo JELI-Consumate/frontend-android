@@ -5,10 +5,6 @@ const _channelId = 'inactivity_reminder';
 const _channelName = 'Pengingat';
 const _channelDescription = 'Notifikasi pengingat dari aplikasi.';
 
-/// Pembungkus tipis di atas `flutter_local_notifications` -- dibutuhkan
-/// karena notification payload FCM cuma auto-tampil di tray kalau app
-/// background/ketutup; saat app foreground, harus ditampilkan manual lewat
-/// plugin ini (lihat `NotificationListenerController.onMessage`).
 class LocalNotificationService {
   final _plugin = FlutterLocalNotificationsPlugin();
   bool _initialized = false;

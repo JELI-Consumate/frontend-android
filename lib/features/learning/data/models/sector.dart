@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'learning_status.dart';
 import 'sector_survey.dart';
 
-/// Satu sektor pembelajaran (mis. "E-Commerce"). Saat ini backend baru
-/// punya satu sektor aktif, tapi model ini tetap dibuat generik.
 @immutable
 class Sector {
   const Sector({

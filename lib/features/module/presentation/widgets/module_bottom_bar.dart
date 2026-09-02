@@ -3,13 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
-/// Bilah bawah seragam kelima layar konsumsi konten -- dipasang lewat
-/// `Scaffold.bottomNavigationBar` supaya SELALU nempel di posisi paling
-/// bawah layar, bukan ikut discroll di dalam body seperti sebelumnya.
-/// Isinya indikator titik posisi halaman (cuma tampil kalau module ini py
-/// >1 halaman) diikuti [child] -- selalu SATU widget aksi (tombol, atau
-/// Column kecil berisi hint teks + satu tombol), tidak pernah dua tombol
-/// sejajar.
 class ModuleBottomBar extends StatelessWidget {
   const ModuleBottomBar({
     super.key,

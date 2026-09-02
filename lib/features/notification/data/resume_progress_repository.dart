@@ -10,9 +10,6 @@ class ResumeProgressRepository {
 
   final Dio _dio;
 
-  /// `GET /progress/next` -- dipakai untuk arahkan tap notifikasi
-  /// inactivity ke titik terakhir user belajar (lihat
-  /// `NotificationListenerController`).
   Future<NextProgress> next() {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>('/progress/next');

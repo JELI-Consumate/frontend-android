@@ -96,7 +96,6 @@ abstract final class AppTypography {
     color: AppColors.primary,
   );
 
-  // ── Label — UI chrome kecil ──
   static TextStyle get labelLarge => _style(
     size: 15,
     weight: FontWeight.w600,
@@ -112,8 +111,6 @@ abstract final class AppTypography {
     color: AppColors.ink,
   );
 
-  /// BARU — untuk caption kecil ("5 Materi", "80%") dan label nav bar,
-  /// yang di desain jelas lebih kecil dari labelMedium.
   static TextStyle get labelSmall => _style(
     size: 11,
     weight: FontWeight.w500,

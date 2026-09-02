@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Cermin dari `ReflectionQuestionType` enum di backend.
 enum ReflectionQuestionType {
   openQuestion,
   checklist,
@@ -28,8 +27,6 @@ class ReflectionChecklistItem {
   final String label;
   final int order;
 
-  /// Sudah dipersonalisasi ke user yang sedang login oleh backend (lihat
-  /// `ReflectionEntryController::mergeUserEntries`) -- bukan default global.
   final bool isChecked;
 
   factory ReflectionChecklistItem.fromJson(Map<String, dynamic> json) {
@@ -58,9 +55,6 @@ class ReflectionQuestion {
   final String questionText;
   final int order;
 
-  /// Cuma terisi untuk [ReflectionQuestionType.openQuestion], dan cuma ada
-  /// nilainya kalau dimuat lewat `GET /reflections/{id}` (bukan lewat
-  /// `GET /modules/{id}` -- lihat `ModuleRepository.reflection`).
   final String? answerText;
   final List<ReflectionChecklistItem> checklistItems;
 
@@ -115,9 +109,6 @@ class ReflectionSection {
   }
 }
 
-/// Konten tipe `reflection` (`ContentableType::Reflection`) -- jurnal
-/// refleksi tanpa skor benar/salah (BR-10). Selesai begitu SEMUA pertanyaan
-/// `open_question` di dalamnya terisi; checklist tidak menghalangi selesai.
 @immutable
 class ReflectionContent {
   const ReflectionContent({
@@ -136,9 +127,6 @@ class ReflectionContent {
   final String? closingMessage;
   final List<ReflectionSection> sections;
 
-  /// Seluruh pertanyaan `open_question`, lintas section, urut sesuai
-  /// kemunculannya -- dipakai untuk cek BR-10 di sisi Flutter (badge
-  /// "X/Y terisi" dan status selesai) tanpa menunggu bolak-balik ke server.
   List<ReflectionQuestion> get openQuestions => sections
       .expand((section) => section.questions)
       .where(

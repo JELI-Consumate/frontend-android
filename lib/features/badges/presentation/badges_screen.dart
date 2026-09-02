@@ -8,9 +8,6 @@ import '../application/badge_providers.dart';
 import '../data/models/badge.dart';
 import 'widgets/badge_tile.dart';
 
-/// Tab "Pencapaian": lencana yang bisa diraih di sektor yang sedang dipilih
-/// user, lengkap dengan status raihannya (`GET /badges`, lihat
-/// `BadgeController::index` di backend).
 class BadgesScreen extends ConsumerWidget {
   const BadgesScreen({super.key});
 
@@ -51,9 +48,6 @@ class BadgesScreen extends ConsumerWidget {
   }
 }
 
-/// Kartu ringkasan "X/Y Lencana diraih" di atas daftar -- progress bar warna
-/// putih di atas latar biru, senada dengan gaya kartu lain di app (lihat
-/// `_ProgressCard` di journey_detail_screen.dart).
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard({required this.badges});
 

@@ -12,12 +12,6 @@ import 'widgets/auth_error_mapper.dart';
 
 const _kOtpLength = 6;
 
-/// Layar terakhir alur lupa kata sandi: kode 6 digit dari email + kata
-/// sandi baru.
-///
-/// Tidak ada deep link yang membuka layar ini otomatis dari email, jadi
-/// [initialEmail] hanya pre-fill kenyamanan — kode reset tetap harus
-/// disalin manual oleh pengguna dari isi email ke field "Kode Reset".
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({super.key, this.initialEmail});
 
@@ -96,8 +90,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           );
       if (!mounted) return;
 
-      // Kembali ke AuthScreen (root dari stack ini) supaya pengguna masuk
-      // pakai kata sandi barunya.
       Navigator.of(context).popUntil((route) => route.isFirst);
       showAppAlert(
         context,

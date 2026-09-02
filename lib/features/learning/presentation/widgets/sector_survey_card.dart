@@ -8,13 +8,6 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/primary_button.dart';
 
-/// Kartu ajakan mengisi survei eksternal (Google Form) pretest/posttest satu
-/// sektor -- tampil di tab Perjalanan selama link-nya dikonfigurasi admin
-/// dan belum ditandai selesai (lihat JourneysScreen). Alurnya dua langkah:
-/// tombol "Buka Google Form" (browser eksternal), lalu begitu itu berhasil
-/// terbuka baru muncul tombol kedua "Saya Sudah Mengisi" untuk self-report
-/// selesainya -- backend tidak bisa tahu isian form yang sesungguhnya, jadi
-/// tidak ada verifikasi selain kejujuran user.
 class SectorSurveyCard extends StatefulWidget {
   const SectorSurveyCard({
     super.key,
@@ -29,14 +22,8 @@ class SectorSurveyCard extends StatefulWidget {
   final String description;
   final String link;
 
-  /// Dipanggil setelah user menekan "Saya Sudah Mengisi" -- pemanggil
-  /// (JourneysScreen) yang bertanggung jawab memanggil repository +
-  /// me-refresh providernya sesudahnya.
   final Future<void> Function() onComplete;
 
-  /// Disuntikkan supaya widget test bisa mem-fake tanpa benar-benar memanggil
-  /// plugin url_launcher (tidak tersedia di flutter_test). Default: buka
-  /// browser eksternal sungguhan.
   final Future<bool> Function(Uri uri)? openLink;
 
   @override

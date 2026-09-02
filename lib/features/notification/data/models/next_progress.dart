@@ -1,8 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Hasil `GET /progress/next` -- titik modul pertama yang belum
-/// diselesaikan user, lintas sektor. Semua field `null` kalau seluruh modul
-/// sudah selesai (lihat `ProgressResolverService::resolveNext` di backend).
 @immutable
 class NextProgress {
   const NextProgress({this.sectorId, this.journeyId, this.modulePageId});

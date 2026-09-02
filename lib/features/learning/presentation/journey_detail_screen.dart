@@ -49,11 +49,6 @@ class _JourneyDetailBody extends ConsumerWidget {
   final String journeyId;
   final JourneyDetail detail;
 
-  /// Baru pernah completed status-nya sebelum sesi buka-module ini dimulai?
-  /// Dibandingkan lagi dengan status TERBARU sesudah kembali (lihat bawah)
-  /// buat mendeteksi transisi "baru saja selesai" -- bukan cuma "sedang
-  /// selesai", supaya layar perayaan tidak muncul berulang tiap kali user
-  /// sekadar membuka ulang journey yang memang sudah lama tuntas.
   Future<void> _openModule(
     BuildContext context,
     WidgetRef ref,
@@ -82,11 +77,6 @@ class _JourneyDetailBody extends ConsumerWidget {
     await _showCelebration(context, ref, refreshed);
   }
 
-  /// Journey ini baru saja tuntas (dicek pemanggil) -- kumpulkan badge-nya
-  /// (fetch ulang lewat [badgesProvider], sengaja di-invalidate dulu supaya
-  /// tidak kepakai cache dari sebelum `AwardJourneyBadge` sempat jalan di
-  /// backend) + journey berikutnya di sektor yang sama, lalu buka layar
-  /// perayaan.
   Future<void> _showCelebration(
     BuildContext context,
     WidgetRef ref,
@@ -129,10 +119,6 @@ class _JourneyDetailBody extends ConsumerWidget {
     );
   }
 
-  /// Badge generik dipakai kalau admin belum sempat mengisi badge journey
-  /// ini di Filament (lihat BadgeRelationManager di backend) -- journey
-  /// yang selesai TETAP layak dirayakan walau belum ada badge resminya,
-  /// bukan diam-diam melompati layar perayaan sama sekali.
   Badge _fallbackBadge(JourneyDetail refreshed) {
     return Badge(
       id: '',
@@ -161,9 +147,6 @@ class _JourneyDetailBody extends ConsumerWidget {
         AppSpacing.xl,
       ),
       children: [
-        // Dibungkus `Align` -- tanpa ini, `ListView` memberi lebar TIGHT
-        // (dipaksa selebar layar) ke tiap child-nya, jadi badge pill ini
-        // ikut melebar penuh walau `Row`-nya sendiri `mainAxisSize.min`.
         Align(
           alignment: Alignment.centerLeft,
           child: _JourneyBadge(order: journey.order),

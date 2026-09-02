@@ -2,14 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Gambar konten yang bisa di-tap untuk dibesarkan jadi full-screen (pinch
-/// zoom lewat `InteractiveViewer`), lalu diminimize lagi lewat tombol close
-/// atau tombol kembali. Dipakai untuk foto infografis/komik dsb -- yang
-/// sebelumnya cuma `Image.network` polos, tidak bisa diperbesar sama sekali.
-///
-/// Loader (spinner) SELALU dibatasi cuma di area gambar itu sendiri lewat
-/// `loadingBuilder`, baik versi kecil di dalam konten maupun versi
-/// full-screen-nya -- bukan menutupi seluruh layar.
 class ZoomableImage extends StatelessWidget {
   const ZoomableImage({
     super.key,
@@ -81,16 +73,12 @@ class _FullScreenImage extends StatelessWidget {
         children: [
           Positioned.fill(
             child: GestureDetector(
-              // Tap di luar gambar (area gelap kosong) ikut menutup --
-              // bukan cuma lewat tombol close.
               onTap: () => Navigator.of(context).pop(),
               child: InteractiveViewer(
                 minScale: 1,
                 maxScale: 5,
                 child: Center(
                   child: GestureDetector(
-                    // Tap TEPAT di atas gambarnya sendiri jangan ikut nutup
-                    // -- supaya tidak bentrok dengan gestur pinch-zoom.
                     onTap: () {},
                     child: Image.network(
                       url,

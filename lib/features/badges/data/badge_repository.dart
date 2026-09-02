@@ -10,10 +10,6 @@ class BadgeRepository {
 
   final Dio _dio;
 
-  /// `GET /badges` -- semua badge lintas sektor, masing-masing dengan status
-  /// raihan user yang sedang login. Tidak ada parameter sektor di endpoint
-  /// ini (lihat `BadgeController::index`); pencocokan ke sektor dilakukan
-  /// di Flutter, lihat `sectorBadgesProvider`.
   Future<List<Badge>> badges() {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>('/badges');

@@ -83,9 +83,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       if (!mounted) return;
 
       if (error is ApiException && error.isEmailNotVerified) {
-        // Kredensial-nya benar, cuma belum verifikasi -- langsung dorong ke
-        // layar OTP (kode lama dari saat daftar, kalau masih berlaku, masih
-        // bisa dipakai di sana; kalau tidak, ada tombol kirim ulang).
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => OtpVerificationScreen(email: email),

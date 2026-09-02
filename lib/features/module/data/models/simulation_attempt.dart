@@ -1,8 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Satu pasangan yang SUDAH pernah dijawab benar sejauh ini -- jawaban salah
-/// tidak pernah disimpan server, jadi tidak akan pernah muncul di sini
-/// (lihat `SimulationAttemptResource`, gaya Duolingo: coba lagi sampai benar).
 @immutable
 class MatchingReviewItem {
   const MatchingReviewItem({required this.pairId, required this.isCorrect});
@@ -18,7 +15,6 @@ class MatchingReviewItem {
   }
 }
 
-/// Satu langkah yang SUDAH pernah ditempatkan di posisi yang benar.
 @immutable
 class OrderingReviewItem {
   const OrderingReviewItem({
@@ -40,10 +36,6 @@ class OrderingReviewItem {
   }
 }
 
-/// Snapshot attempt simulasi -- dikembalikan tiap kali
-/// `POST /simulation-attempts/{id}/check` dipanggil (bukan cuma di akhir).
-/// [isCompleted] baru `true` begitu SELURUH item (matching + ordering)
-/// sudah pernah dijawab benar.
 @immutable
 class SimulationAttempt {
   const SimulationAttempt({
@@ -92,10 +84,6 @@ class SimulationAttempt {
   }
 }
 
-/// Hasil satu panggilan `POST /simulation-attempts/{id}/check` -- [correct]
-/// menentukan apakah item yang baru saja dicoba itu sendiri benar; [attempt]
-/// selalu snapshot TERBARU seluruh attempt (dipakai untuk tahu kapan seluruh
-/// game selesai lewat [SimulationAttempt.isCompleted]).
 @immutable
 class SimulationCheckResult {
   const SimulationCheckResult({required this.correct, required this.attempt});

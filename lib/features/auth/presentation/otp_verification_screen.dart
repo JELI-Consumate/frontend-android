@@ -14,15 +14,6 @@ import '../application/auth_controller.dart';
 
 const _kOtpLength = 6;
 
-/// Layar wajib setelah registrasi (dan setelah login ditolak backend karena
-/// `EMAIL_NOT_VERIFIED`): input kode OTP 6 digit yang dikirim ke email.
-///
-/// Verifikasi tidak pernah keluar dari app — tidak ada deep link/browser
-/// yang perlu di-resolve, pengguna cuma menyalin kode dari email ke sini.
-/// Begitu backend menerima kode yang benar, [AuthController.verifyOtp]
-/// mengisi `authControllerProvider` dengan user (yang emailnya kini
-/// terverifikasi) sekaligus token baru, dan AppRoot pindah sendiri ke
-/// MainShell — layar ini tidak perlu navigasi manual saat sukses.
 class OtpVerificationScreen extends ConsumerStatefulWidget {
   const OtpVerificationScreen({super.key, required this.email});
 
@@ -82,12 +73,6 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
           .verifyOtp(email: widget.email, otp: otp);
       if (!mounted) return;
 
-      // authControllerProvider berubah -> AppRoot rebuild ke MainShell,
-      // tapi layar ini nyampe ke sini lewat Navigator.push (dari RegisterForm
-      // atau LoginForm), jadi tetap ada di atas stack sampai di-pop manual --
-      // AppRoot rebuild di "belakang" tidak otomatis membuang route yang
-      // ditumpuk di atasnya. Pop ke root supaya MainShell yang baru itu
-      // kelihatan.
       Navigator.of(context).popUntil((route) => route.isFirst);
     } on ApiException catch (error) {
       if (!mounted) return;
@@ -95,8 +80,6 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
         _error = error.isInvalidOtp
             ? 'Kode OTP salah atau sudah kedaluwarsa.'
             : error.message;
-        // Kosongkan kotak-kotak biar gampang mengetik ulang, bukan harus
-        // hapus manual satu-satu.
         _code = '';
         _boxesResetToken++;
       });
@@ -255,10 +238,6 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   }
 }
 
-/// Kotak-kotak input kode OTP (satu digit per kotak) — gantinya satu field
-/// teks panjang. Mendukung ketik satu-satu (auto-pindah ke kotak berikutnya)
-/// maupun tempel sekaligus (mis. salin kode dari email: sisa digitnya
-/// otomatis tersebar ke kotak-kotak setelahnya).
 class _OtpBoxInput extends StatefulWidget {
   const _OtpBoxInput({
     super.key,
@@ -308,9 +287,6 @@ class _OtpBoxInputState extends State<_OtpBoxInput> {
     }
   }
 
-  /// Satu handler untuk dua kasus -- ketik satu digit maupun tempel banyak
-  /// digit sekaligus -- karena keduanya sama-sama muncul lewat `onChanged`
-  /// (baik lewat keyboard asli maupun `WidgetTester.enterText` di test).
   void _handleChanged(int index, String value) {
     final digits = value.replaceAll(RegExp(r'\D'), '');
 

@@ -8,10 +8,6 @@ import '../../data/models/badge.dart';
 import 'badge_avatar.dart';
 import 'badge_detail_sheet.dart';
 
-/// Satu baris lencana di tab "Pencapaian" -- ikon berwarna + tanggal raih
-/// kalau sudah didapat, ikon pudar + petunjuk cara meraihnya kalau belum.
-/// Bisa diketuk untuk lihat detail lengkapnya (lihat [showBadgeDetailSheet]),
-/// termasuk pesan ucapan selamat & motivasi yang tidak muat di baris ini.
 class BadgeTile extends StatelessWidget {
   const BadgeTile({super.key, required this.badge});
 

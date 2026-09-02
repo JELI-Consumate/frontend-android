@@ -51,9 +51,6 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
   @override
   void initState() {
     super.initState();
-    // Cek kecocokan kata sandi & konfirmasi secara langsung saat mengetik
-    // (bukan cuma pas submit) — cukup trigger rebuild, pesannya dihitung
-    // ulang lewat _confirmPasswordLiveError di setiap build.
     _password.addListener(_onPasswordEdited);
     _passwordConfirmation.addListener(_onPasswordConfirmationEdited);
   }
@@ -87,8 +84,6 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
     }
   }
 
-  /// Pesan real-time di bawah kotak konfirmasi kata sandi begitu isinya
-  /// berbeda dari kata sandi — tidak menunggu submit dulu.
   String? get _confirmPasswordLiveError {
     if (_passwordConfirmation.text.isEmpty) return null;
     if (_passwordConfirmation.text == _password.text) return null;
@@ -188,9 +183,6 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
           );
       if (!mounted) return;
 
-      // Register tidak membuat sesi (lihat AuthController.register) — dorong
-      // pengguna ke layar OTP secara eksplisit, bukan menunggu
-      // authControllerProvider berubah seperti alur lama.
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => OtpVerificationScreen(email: email),

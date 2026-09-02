@@ -6,9 +6,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../learning/data/models/journey.dart';
 
-/// Kartu journey dipakai di dua tempat: preview di dashboard dan daftar
-/// penuh di tab Perjalanan. Journey terkunci ditampilkan pudar dengan
-/// gembok — sesuai BR-01 di backend (journey terbuka berurutan).
 class JourneyCard extends StatelessWidget {
   const JourneyCard({
     super.key,
@@ -21,19 +18,12 @@ class JourneyCard extends StatelessWidget {
 
   final Journey journey;
 
-  /// Mis. "Journey 1" — dihitung pemanggil dari posisi dalam daftar, bukan
-  /// dari field backend (backend cuma punya `order`, bukan label siap pakai).
   final String label;
 
   final VoidCallback onTap;
 
-  /// Kunci kartu ini walau backend bilang `is_unlocked` — dipakai gerbang
-  /// pre-test di aplikasi (journey 1 terkunci sampai survei pre-test diisi,
-  /// lihat `SectorDetail.pretestGateActive`).
   final bool forceLocked;
 
-  /// Teks kecil di bawah judul saat terkunci. Default:
-  /// "Selesaikan journey sebelumnya".
   final String? lockReason;
 
   @override
@@ -120,8 +110,6 @@ class JourneyCard extends StatelessWidget {
   }
 }
 
-/// Chip label "Journey N" di atas judul -- latar biru muda, teks biru,
-/// gantinya teks abu-abu polos di desain lama.
 class _JourneyBadge extends StatelessWidget {
   const _JourneyBadge({required this.label});
 

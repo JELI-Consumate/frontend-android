@@ -1,9 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-/// Web OAuth Client ID (bukan Android Client ID) — dipakai sebagai audience
-/// supaya `access_token` yang didapat bisa diverifikasi backend lewat
-/// Socialite. Sama dengan `GOOGLE_CLIENT_ID` di backend/.env.
 const _serverClientId =
     '783775692011-94t7r2bhg8m3tpo8prgbeun7v6aha2ka.apps.googleusercontent.com';
 
@@ -18,7 +15,6 @@ class GoogleAuthService {
     _initialized = true;
   }
 
-  /// Return `null` kalau user membatalkan pemilihan akun — bukan error.
   Future<String?> signInAndGetAccessToken() async {
     await _ensureInitialized();
 

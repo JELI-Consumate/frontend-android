@@ -38,26 +38,14 @@ class AppTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onSubmitted;
 
-  /// Kalau `true`, field tidak menerima ketikan langsung — dipakai untuk
-  /// field yang nilainya diisi lewat dialog lain, mis. date picker.
   final bool readOnly;
 
-  /// Dipanggil saat field disentuh. Berguna bareng [readOnly] untuk
-  /// membuka date picker atau dialog lain.
   final VoidCallback? onTap;
 
-  /// Ikon tambahan di kanan field. Diabaikan kalau [obscure] `true`
-  /// (slot itu dipakai tombol tampilkan/sembunyikan kata sandi).
   final IconData? suffixIcon;
 
-  /// Catatan permanen di bawah field (mis. syarat kata sandi). Disembunyikan
-  /// otomatis saat [errorText] terisi — sama seperti helper/error bawaan
-  /// Material, supaya tidak dobel dengan pesan error.
   final String? helperText;
 
-  /// Langsung fokus + buka keyboard begitu field ini muncul di layar --
-  /// dipakai untuk field tunggal di bottom sheet (mis. ubah nama) supaya
-  /// pengguna tidak perlu tap dulu.
   final bool autofocus;
 
   @override

@@ -33,9 +33,6 @@ class AuthController extends AsyncNotifier<AppUser?> {
     _registerDeviceToken();
   }
 
-  /// Sengaja tidak menyentuh `state` — akun baru belum punya sesi sampai
-  /// [verifyOtp] berhasil. Pemanggil (RegisterForm) yang menavigasi ke layar
-  /// OTP setelah ini selesai tanpa error.
   Future<void> register({
     required String name,
     required String email,
@@ -84,19 +81,11 @@ class AuthController extends AsyncNotifier<AppUser?> {
 
   Future<void> signOut() async {
     await _repository.logout();
-    // Sektor yang dipilih itu pilihan akun ini, bukan pilihan device --
-    // kalau tidak ikut dibersihkan, akun lain yang login di device yang
-    // sama akan langsung "mewarisi" sektor akun sebelumnya tanpa pernah
-    // ditanya.
     await ref.read(sectorStorageProvider).clear();
     ref.invalidate(selectedSectorSlugProvider);
     state = const AsyncValue.data(null);
   }
 
-  // Method-method di bawah ini sengaja tidak menyentuh `state` — tidak satu
-  // pun menghasilkan user yang login (reset & resend hanya mengirim email;
-  // reset password sendiri tidak ikut membuatkan sesi baru di backend;
-  // verifikasi sesi barunya lewat OTP, ada di [verifyOtp] di atas).
   Future<String> forgotPassword(String email) {
     return _repository.forgotPassword(email);
   }
@@ -119,10 +108,6 @@ class AuthController extends AsyncNotifier<AppUser?> {
     return _repository.resendOtp(email);
   }
 
-  /// Fire-and-forget dengan sengaja -- gagal daftar token FCM (izin
-  /// ditolak, tidak ada Play Services, dsb.) bukan alasan untuk
-  /// menggagalkan alur login. Error-nya sendiri sudah ditangani di
-  /// [DeviceTokenController].
   void _registerDeviceToken() {
     unawaited(ref.read(deviceTokenControllerProvider).registerCurrentDevice());
   }

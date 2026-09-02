@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Cermin dari `QuizSegmentType` enum di backend.
 enum QuizSegmentType {
   multipleChoice,
   likert,
@@ -73,8 +72,6 @@ class QuizQuestion {
   final String question;
   final int order;
 
-  /// Kosong untuk pertanyaan segmen `likert` -- segmen itu pakai
-  /// [QuizSegment.likertScaleOptions] bersama (bukan per pertanyaan).
   final List<QuizChoiceOption> choiceOptions;
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
@@ -112,8 +109,6 @@ class QuizSegment {
   final int order;
   final List<QuizQuestion> questions;
 
-  /// Skala jawaban bersama untuk SEMUA pertanyaan di segmen `likert` ini
-  /// (mis. "Sangat Tidak Setuju" .. "Sangat Setuju").
   final List<LikertScaleOption> likertScaleOptions;
 
   factory QuizSegment.fromJson(Map<String, dynamic> json) {
@@ -141,9 +136,6 @@ class QuizSegment {
   }
 }
 
-/// Konten tipe `quiz` (`ContentableType::Quiz`) -- mode "soal": tidak pernah
-/// berisi jawaban benar/salah, itu baru muncul di [QuizAttempt] setelah
-/// attempt-nya disubmit (lihat `QuizContentResource` di backend).
 @immutable
 class QuizContent {
   const QuizContent({

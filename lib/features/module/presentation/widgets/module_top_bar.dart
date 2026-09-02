@@ -4,12 +4,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// AppBar seragam kelima layar konsumsi konten -- tombol kembali standar +
-/// badge "Modul X/Y" di tengah (posisi module ini di antara seluruh module
-/// journey-nya, lihat `ModulePageNav.modulePosition`/`moduleTotal`), BUKAN
-/// judul module -- judulnya sendiri tampil besar di body lewat
-/// [ModuleHeader]. Badge-nya kosong kalau module dibuka tanpa konteks
-/// journey (`position`/`total` null).
 class ModuleTopBar extends StatelessWidget implements PreferredSizeWidget {
   const ModuleTopBar({super.key, this.position, this.total});
 

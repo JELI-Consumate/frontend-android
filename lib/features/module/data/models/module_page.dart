@@ -7,11 +7,6 @@ import 'content/reflection_content.dart';
 import 'content/simulation_content.dart';
 import 'content/video_content.dart';
 
-/// Cermin dari `ContentableType` enum di backend -- 5 jenis konten yang
-/// benar-benar tersimpan (beda dari `ModuleType` yang 8 macam; lihat
-/// `ModuleContentType` di fitur learning: `opening`/`materi`/`infografis`/
-/// `komik` empat-empatnya sama-sama konten [ContentType.article] di sini,
-/// cuma beda label/ikon tampilan).
 enum ContentType {
   video,
   article,
@@ -32,9 +27,6 @@ enum ContentType {
   }
 }
 
-/// Union dari 5 jenis konten satu module_page. Sealed supaya `switch` di
-/// layar module (lihat `ModuleScreen`) exhaustive -- nambah jenis konten
-/// baru nanti bakal ditandai analyzer di semua tempat yang perlu diupdate.
 sealed class ModulePageContent {
   const ModulePageContent();
 
@@ -84,9 +76,6 @@ class ReflectionPageContent extends ModulePageContent {
   final ReflectionContent content;
 }
 
-/// Satu halaman di dalam module (`GET /modules/{id}` -> `pages[]`). Modul
-/// saat ini selalu punya persis satu halaman (lihat `ModuleSeeder`), tapi
-/// modelnya tetap dibuat generik per-halaman mengikuti bentuk API.
 @immutable
 class ModulePage {
   const ModulePage({

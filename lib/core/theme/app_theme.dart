@@ -89,9 +89,6 @@ abstract final class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      // Tidak ada navigationBarTheme -- bar navigasi bawah dibangun custom
-      // di MainShell/_BottomNavBar (bukan `NavigationBar` bawaan Material),
-      // jadi warnanya diatur langsung di sana, bukan lewat tema.
     );
   }
 }

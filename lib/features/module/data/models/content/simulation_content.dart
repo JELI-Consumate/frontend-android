@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Cermin dari `SimulationType` enum di backend.
 enum SimulationGameType {
   matching,
   ordering,
@@ -64,10 +63,6 @@ class SimulationOrderingStep {
   final String label;
   final String? imageUrl;
 
-  /// Urutan tampil di response (`array_key` datang), BUKAN `correct_position`
-  /// -- backend sengaja tidak pernah mengirim posisi yang benar (lihat
-  /// `SimulationContentResource`), itu dijaga di server dan cuma dicek lewat
-  /// `POST /simulation-attempts/{id}/check`.
   final int order;
 
   factory SimulationOrderingStep.fromJson(Map<String, dynamic> json) {
@@ -80,9 +75,6 @@ class SimulationOrderingStep {
   }
 }
 
-/// Konten tipe `simulation` (`ContentableType::Simulation`) -- salah satu
-/// dari dua game: [SimulationGameType.matching] (pasangkan kartu kiri-kanan)
-/// atau [SimulationGameType.ordering] (susun langkah sesuai urutan benar).
 @immutable
 class SimulationContent {
   const SimulationContent({

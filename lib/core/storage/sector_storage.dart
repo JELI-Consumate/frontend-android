@@ -1,11 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Slug sektor yang dipilih pengguna sekali di layar onboarding "Pilih
-/// Sektor" (lihat `SectorSelectionScreen`). Backend belum punya kolom
-/// "sektor pilihan user" (cuma satu sektor aktif saat ini, lihat
-/// `SectorController`), jadi pilihannya disimpan lokal di device saja --
-/// sama seperti [TokenStorage] menyimpan token auth.
 class SectorStorage {
   SectorStorage(this._storage);
 

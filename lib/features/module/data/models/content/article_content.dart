@@ -1,10 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Cermin dari `ArticleBlockType` enum di backend. Dipakai untuk modul tipe
-/// `opening`, `materi`, `infografis`, dan `komik` sekaligus -- keempatnya
-/// sama-sama `ContentableType::Article`, cuma beda dominasi jenis block
-/// (materi banyak paragraph, infografis/komik banyak image) dan label/ikon
-/// di UI (lihat `ArticleModuleScreen`).
 enum ArticleBlockType {
   paragraph,
   image,
@@ -53,8 +48,6 @@ class ArticleBlock {
   }
 }
 
-/// Konten tipe `article` (`ContentableType::Article`) — deretan block yang
-/// dirender berurutan sesuai [ArticleBlock.order].
 @immutable
 class ArticleContent {
   const ArticleContent({

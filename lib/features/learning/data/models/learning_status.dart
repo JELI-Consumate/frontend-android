@@ -1,5 +1,3 @@
-/// Cermin dari `ProgressStatus` enum di backend (`not_started`, `in_progress`,
-/// `completed`) — dipakai di sector, journey, dan module.
 enum LearningStatus {
   notStarted('not_started'),
   inProgress('in_progress'),
@@ -21,8 +19,6 @@ enum LearningStatus {
   }
 }
 
-/// Bentuk `{status, percent}` yang berulang di banyak resource backend
-/// (sector, journey, module).
 class LearningProgress {
   const LearningProgress({required this.status, required this.percent});
 

@@ -4,9 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/device_token_repository.dart';
 import '../data/push_notification_service.dart';
 
-/// Sinkronisasi token FCM device ini ke backend. Dipanggil dari
-/// `AuthController` tiap kali sesi baru terbentuk (login, login Google,
-/// verifikasi OTP) -- lihat auth_controller.dart.
 class DeviceTokenController {
   DeviceTokenController(this._ref);
 
@@ -14,15 +11,8 @@ class DeviceTokenController {
 
   bool _refreshListenerAttached = false;
 
-  /// Minta izin notifikasi, ambil token FCM device, lalu daftarkan ke
-  /// backend. Gagal secara diam-diam (di luar debug log) -- device yang
-  /// belum terdaftar cuma berarti user itu tidak kebagian notif
-  /// inactivity, bukan alasan untuk menggagalkan login.
   Future<void> registerCurrentDevice() async {
     try {
-      // `pushNotificationServiceProvider` sendiri bisa gagal dibuat (mis.
-      // `Firebase.initializeApp()` belum dipanggil di test harness) --
-      // harus di dalam try juga, bukan cuma pemanggilan FCM-nya.
       final service = _ref.read(pushNotificationServiceProvider);
       _attachRefreshListener(service);
 

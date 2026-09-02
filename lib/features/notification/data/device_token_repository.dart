@@ -9,9 +9,6 @@ class DeviceTokenRepository {
 
   final Dio _dio;
 
-  /// `POST /device-tokens` -- daftarkan token FCM device ini ke user yang
-  /// sedang login. Backend meng-upsert berdasarkan `fcm_token` (unique),
-  /// aman dipanggil berulang dengan token yang sama.
   Future<void> register(String fcmToken) {
     return guardApi(() async {
       await _dio.post<Map<String, dynamic>>(

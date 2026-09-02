@@ -8,9 +8,6 @@ import '../../learning/application/learning_providers.dart';
 import '../../learning/presentation/journey_detail_screen.dart';
 import 'widgets/journey_card.dart';
 
-/// Tab "Perjalanan": seluruh journey di sektor, berurutan sesuai BR-01 —
-/// journey pertama selalu terbuka, sisanya terbuka satu-satu setelah
-/// journey sebelumnya selesai.
 class JourneysScreen extends ConsumerWidget {
   const JourneysScreen({super.key});
 
@@ -47,8 +44,6 @@ class JourneysScreen extends ConsumerWidget {
                   }
 
                   final journey = value.journeys[index - 1];
-                  // Gerbang pre-test aplikasi: journey pertama dikunci sampai
-                  // survei Pre-Test diisi, walau backend menandainya terbuka.
                   final pretestLock =
                       value.pretestGateActive && journey.order == 1;
                   return JourneyCard(

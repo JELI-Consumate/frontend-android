@@ -4,8 +4,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-/// Scaffold kosong dengan spinner tengah -- dipakai selagi menunggu
-/// `GET /modules/{id}` atau panggilan "mulai attempt" (kuis/simulasi).
 class ModuleLoadingScaffold extends StatelessWidget {
   const ModuleLoadingScaffold({super.key});
 
@@ -15,7 +13,6 @@ class ModuleLoadingScaffold extends StatelessWidget {
   }
 }
 
-/// Scaffold error seragam untuk kelima layar konsumsi konten.
 class ModuleErrorScaffold extends StatelessWidget {
   const ModuleErrorScaffold({super.key, this.title, this.message});
 

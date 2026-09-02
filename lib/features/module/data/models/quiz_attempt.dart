@@ -1,8 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Satu baris pembahasan setelah kuis disubmit -- cuma ada di dalam
-/// [QuizAttempt.review], tidak pernah muncul sebelum attempt selesai
-/// (lihat `QuizAttemptResource` di backend).
 @immutable
 class QuizReviewItem {
   const QuizReviewItem({
@@ -33,11 +30,6 @@ class QuizReviewItem {
   }
 }
 
-/// Hasil `POST /quiz-attempts/{id}/submit` (atau `GET /quiz-attempts/{id}`)
-/// -- attempt kuis yang SUDAH disubmit, lengkap dengan skor & pembahasan.
-/// `passed` menandai lulus/tidaknya, tapi TIDAK menghalangi module selesai --
-/// backend menandai halaman selesai begitu attempt disubmit, apapun hasilnya
-/// (lihat `QuizScoringService::submit`).
 @immutable
 class QuizAttempt {
   const QuizAttempt({
@@ -83,15 +75,6 @@ class QuizAttempt {
   }
 }
 
-/// Hasil satu panggilan `POST /quiz-attempts/{id}/check` -- gaya ujian, BEDA
-/// dari `SimulationCheckResult`: jawaban salah TETAP disimpan (soal langsung
-/// terkunci untuk attempt ini), bukan ditolak-boleh-coba-lagi.
-///
-/// [correct]/[correctOptionId]/[explanation] semuanya `null` untuk
-/// pertanyaan segmen likert -- tidak ada benar/salah di situ. [attempt]
-/// selalu snapshot TERBARU seluruh attempt -- begitu SEMUA pertanyaan sudah
-/// dicek, `attempt.review` sudah lengkap tanpa perlu panggilan submit
-/// terpisah lagi (lihat `QuizAttempt.review`).
 @immutable
 class QuizAnswerCheckResult {
   const QuizAnswerCheckResult({

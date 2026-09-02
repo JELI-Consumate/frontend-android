@@ -6,8 +6,6 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../learning/data/models/learning_module.dart';
 import '../../data/models/module_detail.dart';
 
-/// Header dipakai seragam di kelima layar konsumsi konten -- chip tipe
-/// module + estimasi durasi, judul, dan deskripsi opsional.
 class ModuleHeader extends StatelessWidget {
   const ModuleHeader({super.key, required this.module});
 

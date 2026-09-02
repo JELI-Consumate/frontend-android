@@ -39,10 +39,6 @@ _AlertVisual _visualFor(AppAlertType type) => switch (type) {
   ),
 };
 
-/// Modal alert ala SweetAlert (ikon bulat besar + judul + pesan + tombol
-/// aksi) — dipakai untuk hasil penting yang butuh perhatian eksplisit
-/// pengguna (mis. login/registrasi/reset gagal), bukan untuk info sekilas
-/// yang cukup lewat SnackBar.
 Future<void> showAppAlert(
   BuildContext context, {
   required AppAlertType type,

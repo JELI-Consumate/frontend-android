@@ -41,7 +41,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       final accessToken = await ref
           .read(googleAuthServiceProvider)
           .signInAndGetAccessToken();
-      if (accessToken == null) return; // User batal pilih akun.
+      if (accessToken == null) return;
 
       await ref
           .read(authControllerProvider.notifier)

@@ -23,10 +23,6 @@ class _AppRootState extends ConsumerState<AppRoot> {
   @override
   void initState() {
     super.initState();
-    // Sekali seumur hidup widget tree, bukan per rebuild -- attach()
-    // sendiri sudah idempoten (lihat NotificationListenerController), tapi
-    // initState tetap tempat yang tepat karena AppRoot tidak pernah
-    // dibuang selama app hidup.
     unawaited(ref.read(notificationListenerControllerProvider).attach());
   }
 
@@ -39,18 +35,6 @@ class _AppRootState extends ConsumerState<AppRoot> {
     final user = auth.value;
     if (user == null) return const _UnauthenticatedFlow();
 
-    // Tidak ada cabang "belum verifikasi" di sini -- backend tidak pernah
-    // menerbitkan token untuk akun yang emailnya belum terverifikasi
-    // (register() tidak lagi membuat sesi; login()/verifyOtp() sama-sama
-    // mensyaratkan email_verified_at terisi). Kalau `user` bukan null,
-    // emailnya sudah pasti terverifikasi.
-
-    // Satu langkah lagi sebelum MainShell: pengguna yang belum pernah
-    // memilih sektor (akun baru, atau device baru) harus memilih dulu di
-    // SectorSelectionScreen. Errornya sengaja diperlakukan sama seperti
-    // "belum memilih" -- ini cuma baca local storage, hampir tidak pernah
-    // gagal, dan lebih baik pengguna diminta memilih ulang daripada
-    // terjebak di layar error.
     final selectedSector = ref.watch(selectedSectorSlugProvider);
     final hasSelectedSector = selectedSector.maybeWhen(
       data: (slug) => slug != null,
@@ -61,9 +45,6 @@ class _AppRootState extends ConsumerState<AppRoot> {
       return const SectorSelectionScreen();
     }
 
-    // Survei pre-test bukan gerbang di sini lagi -- ia sekarang kartu di
-    // Beranda yang mengunci journey pertama sampai diisi (lihat
-    // `SectorDetail.pretestGateActive`).
     return const MainShell();
   }
 }

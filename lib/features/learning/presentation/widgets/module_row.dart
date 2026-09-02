@@ -5,13 +5,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../data/models/learning_module.dart';
 
-/// Satu baris di checklist journey -- selalu kartu putih bertepi, dengan dua
-/// varian border: module yang sedang dikerjakan (tepi biru menonjol) dan
-/// sisanya (tepi abu-abu tipis biasa). Module terkunci (`module.locked`)
-/// ditampilkan pudar dengan gembok, tidak bisa disentuh -- sesuai pola yang
-/// sama dengan `JourneyCard` untuk journey terkunci: module sebelumnya
-/// (order - 1) di journey ini harus completed dulu (lihat
-/// `ModuleAccessService` di backend).
 class ModuleRow extends StatelessWidget {
   const ModuleRow({
     super.key,
@@ -34,12 +27,6 @@ class ModuleRow extends StatelessWidget {
     );
     final subtitleStyle = AppTypography.bodySmall;
 
-    // Tinggi kotak dipatok dari kasus TERPANJANG (judul 2 baris + subtitle)
-    // supaya seluruh baris sama tinggi, TAPI teksnya sendiri (title+subtitle)
-    // dibiarkan setinggi aslinya lalu di-tengahkan lewat `SizedBox` + `Row`
-    // yang center secara vertikal (default `Row`) -- bukan judulnya sendiri
-    // yang dipaksa 2 baris, soalnya itu bikin jarak kosong besar menganga di
-    // bawah judul begitu judulnya kebetulan cuma 1 baris.
     final rowHeight =
         (titleStyle.fontSize ?? 15) * (titleStyle.height ?? 1) * 2 +
         2 +
@@ -210,10 +197,6 @@ class _StatusIcon extends StatelessWidget {
       );
     }
 
-    // Module yang sedang dikerjakan tetap ditandai kartu biru menonjol
-    // meski kebetulan sudah selesai (mis. "Opening Journey" di awal) --
-    // status "Selesai"-nya tetap kelihatan lewat subtitle, bukan lewat
-    // ikon lingkaran ini.
     if (isCurrent) {
       return CircleAvatar(
         radius: 18,
@@ -238,8 +221,6 @@ class _StatusIcon extends StatelessWidget {
   }
 }
 
-/// Ikon lingkaran besar di kiri baris. "Opening" pakai lambang titik-awal
-/// (bukan ikon info) supaya terasa beda dari module isi lainnya.
 IconData _avatarIconFor(ModuleContentType type) => switch (type) {
   ModuleContentType.opening => Icons.trip_origin,
   ModuleContentType.video => Icons.play_circle_outline,
@@ -252,9 +233,6 @@ IconData _avatarIconFor(ModuleContentType type) => switch (type) {
   ModuleContentType.unknown => Icons.circle_outlined,
 };
 
-/// Ikon kecil di depan label tipe ("Video", "Materi", dst). Sama dengan
-/// ikon lingkaran untuk semua tipe, kecuali "Opening" -- di situ dipakai
-/// ikon info supaya bedanya dengan lambang titik-awal di lingkaran.
 IconData _labelIconFor(ModuleContentType type) =>
     type == ModuleContentType.opening
     ? Icons.info_outline

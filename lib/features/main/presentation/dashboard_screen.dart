@@ -103,9 +103,7 @@ class _DashboardBody extends ConsumerWidget {
       (journey) => journey.progress.status.isCompleted,
     );
     final showPosttestSurvey =
-        allJourneysCompleted &&
-        posttest.isConfigured &&
-        !posttest.isCompleted;
+        allJourneysCompleted && posttest.isConfigured && !posttest.isCompleted;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,9 +149,6 @@ class _DashboardBody extends ConsumerWidget {
           _ContinueLearningSection(journeyId: inProgress.id),
           const SizedBox(height: AppSpacing.lg),
         ],
-        // Selama gerbang pre-test aktif, journey pertama belum boleh dibuka
-        // -- cukup tampilkan kartu survei di atas, jangan pratinjau journey
-        // yang terkunci.
         if (nextJourney != null && !showPretestSurvey) ...[
           Text('Perjalanan', style: AppTypography.titleLarge),
           const SizedBox(height: AppSpacing.sm),
