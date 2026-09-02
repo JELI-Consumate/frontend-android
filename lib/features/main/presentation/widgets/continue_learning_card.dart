@@ -22,6 +22,7 @@ class ContinueLearningCard extends StatelessWidget {
     if (currentModule == null) return const SizedBox.shrink();
 
     final percent = journeyDetail.journey.progress.percent;
+    final imageUrl = journeyDetail.journey.imageUrl;
 
     return Material(
       color: AppColors.white,
@@ -35,15 +36,12 @@ class ContinueLearningCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
+            SizedBox(
               height: 130,
               width: double.infinity,
-              alignment: Alignment.center,
-              color: AppColors.primarySoft,
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: SvgPicture.asset(
-                'assets/images/journey_illustration.svg',
-                height: 104,
+              child: ColoredBox(
+                color: AppColors.primarySoft,
+                child: _CoverImage(imageUrl: imageUrl),
               ),
             ),
             Padding(
@@ -96,6 +94,43 @@ class ContinueLearningCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CoverImage extends StatelessWidget {
+  const _CoverImage({required this.imageUrl});
+
+  final String? imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = imageUrl;
+    if (url == null || url.isEmpty) return const _CoverFallback();
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      loadingBuilder: (context, child, progress) =>
+          progress == null ? child : const _CoverFallback(),
+      errorBuilder: (_, _, _) => const _CoverFallback(),
+    );
+  }
+}
+
+class _CoverFallback extends StatelessWidget {
+  const _CoverFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: SvgPicture.asset(
+          'assets/images/journey_illustration.svg',
+          height: 104,
         ),
       ),
     );

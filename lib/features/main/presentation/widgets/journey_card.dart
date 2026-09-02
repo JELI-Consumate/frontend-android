@@ -46,7 +46,7 @@ class JourneyCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Thumbnail(locked: isLocked),
+                _Thumbnail(imageUrl: journey.imageUrl, locked: isLocked),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -138,24 +138,49 @@ class _JourneyBadge extends StatelessWidget {
 }
 
 class _Thumbnail extends StatelessWidget {
-  const _Thumbnail({required this.locked});
+  const _Thumbnail({required this.imageUrl, required this.locked});
 
+  final String? imageUrl;
   final bool locked;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 76,
-      height: 92,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.all(AppSpacing.xs),
-      decoration: BoxDecoration(
-        color: AppColors.primarySoft,
-        borderRadius: BorderRadius.circular(AppRadius.md),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: SizedBox(
+        width: 76,
+        height: 92,
+        child: ColoredBox(
+          color: AppColors.primarySoft,
+          child: locked
+              ? Icon(Icons.lock_outline, color: AppColors.inkMuted)
+              : _cover(),
+        ),
       ),
-      child: locked
-          ? Icon(Icons.lock_outline, color: AppColors.inkMuted)
-          : SvgPicture.asset('assets/images/journey_illustration.svg'),
+    );
+  }
+
+  Widget _cover() {
+    final url = imageUrl;
+    if (url == null || url.isEmpty) return const _CoverFallback();
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) =>
+          progress == null ? child : const _CoverFallback(),
+      errorBuilder: (_, _, _) => const _CoverFallback(),
+    );
+  }
+}
+
+class _CoverFallback extends StatelessWidget {
+  const _CoverFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.xs),
+      child: SvgPicture.asset('assets/images/journey_illustration.svg'),
     );
   }
 }

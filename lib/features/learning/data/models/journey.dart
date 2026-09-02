@@ -14,12 +14,14 @@ class Journey {
     required this.isUnlocked,
     required this.modulesCount,
     required this.progress,
+    this.imageUrl,
   });
 
   final String id;
   final String slug;
   final String title;
   final String? description;
+  final String? imageUrl;
   final int order;
   final int estimatedMinutes;
   final bool isUnlocked;
@@ -32,6 +34,7 @@ class Journey {
       slug: json['slug'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,
+      imageUrl: json['image_url'] as String?,
       order: (json['order'] as num?)?.toInt() ?? 0,
       estimatedMinutes: (json['estimated_minutes'] as num?)?.toInt() ?? 0,
       isUnlocked: json['is_unlocked'] as bool? ?? false,
