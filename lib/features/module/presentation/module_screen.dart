@@ -11,17 +11,10 @@ import 'reflection_module_screen.dart';
 import 'simulation_module_screen.dart';
 import 'video_module_screen.dart';
 import 'widgets/module_async_scaffold.dart';
+import 'widgets/module_bottom_bar.dart';
 import 'widgets/module_page_nav.dart';
+import 'widgets/module_top_bar.dart';
 
-/// Titik masuk konsumsi konten satu module -- ambil `GET /modules/{id}` lalu
-/// alihkan ke layar yang sesuai berdasarkan tipe konten tiap halamannya.
-/// Module dengan >1 halaman (mis. video + ringkasan artikel) dirender sebagai
-/// kartu yang bisa di-swipe (lihat `_ModuleContentRouter`), bukan cuma
-/// halaman pertamanya.
-///
-/// Navigasi antar-halaman DAN antar-module sama-sama lewat satu tombol yang
-/// sama di tiap layar (lihat `ModulePageNav`/`ModuleContinueButton`) -- swipe
-/// manual di sini cuma jalan pintas tambahan, bukan satu-satunya cara.
 class ModuleScreen extends ConsumerWidget {
   const ModuleScreen({
     super.key,
@@ -31,13 +24,6 @@ class ModuleScreen extends ConsumerWidget {
 
   final String moduleId;
 
-  /// Urutan id seluruh module di journey yang sama (lihat pemanggilnya di
-  /// `JourneyDetailScreen`) -- dipakai buat badge "Modul X/Y" di
-  /// `ModuleTopBar` dan tombol lanjut di halaman terakhir module ini, lalu
-  /// diteruskan lagi ke module berikutnya kalau tombol itu ditekan supaya
-  /// rantainya jalan sampai akhir journey, bukan cuma sekali lompat. `null`
-  /// kalau module ini dibuka tanpa konteks journey -- badge & tombol
-  /// lanjutnya cuma turun ke tampilan "akhir" (tanpa nomor, label "Selesai").
   final List<String>? journeyModuleIds;
 
   @override
@@ -68,9 +54,19 @@ class _ModuleContentRouter extends StatefulWidget {
 class _ModuleContentRouterState extends State<_ModuleContentRouter> {
   final _controller = PageController();
 
+  late final List<ValueNotifier<Widget?>> _footerSinks = List.generate(
+    widget.module.pages.length,
+    (_) => ValueNotifier<Widget?>(null),
+  );
+
+  int _currentPage = 0;
+
   @override
   void dispose() {
     _controller.dispose();
+    for (final sink in _footerSinks) {
+      sink.dispose();
+    }
     super.dispose();
   }
 
@@ -97,10 +93,6 @@ class _ModuleContentRouterState extends State<_ModuleContentRouter> {
     final nextModuleId = _nextModuleId;
     if (nextModuleId == null) return;
 
-    // pushReplacement, bukan push -- lompat antar-module bukan "buka
-    // sub-layar baru", jadi tombol kembali dari module berikutnya langsung
-    // ke JourneyDetailScreen, bukan menumpuk balik lewat tiap module yang
-    // sudah dilewati.
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
         builder: (_) => ModuleScreen(
@@ -111,11 +103,6 @@ class _ModuleContentRouterState extends State<_ModuleContentRouter> {
     );
   }
 
-  /// Dipanggil lewat `ModulePageNav.onAdvance` begitu halaman ke-[fromIndex]
-  /// (dari total [pageCount] halaman module ini) beres: pindah ke halaman
-  /// berikutnya dalam module ini kalau masih ada, kalau tidak baru lompat ke
-  /// module berikutnya di journey, kalau itu juga tidak ada berarti ini akhir
-  /// journey-nya -- kembali ke layar sebelumnya.
   void _handleAdvance(int fromIndex, int pageCount) {
     if (fromIndex < pageCount - 1) {
       _controller.animateToPage(
@@ -134,21 +121,26 @@ class _ModuleContentRouterState extends State<_ModuleContentRouter> {
     Navigator.of(context).pop();
   }
 
+  void _goToPage(int target) {
+    _controller.animateToPage(
+      target,
+      duration: AppDuration.normal,
+      curve: Curves.easeOut,
+    );
+  }
+
   ModulePageNav _navFor(int index, int pageCount) {
+    final hoisted = pageCount > 1;
     return ModulePageNav(
       modulePosition: _modulePosition,
       moduleTotal: _moduleTotal,
       pageCount: pageCount,
       pageIndex: index,
-      onDotTap: pageCount > 1
-          ? (target) => _controller.animateToPage(
-              target,
-              duration: AppDuration.normal,
-              curve: Curves.easeOut,
-            )
-          : null,
+      onDotTap: hoisted ? _goToPage : null,
       hasNext: index < pageCount - 1 || _nextModuleId != null,
       onAdvance: () => _handleAdvance(index, pageCount),
+      chromeHoisted: hoisted,
+      footerSink: hoisted ? _footerSinks[index] : null,
     );
   }
 
@@ -193,18 +185,30 @@ class _ModuleContentRouterState extends State<_ModuleContentRouter> {
       );
     }
 
-    // Kasus paling umum (1 halaman) -- render langsung layar tipe kontennya
-    // tanpa overhead PageView, persis seperti sebelumnya.
     if (pages.length == 1) {
       return _buildPage(pages.first, _navFor(0, 1));
     }
 
-    return PageView(
-      controller: _controller,
-      children: [
-        for (var i = 0; i < pages.length; i++)
-          _buildPage(pages[i], _navFor(i, pages.length)),
-      ],
+    final activePage = _currentPage.clamp(0, pages.length - 1);
+    return Scaffold(
+      appBar: ModuleTopBar(position: _modulePosition, total: _moduleTotal),
+      body: PageView(
+        controller: _controller,
+        onPageChanged: (index) => setState(() => _currentPage = index),
+        children: [
+          for (var i = 0; i < pages.length; i++)
+            _buildPage(pages[i], _navFor(i, pages.length)),
+        ],
+      ),
+      bottomNavigationBar: ModuleBottomBar(
+        pageCount: pages.length,
+        pageIndex: activePage,
+        onDotTap: _goToPage,
+        child: ValueListenableBuilder<Widget?>(
+          valueListenable: _footerSinks[activePage],
+          builder: (_, footer, _) => footer ?? const SizedBox.shrink(),
+        ),
+      ),
     );
   }
 }

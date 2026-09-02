@@ -10,18 +10,12 @@ import '../data/models/content/article_content.dart';
 import '../data/models/module_detail.dart';
 import '../data/models/module_page.dart';
 import '../data/module_repository.dart';
-import 'widgets/module_bottom_bar.dart';
 import 'widgets/module_continue_button.dart';
 import 'widgets/module_header.dart';
 import 'widgets/module_page_nav.dart';
-import 'widgets/module_top_bar.dart';
+import 'widgets/module_page_scaffold.dart';
 import 'widgets/zoomable_image.dart';
 
-/// Satu layar dipakai untuk EMPAT tipe module (`opening`, `materi`,
-/// `infografis`, `komik`) -- keempatnya sama-sama `ContentableType::Article`
-/// (deretan [ArticleBlock]), cuma beda dominasi jenis block: materi banyak
-/// paragraph, infografis/komik banyak image. Bedanya cuma di chip tipe dari
-/// [ModuleHeader], bukan di cara rendernya.
 class ArticleModuleScreen extends ConsumerStatefulWidget {
   const ArticleModuleScreen({
     super.key,
@@ -46,10 +40,6 @@ class _ArticleModuleScreenState extends ConsumerState<ArticleModuleScreen> {
   ArticleContent get _content =>
       (widget.page.content as ArticlePageContent).content;
 
-  /// Tandai selesai (kalau belum) lalu pindah ke halaman/module berikutnya
-  /// lewat `widget.nav.onAdvance` -- SATU tombol untuk keduanya, dulu 2
-  /// tombol terpisah ("Tandai Selesai" di sini + "Modul Selanjutnya" di
-  /// footer luar).
   Future<void> _continue() async {
     if (!_completed) {
       final ok = await _markComplete();
@@ -86,10 +76,6 @@ class _ArticleModuleScreenState extends ConsumerState<ArticleModuleScreen> {
     final blocks = [..._content.blocks]
       ..sort((a, b) => a.order.compareTo(b.order));
 
-    // Nomor bullet dihitung cuma dari sesama block list_item, bukan dari
-    // seluruh block campur tipe lain -- paragraph/gambar yang diselipkan di
-    // antaranya tidak ikut menaikkan nomornya (sama seperti
-    // `ArticleBlock::listItemNumber` di preview panel admin).
     var listItemCounter = 0;
     final listItemNumbers = <String, int>{};
     for (final block in blocks) {
@@ -99,41 +85,27 @@ class _ArticleModuleScreenState extends ConsumerState<ArticleModuleScreen> {
       }
     }
 
-    return Scaffold(
-      appBar: ModuleTopBar(
-        position: widget.nav.modulePosition,
-        total: widget.nav.moduleTotal,
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.screenPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ModuleHeader(module: widget.module),
-              const SizedBox(height: AppSpacing.lg),
-              ..._buildBlockWidgets(blocks, listItemNumbers),
-            ],
-          ),
+    return ModulePageScaffold(
+      nav: widget.nav,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.screenPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ModuleHeader(module: widget.module),
+            const SizedBox(height: AppSpacing.lg),
+            ..._buildBlockWidgets(blocks, listItemNumbers),
+          ],
         ),
       ),
-      bottomNavigationBar: ModuleBottomBar(
-        pageCount: widget.nav.pageCount,
-        pageIndex: widget.nav.pageIndex,
-        onDotTap: widget.nav.onDotTap,
-        child: ModuleContinueButton(
-          hasNext: widget.nav.hasNext,
-          busy: _busy,
-          onPressed: _continue,
-        ),
+      footer: ModuleContinueButton(
+        hasNext: widget.nav.hasNext,
+        busy: _busy,
+        onPressed: _continue,
       ),
     );
   }
 
-  /// Blok referensi dikelompokkan di bawah SATU heading "Referensi" begitu
-  /// blok reference pertama ditemui -- gaya kutipan biasa (bukan lagi ikon
-  /// tautan + italic per baris).
   List<Widget> _buildBlockWidgets(
     List<ArticleBlock> blocks,
     Map<String, int> listItemNumbers,
@@ -169,8 +141,6 @@ class _ArticleBlockView extends StatelessWidget {
 
   final ArticleBlock block;
 
-  /// Cuma terisi untuk [ArticleBlockType.listItem] -- lihat perhitungannya
-  /// di `_ArticleModuleScreenState._buildBlockWidgets`.
   final int? listItemNumber;
 
   @override
@@ -234,27 +204,17 @@ class _ListItemBlock extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        // Putih + border tipis -- BUKAN `AppColors.background` (itu persis
-        // warna latar halaman artikel ini sendiri, jadi kotaknya kebentur tak
-        // kelihatan sama sekali, lihat regresi yang dilaporkan). Border-nya
-        // yang menjaga kotak ini tetap kelihatan meski warnanya putih sama
-        // seperti latar, bukan cuma mengandalkan bedanya warna fill.
         color: AppColors.white,
         border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
-        // Default (center) -- lingkaran nomornya ikut di-tengahkan kalau
-        // teksnya sampai 2 baris (mis. "Menjadi konsumen yang cerdas,
-        // bijak, dan bertanggung jawab."), bukan nempel rata atas.
         children: [
           Container(
             width: 28,
             height: 28,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              // Solid, bukan `primarySoft` -- biar lingkarannya tetap kontras
-              // menonjol di atas kotak putih di sekelilingnya.
               color: AppColors.primary,
               shape: BoxShape.circle,
             ),
@@ -280,9 +240,6 @@ class _ListItemBlock extends StatelessWidget {
   }
 }
 
-/// Baris referensi tunggal -- teks polos rata kiri (bukan lagi ikon tautan +
-/// italic), dikumpulkan di bawah heading "Referensi" (lihat
-/// `_ArticleModuleScreenState._buildBlockWidgets`).
 class _ReferenceBlock extends StatelessWidget {
   const _ReferenceBlock({required this.text});
 

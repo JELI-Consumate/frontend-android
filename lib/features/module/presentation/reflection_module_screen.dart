@@ -13,26 +13,9 @@ import '../data/models/module_detail.dart';
 import '../data/models/module_page.dart';
 import '../data/module_repository.dart';
 import 'widgets/module_async_scaffold.dart';
-import 'widgets/module_bottom_bar.dart';
 import 'widgets/module_page_nav.dart';
-import 'widgets/module_top_bar.dart';
+import 'widgets/module_page_scaffold.dart';
 
-/// Modul tipe `refleksi` -- jurnal tanpa skor benar/salah (BR-10). Selesai
-/// otomatis di server begitu SEMUA pertanyaan `open_question` terisi
-/// (checklist tidak menghalangi selesai) -- lihat `ReflectionService`.
-///
-/// Kontennya diambil dari `GET /reflections/{id}`, BUKAN dari
-/// `GET /modules/{id}` -- respons module tree tidak membawa jawaban
-/// tersimpan user (lihat `ModuleRepository.reflection`).
-///
-/// Tiap section ditampilkan sebagai kartu terpisah (ikon + judul + soal-soal
-/// di dalamnya), bukan lagi daftar polos memanjang. Tombolnya SATU sepanjang
-/// alurnya, cuma beda peran: "Simpan Jawaban" kalau belum lengkap, berubah
-/// jadi tombol gabungan "Selanjutnya"/"Selesai" (lihat `ModuleContinueButton`)
-/// begitu satu kali penyimpanan berhasil melengkapi semua pertanyaan (lihat
-/// `_savedComplete`) -- bukan langsung berubah begitu user selesai mengetik,
-/// supaya jawaban yang baru diketik tidak lompat ke halaman berikutnya tanpa
-/// sempat tersimpan dulu.
 class ReflectionModuleScreen extends ConsumerStatefulWidget {
   const ReflectionModuleScreen({
     super.key,
@@ -56,10 +39,6 @@ class _ReflectionModuleScreenState
   ApiException? _loadError;
   bool _saving = false;
 
-  /// true begitu SATU KALI penyimpanan berhasil sewaktu semua pertanyaan
-  /// sudah terisi -- beda dari `_isComplete` (heuristik lokal dari teks yang
-  /// SEDANG diketik, belum tentu tersimpan). Menentukan kapan tombol berubah
-  /// peran dari "Simpan Jawaban" jadi tombol lanjut (lihat `build`).
   late bool _savedComplete = widget.page.status.isCompleted;
 
   final Map<String, TextEditingController> _controllers = {};
@@ -94,9 +73,6 @@ class _ReflectionModuleScreenState
     }
   }
 
-  /// Isi controller/checklist dari [content] TANPA menimpa yang sudah ada --
-  /// dipanggil ulang tiap kali dapat konten segar (muat awal maupun setelah
-  /// simpan) supaya teks yang baru saja diketik user tidak hilang.
   void _hydrate(ReflectionContent content) {
     for (final section in content.sections) {
       for (final question in section.questions) {
@@ -168,9 +144,6 @@ class _ReflectionModuleScreenState
     }
   }
 
-  /// Dipanggil dari tombol begitu perannya sudah jadi "lanjut" (lihat
-  /// `build`) -- simpan dulu (jaga-jaga kalau ada perubahan setelah
-  /// `_savedComplete` jadi true) baru pindah ke halaman/module berikutnya.
   Future<void> _continue() async {
     final ok = await _save();
     if (!ok || !mounted) return;
@@ -193,86 +166,71 @@ class _ReflectionModuleScreenState
         .where((q) => (_controllers[q.id]?.text.trim().isNotEmpty ?? false))
         .length;
 
-    return Scaffold(
-      appBar: ModuleTopBar(
-        position: widget.nav.modulePosition,
-        total: widget.nav.moduleTotal,
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.screenPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (final section in [
-                ...content.sections,
-              ]..sort((a, b) => a.order.compareTo(b.order))) ...[
-                _SectionCard(
-                  section: section,
-                  controllers: _controllers,
-                  checklist: _checklist,
-                  onChecklistToggled: (itemId, value) =>
-                      setState(() => _checklist[itemId] = value),
-                  onAnswerChanged: () => setState(() {}),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-              ],
-              if (content.closingMessage case final closingMessage?
-                  when _isComplete) ...[
-                Text(
-                  content.closingTitle ?? 'Kata Penutup',
-                  style: AppTypography.displaySmall.copyWith(
-                    color: AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  closingMessage,
-                  style: AppTypography.bodyMedium,
-                  textAlign: TextAlign.justify,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: ModuleBottomBar(
-        pageCount: widget.nav.pageCount,
-        pageIndex: widget.nav.pageIndex,
-        onDotTap: widget.nav.onDotTap,
+    return ModulePageScaffold(
+      nav: widget.nav,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.screenPadding),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!_savedComplete && openQuestions.isNotEmpty) ...[
+            for (final section in [
+              ...content.sections,
+            ]..sort((a, b) => a.order.compareTo(b.order))) ...[
+              _SectionCard(
+                section: section,
+                controllers: _controllers,
+                checklist: _checklist,
+                onChecklistToggled: (itemId, value) =>
+                    setState(() => _checklist[itemId] = value),
+                onAnswerChanged: () => setState(() {}),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
+            if (content.closingMessage case final closingMessage?
+                when _isComplete) ...[
               Text(
-                '$answeredCount/${openQuestions.length} pertanyaan terisi',
-                style: AppTypography.bodySmall,
-                textAlign: TextAlign.center,
+                content.closingTitle ?? 'Kata Penutup',
+                style: AppTypography.displaySmall.copyWith(
+                  color: AppColors.black,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
+              Text(
+                closingMessage,
+                style: AppTypography.bodyMedium,
+                textAlign: TextAlign.justify,
+              ),
             ],
-            PrimaryButton(
-              label: _savedComplete
-                  ? (widget.nav.hasNext ? 'Selanjutnya' : 'Selesai')
-                  : 'Simpan Jawaban',
-              trailingIcon: _savedComplete
-                  ? (widget.nav.hasNext ? Icons.arrow_forward : Icons.check)
-                  : Icons.save_outlined,
-              isLoading: _saving,
-              onPressed: _savedComplete ? _continue : _save,
-            ),
           ],
         ),
+      ),
+      footer: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!_savedComplete && openQuestions.isNotEmpty) ...[
+            Text(
+              '$answeredCount/${openQuestions.length} pertanyaan terisi',
+              style: AppTypography.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+          PrimaryButton(
+            label: _savedComplete
+                ? (widget.nav.hasNext ? 'Selanjutnya' : 'Selesai')
+                : 'Simpan Jawaban',
+            trailingIcon: _savedComplete
+                ? (widget.nav.hasNext ? Icons.arrow_forward : Icons.check)
+                : Icons.save_outlined,
+            isLoading: _saving,
+            onPressed: _savedComplete ? _continue : _save,
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Satu section dibungkus kartu putih dengan bayangan lembut -- ikon +
-/// judulnya di baris atas, soal-soalnya di bawahnya. Ikonnya beda tergantung
-/// isi section: kotak biru pena kalau berisi soal isian bebas, kotak abu
-/// centang kalau berisi checklist (lihat `_SectionIcon`).
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.section,

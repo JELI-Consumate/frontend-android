@@ -17,7 +17,9 @@ import 'package:perlindungan_konsumen/features/module/presentation/quiz_module_s
 import 'package:perlindungan_konsumen/features/module/presentation/reflection_module_screen.dart';
 import 'package:perlindungan_konsumen/features/module/presentation/simulation_module_screen.dart';
 import 'package:perlindungan_konsumen/features/module/presentation/video_module_screen.dart';
+import 'package:perlindungan_konsumen/features/module/presentation/widgets/module_bottom_bar.dart';
 import 'package:perlindungan_konsumen/features/module/presentation/widgets/module_page_nav.dart';
+import 'package:perlindungan_konsumen/features/module/presentation/widgets/module_top_bar.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import 'support/fake_module_repository.dart';
@@ -614,6 +616,61 @@ void main() {
         // Setelah swipe, halaman 2 tampil dan halaman 1 sudah tidak.
         expect(find.text('Simpan selalu bukti transaksi.'), findsOneWidget);
         expect(find.text('Tonton di YouTube'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'header & footer digambar sekali di luar PageView -- tidak ikut menggeser',
+      (tester) async {
+        final module = multiPageModuleFixture();
+        final repository = FakeModuleRepository(modules: {'99': module});
+        await pump(tester, const ModuleScreen(moduleId: '99'), repository);
+
+        // Cuma SATU top bar & SATU bottom bar untuk seluruh module (bukan
+        // satu set per halaman), dan keduanya di luar `PageView` -- jadi
+        // waktu body digeser, header/footer diam.
+        expect(find.byType(ModuleTopBar), findsOneWidget);
+        expect(find.byType(ModuleBottomBar), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(PageView),
+            matching: find.byType(ModuleBottomBar),
+          ),
+          findsNothing,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(PageView),
+            matching: find.byType(ModuleTopBar),
+          ),
+          findsNothing,
+        );
+
+        // Footer halaman 1 (video) = tombol "Selanjutnya" (bukan halaman
+        // terakhir), berada di dalam bottom bar tetap itu.
+        expect(
+          find.descendant(
+            of: find.byType(ModuleBottomBar),
+            matching: find.text('Selanjutnya'),
+          ),
+          findsOneWidget,
+        );
+
+        await tester.drag(find.byType(PageView), const Offset(-800, 0));
+        await tester.pumpAndSettle();
+
+        // Setelah swipe: masih satu-satunya, dan footer-nya sudah ganti ke
+        // milik halaman 2 (artikel, halaman terakhir tanpa module lain) --
+        // "Selesai".
+        expect(find.byType(ModuleTopBar), findsOneWidget);
+        expect(find.byType(ModuleBottomBar), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(ModuleBottomBar),
+            matching: find.text('Selesai'),
+          ),
+          findsOneWidget,
+        );
       },
     );
 

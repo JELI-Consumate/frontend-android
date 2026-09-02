@@ -13,22 +13,10 @@ import '../data/models/module_page.dart';
 import '../data/models/quiz_attempt.dart';
 import '../data/module_repository.dart';
 import 'widgets/module_async_scaffold.dart';
-import 'widgets/module_bottom_bar.dart';
 import 'widgets/module_continue_button.dart';
 import 'widgets/module_page_nav.dart';
-import 'widgets/module_top_bar.dart';
+import 'widgets/module_page_scaffold.dart';
 
-/// Modul tipe `kuis` -- mulai attempt begitu layar dibuka, jawab SATU
-/// pertanyaan per halaman (lintas segmen pilihan ganda maupun likert,
-/// diflatten & diurutkan lewat `_flatQuestions`). BEDA dari sebelumnya:
-/// setiap pertanyaan pilihan ganda dicek SATU PER SATU begitu tombol
-/// ditekan (lihat `_onPrimaryPressed`) -- jawaban benar/salah langsung
-/// diberi umpan balik + pembahasan sebelum lanjut ke pertanyaan berikutnya,
-/// bukan menunggu submit di akhir. Attempt otomatis selesai (dan halaman
-/// module ditandai selesai) begitu SELURUH pertanyaan sudah pernah dicek --
-/// lihat `QuizScoringService::checkAnswer` di backend. Tidak ada batas
-/// jumlah percobaan (BR-06 backend) -- tiap kali layar ini dibuka, itu
-/// attempt baru.
 class QuizModuleScreen extends ConsumerStatefulWidget {
   const QuizModuleScreen({
     super.key,
@@ -52,23 +40,15 @@ class _QuizModuleScreenState extends ConsumerState<QuizModuleScreen> {
   final Map<String, String> _choiceAnswers = {};
   final Map<String, String> _likertAnswers = {};
 
-  /// Hasil cek per pertanyaan (keyed by quiz_question_id) -- SEKALI
-  /// pertanyaan tercatat di sini, tampilannya terkunci ke umpan balik
-  /// (benar/salah + pembahasan), tidak bisa jawab ulang. Pertanyaan likert
-  /// juga masuk sini (cuma buat menandai "sudah dicek", `correct`-nya
-  /// selalu null -- lihat `QuizAnswerCheckResult`).
   final Map<String, QuizAnswerCheckResult> _checkedResults = {};
 
   bool _checking = false;
   QuizAttempt? _result;
 
-  /// Indeks pertanyaan yang lagi tampil (flat, lintas segmen).
   int _questionIndex = 0;
 
   QuizContent get _quiz => (widget.page.content as QuizPageContent).content;
 
-  /// Pasangan (segment, question) terurut sesuai `order` masing-masing --
-  /// dasar navigasi 1-pertanyaan-1-halaman di `build`.
   List<(QuizSegment, QuizQuestion)> get _flatQuestions => [
     for (final segment in [
       ..._quiz.segments,
@@ -133,17 +113,9 @@ class _QuizModuleScreenState extends ConsumerState<QuizModuleScreen> {
       setState(() => _questionIndex++);
       return;
     }
-    // Sudah pertanyaan terakhir -- attempt-nya sendiri otomatis sudah
-    // completed di respons check barusan (lihat backend), jadi tinggal
-    // tampilkan hasilnya, tidak perlu panggilan submit terpisah lagi.
     setState(() => _result = latestAttempt);
   }
 
-  /// Tombol utama berperan ganda: kalau pertanyaan saat ini BELUM dicek,
-  /// menekannya memicu pengecekan (dan untuk pilihan ganda, BERHENTI di situ
-  /// dulu supaya umpan balik benar/salah + pembahasan sempat terlihat).
-  /// Kalau SUDAH dicek (atau segmennya likert, yang tidak ada umpan balik
-  /// buat ditampilkan), langsung lanjut ke pertanyaan berikutnya.
   Future<void> _onPrimaryPressed(
     QuizSegment segment,
     QuizQuestion question,
@@ -183,118 +155,101 @@ class _QuizModuleScreenState extends ConsumerState<QuizModuleScreen> {
         ? _likertAnswers[currentQuestion.id]
         : _choiceAnswers[currentQuestion.id];
 
-    return Scaffold(
+    return ModulePageScaffold(
+      nav: widget.nav,
       backgroundColor: AppColors.white,
-      appBar: ModuleTopBar(
-        position: widget.nav.modulePosition,
-        total: widget.nav.moduleTotal,
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: result != null
-            ? _QuizResultView(quiz: _quiz, result: result)
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.screenPadding),
-                child: Column(
-                  key: ValueKey(currentQuestion.id),
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _QuestionProgress(
-                      current: questionIndex + 1,
-                      total: flatQuestions.length,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      currentQuestion.question,
-                      style: AppTypography.bodyLarge,
-                      textAlign: TextAlign.justify,
-                    ),
-                    if (currentSegment.instruction case final instruction?) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(instruction, style: AppTypography.bodySmall),
-                    ],
-                    const SizedBox(height: AppSpacing.md),
-                    if (checked != null &&
-                        currentSegment.segmentType != QuizSegmentType.likert)
-                      _AnswerFeedback(
-                        result: checked,
-                        question: currentQuestion,
-                      )
-                    else if (currentSegment.segmentType ==
-                        QuizSegmentType.likert)
-                      _LikertRow(
-                        options: currentSegment.likertScaleOptions,
-                        selectedOptionId: selected,
-                        onSelected: (optionId) => setState(
-                          () => _likertAnswers[currentQuestion.id] = optionId,
-                        ),
-                      )
-                    else
-                      for (final option in [
-                        ...currentQuestion.choiceOptions,
-                      ]..sort((a, b) => a.order.compareTo(b.order)))
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                          child: _ChoiceOptionTile(
-                            letter: String.fromCharCode(
-                              65 +
-                                  currentQuestion.choiceOptions.indexOf(option),
-                            ),
-                            option: option,
-                            selected: selected == option.id,
-                            onTap: () => setState(
-                              () => _choiceAnswers[currentQuestion.id] =
-                                  option.id,
-                            ),
-                          ),
-                        ),
-                  ],
-                ),
-              ),
-      ),
-      bottomNavigationBar: ModuleBottomBar(
-        pageCount: widget.nav.pageCount,
-        pageIndex: widget.nav.pageIndex,
-        onDotTap: widget.nav.onDotTap,
-        child: result != null
-            ? ModuleContinueButton(
-                hasNext: widget.nav.hasNext,
-                busy: false,
-                onPressed: widget.nav.onAdvance,
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
+      body: result != null
+          ? _QuizResultView(quiz: _quiz, result: result)
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.screenPadding),
+              child: Column(
+                key: ValueKey(currentQuestion.id),
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PrimaryButton(
-                    label: checked != null && isLastQuestion
-                        ? 'Lihat Hasil'
-                        : 'Lanjut ke Pertanyaan Berikutnya',
-                    trailingIcon: Icons.arrow_forward,
-                    isLoading: _checking,
-                    onPressed: selected == null
-                        ? null
-                        : () => _onPrimaryPressed(
-                            currentSegment,
-                            currentQuestion,
-                            flatQuestions.length,
-                          ),
+                  _QuestionProgress(
+                    current: questionIndex + 1,
+                    total: flatQuestions.length,
                   ),
-                  if (selected == null) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Pilih salah satu jawaban dulu sebelum lanjut.',
-                      style: AppTypography.bodySmall,
-                      textAlign: TextAlign.center,
-                    ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    currentQuestion.question,
+                    style: AppTypography.bodyLarge,
+                    textAlign: TextAlign.justify,
+                  ),
+                  if (currentSegment.instruction case final instruction?) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(instruction, style: AppTypography.bodySmall),
                   ],
+                  const SizedBox(height: AppSpacing.md),
+                  if (checked != null &&
+                      currentSegment.segmentType != QuizSegmentType.likert)
+                    _AnswerFeedback(result: checked, question: currentQuestion)
+                  else if (currentSegment.segmentType == QuizSegmentType.likert)
+                    _LikertRow(
+                      options: currentSegment.likertScaleOptions,
+                      selectedOptionId: selected,
+                      onSelected: (optionId) => setState(
+                        () => _likertAnswers[currentQuestion.id] = optionId,
+                      ),
+                    )
+                  else
+                    for (final option in [
+                      ...currentQuestion.choiceOptions,
+                    ]..sort((a, b) => a.order.compareTo(b.order)))
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: _ChoiceOptionTile(
+                          letter: String.fromCharCode(
+                            65 + currentQuestion.choiceOptions.indexOf(option),
+                          ),
+                          option: option,
+                          selected: selected == option.id,
+                          onTap: () => setState(
+                            () =>
+                                _choiceAnswers[currentQuestion.id] = option.id,
+                          ),
+                        ),
+                      ),
                 ],
               ),
-      ),
+            ),
+      footer: result != null
+          ? ModuleContinueButton(
+              hasNext: widget.nav.hasNext,
+              busy: false,
+              onPressed: widget.nav.onAdvance,
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PrimaryButton(
+                  label: checked != null && isLastQuestion
+                      ? 'Lihat Hasil'
+                      : 'Lanjut ke Pertanyaan Berikutnya',
+                  trailingIcon: Icons.arrow_forward,
+                  isLoading: _checking,
+                  onPressed: selected == null
+                      ? null
+                      : () => _onPrimaryPressed(
+                          currentSegment,
+                          currentQuestion,
+                          flatQuestions.length,
+                        ),
+                ),
+                if (selected == null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Pilih salah satu jawaban dulu sebelum lanjut.',
+                    style: AppTypography.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ],
+            ),
     );
   }
 }
 
-/// "PERTANYAAN X DARI Y" + persentase, lalu bar tipis di bawahnya.
 class _QuestionProgress extends StatelessWidget {
   const _QuestionProgress({required this.current, required this.total});
 
@@ -364,17 +319,9 @@ class _ChoiceOptionTile extends StatelessWidget {
       fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
     );
 
-    // Tinggi kotak dipatok dari kasus TERPANJANG (teks opsi 2 baris) supaya
-    // seluruh opsi (A/B/C/D) sama tinggi -- teksnya sendiri dibiarkan
-    // setinggi aslinya lalu di-tengahkan lewat `Row` yang center secara
-    // vertikal (default), sama seperti pola di `ModuleRow`.
     final rowHeight = (textStyle.fontSize ?? 14) * (textStyle.height ?? 1) * 2;
 
     return Material(
-      // Kebalikan dari sebelumnya: opsi yang BELUM dipilih justru diberi
-      // warna latar lembut (`background`), yang SEDANG dipilih putih bersih
-      // dengan tepi biru menonjol -- supaya opsi terpilih yang paling
-      // menarik perhatian, bukan sebaliknya.
       color: selected ? AppColors.white : AppColors.background,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
@@ -432,8 +379,6 @@ class _ChoiceOptionTile extends StatelessWidget {
   }
 }
 
-/// Kartu umpan balik benar/salah + pembahasan -- muncul menggantikan daftar
-/// opsi begitu satu pertanyaan pilihan ganda selesai dicek.
 class _AnswerFeedback extends StatelessWidget {
   const _AnswerFeedback({required this.result, required this.question});
 
