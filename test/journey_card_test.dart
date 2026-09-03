@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/journey.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
+import 'package:perlindungan_konsumen/core/models/learning_status.dart';
 import 'package:perlindungan_konsumen/features/main/presentation/widgets/journey_card.dart';
 
 Journey _journey({String? imageUrl, bool unlocked = true}) => Journey(

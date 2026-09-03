@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'learning_status.dart';
+import '../../../../core/models/learning_status.dart';
 
 @immutable
 class Journey {
@@ -27,6 +27,60 @@ class Journey {
   final bool isUnlocked;
   final int modulesCount;
   final LearningProgress progress;
+
+  Journey copyWith({
+    String? id,
+    String? slug,
+    String? title,
+    String? description,
+    String? imageUrl,
+    int? order,
+    int? estimatedMinutes,
+    bool? isUnlocked,
+    int? modulesCount,
+    LearningProgress? progress,
+  }) {
+    return Journey(
+      id: id ?? this.id,
+      slug: slug ?? this.slug,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+      order: order ?? this.order,
+      estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
+      isUnlocked: isUnlocked ?? this.isUnlocked,
+      modulesCount: modulesCount ?? this.modulesCount,
+      progress: progress ?? this.progress,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is Journey &&
+      other.id == id &&
+      other.slug == slug &&
+      other.title == title &&
+      other.description == description &&
+      other.imageUrl == imageUrl &&
+      other.order == order &&
+      other.estimatedMinutes == estimatedMinutes &&
+      other.isUnlocked == isUnlocked &&
+      other.modulesCount == modulesCount &&
+      other.progress == progress;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    slug,
+    title,
+    description,
+    imageUrl,
+    order,
+    estimatedMinutes,
+    isUnlocked,
+    modulesCount,
+    progress,
+  );
 
   factory Journey.fromJson(Map<String, dynamic> json) {
     return Journey(

@@ -13,6 +13,22 @@ class SectorSurvey {
 
   bool get isCompleted => completedAt != null;
 
+  SectorSurvey copyWith({String? link, DateTime? completedAt}) {
+    return SectorSurvey(
+      link: link ?? this.link,
+      completedAt: completedAt ?? this.completedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SectorSurvey &&
+      other.link == link &&
+      other.completedAt == completedAt;
+
+  @override
+  int get hashCode => Object.hash(link, completedAt);
+
   factory SectorSurvey.fromJson(Map<String, dynamic>? json) {
     if (json == null) return empty;
     return SectorSurvey(
@@ -36,6 +52,22 @@ class SectorSurveys {
     pretest: SectorSurvey.empty,
     posttest: SectorSurvey.empty,
   );
+
+  SectorSurveys copyWith({SectorSurvey? pretest, SectorSurvey? posttest}) {
+    return SectorSurveys(
+      pretest: pretest ?? this.pretest,
+      posttest: posttest ?? this.posttest,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SectorSurveys &&
+      other.pretest == pretest &&
+      other.posttest == posttest;
+
+  @override
+  int get hashCode => Object.hash(pretest, posttest);
 
   factory SectorSurveys.fromJson(Map<String, dynamic>? json) {
     if (json == null) return empty;

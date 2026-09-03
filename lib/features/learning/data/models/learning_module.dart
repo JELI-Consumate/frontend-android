@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'learning_status.dart';
+import '../../../../core/models/learning_status.dart';
 
 enum ModuleContentType {
   opening,
@@ -48,6 +48,60 @@ class LearningModule {
   final List<String> pageIds;
 
   final bool locked;
+
+  LearningModule copyWith({
+    String? id,
+    ModuleContentType? type,
+    String? title,
+    String? description,
+    int? order,
+    int? estimatedMinutes,
+    bool? isRequired,
+    LearningProgress? progress,
+    bool? locked,
+    List<String>? pageIds,
+  }) {
+    return LearningModule(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      order: order ?? this.order,
+      estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
+      isRequired: isRequired ?? this.isRequired,
+      progress: progress ?? this.progress,
+      locked: locked ?? this.locked,
+      pageIds: pageIds ?? this.pageIds,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is LearningModule &&
+      other.id == id &&
+      other.type == type &&
+      other.title == title &&
+      other.description == description &&
+      other.order == order &&
+      other.estimatedMinutes == estimatedMinutes &&
+      other.isRequired == isRequired &&
+      other.progress == progress &&
+      other.locked == locked &&
+      listEquals(other.pageIds, pageIds);
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    type,
+    title,
+    description,
+    order,
+    estimatedMinutes,
+    isRequired,
+    progress,
+    locked,
+    Object.hashAll(pageIds),
+  );
 
   factory LearningModule.fromJson(Map<String, dynamic> json) {
     final rawPages = json['pages'];

@@ -9,7 +9,7 @@ import 'package:perlindungan_konsumen/features/auth/application/auth_controller.
 import 'package:perlindungan_konsumen/features/auth/data/models/app_user.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/journey.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
+import 'package:perlindungan_konsumen/core/models/learning_status.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/sector.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/sector_survey.dart';
 import 'package:perlindungan_konsumen/features/main/presentation/dashboard_screen.dart';
@@ -86,17 +86,7 @@ void main() {
       final journeys = FakeLearningRepository.defaultJourneys
           .map(
             (j) => j.id == '1'
-                ? Journey(
-                    id: j.id,
-                    slug: j.slug,
-                    title: j.title,
-                    description: j.description,
-                    order: j.order,
-                    estimatedMinutes: j.estimatedMinutes,
-                    isUnlocked: j.isUnlocked,
-                    modulesCount: j.modulesCount,
-                    progress: LearningProgress.zero,
-                  )
+                ? j.copyWith(progress: LearningProgress.zero)
                 : j,
           )
           .toList();
@@ -158,16 +148,7 @@ void main() {
 
   group('Survei sektor', () {
     Sector sectorWithSurveys({SectorSurvey? pretest, SectorSurvey? posttest}) {
-      final base = FakeLearningRepository.defaultSector;
-      return Sector(
-        id: base.id,
-        slug: base.slug,
-        name: base.name,
-        description: base.description,
-        iconUrl: base.iconUrl,
-        color: base.color,
-        order: base.order,
-        progress: base.progress,
+      return FakeLearningRepository.defaultSector.copyWith(
         surveys: SectorSurveys(
           pretest: pretest ?? SectorSurvey.empty,
           posttest: posttest ?? SectorSurvey.empty,
@@ -181,17 +162,10 @@ void main() {
     }) {
       return FakeLearningRepository.defaultJourneys
           .map(
-            (journey) => Journey(
-              id: journey.id,
-              slug: journey.slug,
-              title: journey.title,
-              description: journey.description,
-              order: journey.order,
-              estimatedMinutes: journey.estimatedMinutes,
+            (journey) => journey.copyWith(
               isUnlocked: firstUnlocked && journey.order == 1
                   ? true
                   : status == LearningStatus.completed,
-              modulesCount: journey.modulesCount,
               progress: LearningProgress(
                 status: status,
                 percent: status == LearningStatus.completed ? 100 : 0,

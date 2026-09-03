@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../learning/data/models/learning_status.dart';
+import '../../../../core/models/learning_status.dart';
 import 'content/article_content.dart';
 import 'content/quiz_content.dart';
 import 'content/reflection_content.dart';

@@ -10,7 +10,7 @@ import 'package:perlindungan_konsumen/features/badges/data/models/badge.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/journey.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/learning_module.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
+import 'package:perlindungan_konsumen/core/models/learning_status.dart';
 import 'package:perlindungan_konsumen/features/learning/presentation/journey_detail_screen.dart';
 import 'package:perlindungan_konsumen/features/module/data/module_repository.dart';
 

@@ -1,3 +1,8 @@
+import 'package:flutter/foundation.dart';
+
+/// Kosakata progres bersama seluruh domain belajar (sector, journey, module,
+/// module page). Sengaja di `core/` -- bukan milik satu fitur -- karena
+/// dipakai lintas fitur `learning` dan `module`.
 enum LearningStatus {
   notStarted('not_started'),
   inProgress('in_progress'),
@@ -19,11 +24,28 @@ enum LearningStatus {
   }
 }
 
+@immutable
 class LearningProgress {
   const LearningProgress({required this.status, required this.percent});
 
   final LearningStatus status;
   final int percent;
+
+  LearningProgress copyWith({LearningStatus? status, int? percent}) {
+    return LearningProgress(
+      status: status ?? this.status,
+      percent: percent ?? this.percent,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is LearningProgress &&
+      other.status == status &&
+      other.percent == percent;
+
+  @override
+  int get hashCode => Object.hash(status, percent);
 
   static const zero = LearningProgress(
     status: LearningStatus.notStarted,

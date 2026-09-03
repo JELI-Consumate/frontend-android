@@ -1,5 +1,5 @@
 import 'package:perlindungan_konsumen/features/learning/data/models/learning_module.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
+import 'package:perlindungan_konsumen/core/models/learning_status.dart';
 import 'package:perlindungan_konsumen/features/module/data/models/content/article_content.dart';
 import 'package:perlindungan_konsumen/features/module/data/models/content/quiz_content.dart';
 import 'package:perlindungan_konsumen/features/module/data/models/content/reflection_content.dart';

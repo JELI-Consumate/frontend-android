@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'learning_status.dart';
+import '../../../../core/models/learning_status.dart';
 import 'sector_survey.dart';
 
 @immutable
@@ -26,6 +26,56 @@ class Sector {
   final int order;
   final LearningProgress progress;
   final SectorSurveys surveys;
+
+  Sector copyWith({
+    String? id,
+    String? slug,
+    String? name,
+    String? description,
+    String? iconUrl,
+    String? color,
+    int? order,
+    LearningProgress? progress,
+    SectorSurveys? surveys,
+  }) {
+    return Sector(
+      id: id ?? this.id,
+      slug: slug ?? this.slug,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      iconUrl: iconUrl ?? this.iconUrl,
+      color: color ?? this.color,
+      order: order ?? this.order,
+      progress: progress ?? this.progress,
+      surveys: surveys ?? this.surveys,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is Sector &&
+      other.id == id &&
+      other.slug == slug &&
+      other.name == name &&
+      other.description == description &&
+      other.iconUrl == iconUrl &&
+      other.color == color &&
+      other.order == order &&
+      other.progress == progress &&
+      other.surveys == surveys;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    slug,
+    name,
+    description,
+    iconUrl,
+    color,
+    order,
+    progress,
+    surveys,
+  );
 
   factory Sector.fromJson(Map<String, dynamic> json) {
     return Sector(
