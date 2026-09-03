@@ -166,6 +166,9 @@ class _Thumbnail extends StatelessWidget {
     return Image.network(
       url,
       fit: BoxFit.cover,
+      // Thumbnail cuma ~76px lebar -- dekode kecil supaya foto asli 2-3 MB
+      // dari admin tidak dibaca full-res.
+      cacheWidth: 300,
       loadingBuilder: (context, child, progress) =>
           progress == null ? child : const _CoverFallback(),
       errorBuilder: (_, _, _) => const _CoverFallback(),

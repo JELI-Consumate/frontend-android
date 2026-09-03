@@ -113,6 +113,8 @@ class _CoverImage extends StatelessWidget {
       url,
       fit: BoxFit.cover,
       width: double.infinity,
+      // Banner cuma 130px tinggi -- batasi lebar dekode.
+      cacheWidth: 1080,
       loadingBuilder: (context, child, progress) =>
           progress == null ? child : const _CoverFallback(),
       errorBuilder: (_, _, _) => const _CoverFallback(),
