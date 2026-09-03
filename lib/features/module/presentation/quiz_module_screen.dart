@@ -337,6 +337,7 @@ class _ChoiceOptionTile extends StatelessWidget {
             vertical: AppSpacing.sm,
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 width: 28,
@@ -358,9 +359,9 @@ class _ChoiceOptionTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              // Tanpa maxLines -- opsi jawaban tidak boleh terpotong, jadi
-              // baris tumbuh sepanjang yang dibutuhkan teksnya.
-              Expanded(child: Text(option.optionText, style: textStyle)),
+              Expanded(
+                child: Text(option.optionText, style: textStyle),
+              ),
             ],
           ),
         ),
