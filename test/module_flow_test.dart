@@ -628,6 +628,46 @@ void main() {
       expect(find.text('Jawaban tersimpan.'), findsOneWidget);
       expect(find.text('Refleksimu sudah tersimpan.'), findsOneWidget);
     });
+
+    testWidgets(
+      'tombol Selesai lanjut tanpa memunculkan alert simpan lagi -- alert '
+      'yang ter-pop oleh onAdvance dulu bikin perayaan journey tidak muncul',
+      (tester) async {
+        final module = reflectionModuleFixture();
+        final repository = FakeModuleRepository()
+          ..reflectionFixture =
+              (module.firstPage!.content as ReflectionPageContent).content;
+
+        var advanced = 0;
+        await pump(
+          tester,
+          ReflectionModuleScreen(
+            module: module,
+            page: module.firstPage!,
+            nav: ModulePageNav.single(onAdvance: () => advanced++),
+          ),
+          repository,
+        );
+
+        await tester.enterText(
+          find.byType(TextField),
+          'Hak atas informasi yang benar.',
+        );
+        await tester.tap(find.text('Simpan Jawaban'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('OK')); // tutup alert simpan pertama
+        await tester.pumpAndSettle();
+
+        // Tombol kini "Selesai" -> memanggil _continue (simpan senyap + lanjut).
+        await tester.tap(find.text('Selesai'));
+        await tester.pumpAndSettle();
+
+        expect(advanced, 1);
+        // TIDAK ada alert "Jawaban tersimpan." kedua yang, di alur journey,
+        // akan ter-pop oleh nav.onAdvance() dan menelan push layar perayaan.
+        expect(find.text('Jawaban tersimpan.'), findsNothing);
+      },
+    );
   });
 
   group('ModuleScreen -- module dengan lebih dari satu halaman', () {

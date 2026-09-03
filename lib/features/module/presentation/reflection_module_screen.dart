@@ -100,7 +100,10 @@ class _ReflectionModuleScreenState
     );
   }
 
-  Future<bool> _save() async {
+  /// [silent] menekan alert sukses -- dipakai saat menyimpan sekalian lanjut
+  /// (`_continue`), supaya dialog "Jawaban tersimpan" tidak muncul lalu
+  /// keburu ter-`pop` oleh `nav.onAdvance()` dan menelan navigasi berikutnya.
+  Future<bool> _save({bool silent = false}) async {
     final content = _content;
     if (content == null) return false;
 
@@ -121,12 +124,14 @@ class _ReflectionModuleScreenState
           _content = updated;
           if (_isComplete) _savedComplete = true;
         });
-        showAppAlert(
-          context,
-          type: AppAlertType.success,
-          title: 'Berhasil',
-          message: 'Jawaban tersimpan.',
-        );
+        if (!silent) {
+          showAppAlert(
+            context,
+            type: AppAlertType.success,
+            title: 'Berhasil',
+            message: 'Jawaban tersimpan.',
+          );
+        }
       }
       return true;
     } on ApiException catch (error) {
@@ -145,7 +150,7 @@ class _ReflectionModuleScreenState
   }
 
   Future<void> _continue() async {
-    final ok = await _save();
+    final ok = await _save(silent: true);
     if (!ok || !mounted) return;
     widget.nav.onAdvance();
   }
