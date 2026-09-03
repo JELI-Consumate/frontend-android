@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_alert_dialog.dart';
 import '../data/models/content/article_content.dart';
 import '../data/models/module_detail.dart';
 import '../data/models/module_page.dart';
-import '../data/module_repository.dart';
 import 'widgets/module_continue_button.dart';
 import 'widgets/module_header.dart';
+import 'widgets/module_page_advance.dart';
 import 'widgets/module_page_nav.dart';
 import 'widgets/module_page_scaffold.dart';
 import 'widgets/zoomable_image.dart';
@@ -33,43 +31,19 @@ class ArticleModuleScreen extends ConsumerStatefulWidget {
       _ArticleModuleScreenState();
 }
 
-class _ArticleModuleScreenState extends ConsumerState<ArticleModuleScreen> {
+class _ArticleModuleScreenState extends ConsumerState<ArticleModuleScreen>
+    with ModulePageAdvance {
   late bool _completed = widget.page.status.isCompleted;
-  bool _busy = false;
 
   ArticleContent get _content =>
       (widget.page.content as ArticlePageContent).content;
 
-  Future<void> _continue() async {
-    if (!_completed) {
-      final ok = await _markComplete();
-      if (!ok || !mounted) return;
-    }
-    widget.nav.onAdvance();
-  }
-
-  Future<bool> _markComplete() async {
-    setState(() => _busy = true);
-    try {
-      await ref
-          .read(moduleRepositoryProvider)
-          .completeModulePage(widget.page.id);
-      if (mounted) setState(() => _completed = true);
-      return true;
-    } on ApiException catch (error) {
-      if (mounted) {
-        showAppAlert(
-          context,
-          type: AppAlertType.error,
-          title: 'Gagal Menandai Selesai',
-          message: error.message,
-        );
-      }
-      return false;
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
+  Future<void> _continue() => completeAndAdvance(
+    pageId: widget.page.id,
+    alreadyComplete: _completed,
+    nav: widget.nav,
+    onCompleted: () => setState(() => _completed = true),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +74,7 @@ class _ArticleModuleScreenState extends ConsumerState<ArticleModuleScreen> {
       ),
       footer: ModuleContinueButton(
         hasNext: widget.nav.hasNext,
-        busy: _busy,
+        busy: isAdvancing,
         onPressed: _continue,
       ),
     );
