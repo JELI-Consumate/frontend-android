@@ -581,6 +581,16 @@ class _OrderingGameState extends ConsumerState<_OrderingGame> {
             );
         latestAttempt = result.attempt;
         if (!result.correct) wrongSteps.add(step);
+
+        // Jawaban benar ke-N (N = jumlah langkah) membuat attempt langsung
+        // completed di server. Hentikan loop di sini -- sisa langkah di
+        // batch ini tidak perlu dicek lagi, dan parent langsung menampilkan
+        // layar "Simulasi selesai!" lewat onChecked.
+        if (result.attempt.isCompleted) {
+          widget.onChecked(result.attempt);
+          if (mounted) setState(() => _checking = false);
+          return;
+        }
       } on ApiException catch (error) {
         if (mounted) {
           showAppAlert(
