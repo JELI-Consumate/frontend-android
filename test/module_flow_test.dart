@@ -675,41 +675,64 @@ void main() {
     );
 
     testWidgets(
-      'tombol Selanjutnya pindah ke halaman berikutnya, baru ke module '
-      'berikutnya di halaman terakhir',
+      'Selanjutnya: antar-halaman dulu, lalu di halaman terakhir pop dengan '
+      'id module berikutnya di journey',
       (tester) async {
         // Satu tombol yang sama dipakai buat pindah ANTAR HALAMAN dalam
-        // module ini (halaman 1 -> 2) MAUPUN ke module berikutnya di journey
-        // (di halaman terakhir) -- dulu ini 2 mekanisme terpisah (swipe manual
-        // vs tombol "Modul Selanjutnya" yang cuma muncul di halaman terakhir).
+        // module ini (halaman 1 -> 2) MAUPUN "menyudahi" module ini. Begitu
+        // seluruh halaman beres, ModuleScreen di-pop dengan id module
+        // berikutnya -- pemanggil (JourneyDetailScreen) yang membuka module
+        // berikutnya + memutuskan menampilkan layar perayaan.
         final module = multiPageModuleFixture();
-        final repository = FakeModuleRepository(
-          modules: {'99': module, '100': module},
-        );
+        final repository = FakeModuleRepository(modules: {'99': module});
+
+        String? poppedWith;
+        var popped = false;
+
         await pump(
           tester,
-          const ModuleScreen(moduleId: '99', journeyModuleIds: ['99', '100']),
+          Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    poppedWith = await Navigator.of(context).push<String>(
+                      MaterialPageRoute<String>(
+                        builder: (_) => const ModuleScreen(
+                          moduleId: '99',
+                          journeyModuleIds: ['99', '100'],
+                        ),
+                      ),
+                    );
+                    popped = true;
+                  },
+                  child: const Text('buka module'),
+                ),
+              ),
+            ),
+          ),
           repository,
         );
 
-        // Halaman 1 (video, BUKAN halaman terakhir) -- tap Selanjutnya cuma
-        // pindah halaman, tidak memicu fetch module 100.
+        await tester.tap(find.text('buka module'));
+        await tester.pumpAndSettle();
+
+        // Halaman 1 (video, BUKAN terakhir) -- Selanjutnya cuma pindah
+        // halaman, belum pop.
         expect(find.text('Tonton di YouTube'), findsOneWidget);
-
         await tester.tap(find.text('Selanjutnya'));
         await tester.pumpAndSettle();
-
         expect(repository.calls, contains('completeModulePage(1010)'));
-        expect(repository.calls, isNot(contains('module(100)')));
         expect(find.text('Simpan selalu bukti transaksi.'), findsOneWidget);
+        expect(popped, isFalse);
 
-        // Halaman 2 (artikel, halaman TERAKHIR, ada module berikutnya) --
-        // baru sekarang tap Selanjutnya memicu pindah module.
+        // Halaman 2 (artikel, TERAKHIR, ada module berikutnya) -- pop dengan
+        // '100'.
         await tester.tap(find.text('Selanjutnya'));
         await tester.pumpAndSettle();
-
         expect(repository.calls, contains('completeModulePage(1012)'));
-        expect(repository.calls, contains('module(100)'));
+        expect(popped, isTrue);
+        expect(poppedWith, '100');
       },
     );
 

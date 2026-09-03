@@ -49,16 +49,18 @@ ModuleDetail videoModuleFixture({
 ModuleDetail articleModuleFixture({
   ModuleContentType type = ModuleContentType.materi,
   LearningStatus status = LearningStatus.notStarted,
+  String id = '12',
+  String pageId = '1012',
 }) {
   return ModuleDetail(
-    id: '12',
+    id: id,
     type: type,
     title: 'Mengenal Aturan Hukum Saat Belanja Online',
     description: 'Ringkasan aturan dasar transaksi online.',
     estimatedMinutes: 5,
     pages: [
       ModulePage(
-        id: '1012',
+        id: pageId,
         order: 1,
         contentType: ContentType.article,
         content: ArticlePageContent(

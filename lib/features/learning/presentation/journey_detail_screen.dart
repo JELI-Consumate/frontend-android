@@ -1,12 +1,11 @@
-import 'package:flutter/material.dart' hide Badge;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../badges/application/badge_providers.dart';
-import '../../badges/data/models/badge.dart';
 import '../../module/presentation/module_screen.dart';
+import '../application/journey_completion.dart';
 import '../application/learning_providers.dart';
 import '../data/models/journey_detail.dart';
 import 'journey_celebration_screen.dart';
@@ -55,82 +54,49 @@ class _JourneyDetailBody extends ConsumerWidget {
     String moduleId,
   ) async {
     final wasCompleted = detail.journey.progress.status.isCompleted;
+    final moduleIds = detail.modules.map((module) => module.id).toList();
 
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ModuleScreen(
-          moduleId: moduleId,
-          journeyModuleIds: detail.modules.map((module) => module.id).toList(),
+    // Rantai module dalam satu journey: tiap layar module di-`pop` dengan id
+    // module berikutnya (atau `null` kalau terakhir / user menekan kembali),
+    // lalu di sini kita buka yang berikutnya. Selalu cuma satu `ModuleScreen`
+    // di stack -- tombol kembali dari module mana pun langsung ke sini.
+    String? currentId = moduleId;
+    while (currentId != null) {
+      final nextId = await Navigator.of(context).push<String>(
+        MaterialPageRoute<String>(
+          builder: (_) =>
+              ModuleScreen(moduleId: currentId!, journeyModuleIds: moduleIds),
         ),
-      ),
-    );
+      );
 
-    ref.invalidate(journeyDetailProvider(journeyId));
-    ref.invalidate(primarySectorDetailProvider);
+      ref.invalidate(journeyDetailProvider(journeyId));
+      ref.invalidate(primarySectorDetailProvider);
+
+      currentId = nextId;
+      if (currentId != null && !context.mounted) return;
+    }
 
     if (wasCompleted || !context.mounted) return;
 
-    final refreshed = await ref.read(journeyDetailProvider(journeyId).future);
-    if (!refreshed.journey.progress.status.isCompleted) return;
-    if (!context.mounted) return;
-
-    await _showCelebration(context, ref, refreshed);
-  }
-
-  Future<void> _showCelebration(
-    BuildContext context,
-    WidgetRef ref,
-    JourneyDetail refreshed,
-  ) async {
-    ref.invalidate(badgesProvider);
-    final badges = await ref.read(badgesProvider.future);
-    if (!context.mounted) return;
-
-    Badge? earnedBadge;
-    for (final candidate in badges) {
-      if (candidate.journeyId == journeyId) {
-        earnedBadge = candidate;
-        break;
-      }
-    }
-
-    final sectorDetail = await ref.read(primarySectorDetailProvider.future);
-    if (!context.mounted) return;
-
-    String? nextJourneyId;
-    for (final journey in sectorDetail?.journeys ?? const []) {
-      if (journey.order == refreshed.journey.order + 1) {
-        nextJourneyId = journey.id;
-        break;
-      }
-    }
+    final celebration = await ref
+        .read(journeyCompletionControllerProvider)
+        .celebrationAfterModules(
+          journeyId: journeyId,
+          wasCompletedBefore: wasCompleted,
+        );
+    if (celebration == null || !context.mounted) return;
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => JourneyCelebrationScreen(
-          journeyOrder: refreshed.journey.order,
-          badge: earnedBadge ?? _fallbackBadge(refreshed),
-          modulesCompleted: refreshed.completedModuleCount,
-          modulesTotal: refreshed.modules.length,
-          quizScore: refreshed.quizScore,
-          nextJourneyId: nextJourneyId,
+          journeyOrder: celebration.journeyOrder,
+          badge: celebration.badge,
+          modulesCompleted: celebration.modulesCompleted,
+          modulesTotal: celebration.modulesTotal,
+          quizScore: celebration.quizScore,
+          nextJourneyId: celebration.nextJourneyId,
         ),
       ),
-    );
-  }
-
-  Badge _fallbackBadge(JourneyDetail refreshed) {
-    return Badge(
-      id: '',
-      journeyId: journeyId,
-      name: '${refreshed.journey.title} Selesai',
-      description: 'Kamu telah menuntaskan seluruh materi journey ini.',
-      congratulationMessage:
-          'Selamat! Kamu telah menuntaskan seluruh materi journey ini.',
-      motivationalMessage: null,
-      iconUrl: null,
-      earned: true,
-      earnedAt: DateTime.now(),
     );
   }
 

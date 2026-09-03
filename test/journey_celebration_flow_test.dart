@@ -197,6 +197,117 @@ void main() {
   );
 
   testWidgets(
+    'journey 2 module: perayaan tetap muncul setelah module TERAKHIR selesai',
+    (tester) async {
+      // Regresi: dulu perpindahan antar-module pakai pushReplacement, yang
+      // menyelesaikan `await` di `_openModule` terlalu dini -- jadi
+      // pengecekan "journey selesai" cuma jalan setelah module PERTAMA dan
+      // tidak pernah lagi. Untuk journey >1 module, layar perayaan tidak
+      // pernah muncul.
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      const module1 = LearningModule(
+        id: '12',
+        type: ModuleContentType.materi,
+        title: 'Modul Satu',
+        description: null,
+        order: 1,
+        estimatedMinutes: 5,
+        isRequired: true,
+        progress: LearningProgress.zero,
+        locked: false,
+      );
+      const module2 = LearningModule(
+        id: '13',
+        type: ModuleContentType.materi,
+        title: 'Modul Dua',
+        description: null,
+        order: 2,
+        estimatedMinutes: 5,
+        isRequired: true,
+        progress: LearningProgress.zero,
+        locked: false,
+      );
+      LearningModule markDone(LearningModule module) => module.copyWith(
+        progress: const LearningProgress(
+          status: LearningStatus.completed,
+          percent: 100,
+        ),
+        locked: false,
+      );
+
+      final learningRepository = FakeLearningRepository(
+        journeys: [inProgressJourney1(), lockedJourney2()],
+        modules: [module1, module2],
+      );
+      final badgeRepository = FakeBadgeRepository(
+        items: [
+          Badge(
+            id: '1',
+            journeyId: '1',
+            name: 'Consumer Rights Explorer',
+            description: 'Memahami dasar-dasar hak dan kewajiban konsumen.',
+            congratulationMessage: 'Selamat! Kamu telah menuntaskan Journey 1.',
+            motivationalMessage: 'Yuk lanjut ke Journey 2!',
+            iconUrl: null,
+            earned: true,
+            earnedAt: DateTime.utc(2026, 1, 10),
+          ),
+        ],
+      );
+
+      var completions = 0;
+      final moduleRepository = FakeModuleRepository(
+        modules: {
+          '12': articleModuleFixture(id: '12', pageId: '1012'),
+          '13': articleModuleFixture(id: '13', pageId: '1013'),
+        },
+        onComplete: (_) {
+          completions++;
+          if (completions >= 2) {
+            learningRepository.modules = [markDone(module1), markDone(module2)];
+            learningRepository.journeys = [
+              completedJourney1(),
+              unlockedJourney2(),
+            ];
+          } else {
+            learningRepository.modules = [markDone(module1), module2];
+          }
+        },
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            learningRepositoryProvider.overrideWithValue(learningRepository),
+            badgeRepositoryProvider.overrideWithValue(badgeRepository),
+            moduleRepositoryProvider.overrideWithValue(moduleRepository),
+            activeSectorOverride('e-commerce'),
+          ],
+          child: const MaterialApp(home: JourneyDetailScreen(journeyId: '1')),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Module 1 masih ada module berikutnya -> tombolnya "Selanjutnya".
+      await tester.tap(find.text('1. Modul Satu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Selanjutnya'));
+      await tester.pumpAndSettle();
+      expect(find.text('PENCAPAIAN BARU!'), findsNothing);
+
+      // Module 2 = TERAKHIR -> tombolnya "Selesai" -> perayaan MUNCUL.
+      await tester.tap(find.text('Selesai'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('PENCAPAIAN BARU!'), findsOneWidget);
+      expect(find.text('Journey 1 Selesai'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'tombol Lanjut ke Journey Berikutnya membuka detail journey berikutnya',
     (tester) async {
       await pumpAlmostDoneJourney(tester);

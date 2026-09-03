@@ -64,16 +64,25 @@ class NotificationListenerController {
       if (targetModule == null) return;
 
       final navigator = _ref.read(navigatorKeyProvider).currentState;
-      navigator?.push(
-        MaterialPageRoute(
-          builder: (_) => ModuleScreen(
-            moduleId: targetModule.id,
-            journeyModuleIds: journeyDetail.modules
-                .map((module) => module.id)
-                .toList(),
+      if (navigator == null) return;
+
+      // Rantai module dalam journey: tiap `ModuleScreen` di-pop dengan id
+      // module berikutnya (atau null kalau terakhir / user menekan kembali),
+      // sama seperti `JourneyDetailScreen._openModule`.
+      final moduleIds = journeyDetail.modules
+          .map((module) => module.id)
+          .toList();
+      String? currentId = targetModule.id;
+      while (currentId != null) {
+        currentId = await navigator.push<String>(
+          MaterialPageRoute<String>(
+            builder: (_) => ModuleScreen(
+              moduleId: currentId!,
+              journeyModuleIds: moduleIds,
+            ),
           ),
-        ),
-      );
+        );
+      }
     } catch (error) {
       if (kDebugMode) {
         debugPrint('Gagal navigate ke titik lanjut belajar: $error');

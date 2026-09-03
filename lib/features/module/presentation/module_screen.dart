@@ -89,20 +89,6 @@ class _ModuleContentRouterState extends State<_ModuleContentRouter> {
     return ids[index + 1];
   }
 
-  void _goToNextModule() {
-    final nextModuleId = _nextModuleId;
-    if (nextModuleId == null) return;
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => ModuleScreen(
-          moduleId: nextModuleId,
-          journeyModuleIds: widget.journeyModuleIds,
-        ),
-      ),
-    );
-  }
-
   void _handleAdvance(int fromIndex, int pageCount) {
     if (fromIndex < pageCount - 1) {
       _controller.animateToPage(
@@ -113,12 +99,14 @@ class _ModuleContentRouterState extends State<_ModuleContentRouter> {
       return;
     }
 
-    if (_nextModuleId != null) {
-      _goToNextModule();
-      return;
-    }
-
-    Navigator.of(context).pop();
+    // Seluruh halaman module ini beres -- kembali ke pemanggil (biasanya
+    // `JourneyDetailScreen`, lihat `_openModule`) lewat hasil pop: id module
+    // berikutnya di journey, atau `null` kalau ini module terakhir. Pemanggil
+    // yang meneruskan rantai module + memutuskan menampilkan layar perayaan
+    // journey. Dulu di sini `pushReplacement` ke module berikutnya sendiri,
+    // yang membuat `await` di `_openModule` selesai terlalu dini sehingga
+    // pengecekan "journey selesai" tidak pernah jalan buat journey >1 module.
+    Navigator.of(context).pop(_nextModuleId);
   }
 
   void _goToPage(int target) {
