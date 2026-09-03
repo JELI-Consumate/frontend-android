@@ -342,6 +342,7 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
               description: left.leftDescription,
               imageUrl: left.leftImageUrl,
               backgroundColor: backgroundColor,
+              side: _MatchCardSide.situation,
               solved: _solved.contains(left.id),
               selected: _selectedLeftId == left.id,
               onTap: _solved.contains(left.id) || _checking
@@ -360,6 +361,7 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
               description: right.rightDescription,
               imageUrl: right.rightImageUrl,
               backgroundColor: backgroundColor,
+              side: _MatchCardSide.solution,
               solved: _solved.contains(right.id),
               selected: false,
               onTap: _solved.contains(right.id) || _checking
@@ -372,6 +374,10 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
     );
   }
 }
+
+/// Sisi kartu di satu baris pasangan -- menentukan warna/ikon badge dan arah
+/// (foto di kiri untuk situasi, foto di kanan untuk solusi) meniru mockup.
+enum _MatchCardSide { situation, solution }
 
 /// Warna latar kartu per pasangan, diulang jika pasangan lebih banyak dari
 /// jumlah warna. Kedua kartu (situasi & solusi) dalam satu baris berbagi
@@ -392,6 +398,7 @@ class _MatchCard extends StatelessWidget {
     required this.description,
     required this.imageUrl,
     required this.backgroundColor,
+    required this.side,
     required this.solved,
     required this.selected,
     required this.onTap,
@@ -401,6 +408,7 @@ class _MatchCard extends StatelessWidget {
   final String? description;
   final String? imageUrl;
   final Color backgroundColor;
+  final _MatchCardSide side;
   final bool solved;
   final bool selected;
   final VoidCallback? onTap;
@@ -412,6 +420,31 @@ class _MatchCard extends StatelessWidget {
         : selected
         ? AppColors.primary
         : AppColors.border;
+    final isSituation = side == _MatchCardSide.situation;
+
+    final url = imageUrl;
+    final thumbnail = url != null && url.isNotEmpty
+        ? _StepThumbnail(imageUrl: url, size: 48)
+        : _MatchThumbnailPlaceholder(isSituation: isSituation);
+
+    final content = Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _MatchBadge(label: label, isSituation: isSituation),
+          if (description case final desc? when desc.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              desc,
+              style: AppTypography.bodySmall,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
 
     return Opacity(
       opacity: solved ? 0.6 : 1,
@@ -427,80 +460,109 @@ class _MatchCard extends StatelessWidget {
         ),
         child: InkWell(
           onTap: onTap,
-          child: Stack(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (imageUrl case final url? when url.isNotEmpty)
-                    AspectRatio(
-                      aspectRatio: 4 / 3,
-                      child: Image.network(
-                        url,
-                        cacheWidth: 400,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) return child;
-                          return const Center(
-                            child: SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: AppColors.background,
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 20,
-                            color: AppColors.inkMuted,
-                          ),
-                        ),
-                      ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          label,
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        if (description case final desc?
-                            when desc.isNotEmpty) ...[
-                          const SizedBox(height: AppSpacing.xxs),
-                          Text(
-                            desc,
-                            style: AppTypography.bodySmall,
-                            textAlign: TextAlign.center,
-                          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: Stack(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: isSituation
+                      ? [
+                          thumbnail,
+                          const SizedBox(width: AppSpacing.sm),
+                          content,
+                        ]
+                      : [
+                          content,
+                          const SizedBox(width: AppSpacing.sm),
+                          thumbnail,
                         ],
-                      ],
+                ),
+                if (solved)
+                  const Positioned(
+                    top: -2,
+                    right: -2,
+                    child: Icon(
+                      Icons.check_circle,
+                      size: 18,
+                      color: AppColors.success,
                     ),
                   ),
-                ],
-              ),
-              if (solved)
-                const Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Icon(
-                    Icons.check_circle,
-                    size: 18,
-                    color: AppColors.success,
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Badge kecil untuk label singkat ("Situasi 1", "Solusi A") -- merah untuk
+/// situasi (meniru chip "Skenario N" di mockup), biru untuk solusi.
+class _MatchBadge extends StatelessWidget {
+  const _MatchBadge({required this.label, required this.isSituation});
+
+  final String label;
+  final bool isSituation;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isSituation ? AppColors.danger : AppColors.primary;
+    final soft = isSituation ? AppColors.dangerSoft : AppColors.primarySoft;
+    final icon = isSituation ? Icons.error_outline : Icons.lightbulb_outline;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: soft,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: accent),
+          const SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              label,
+              style: AppTypography.labelSmall.copyWith(
+                color: accent,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Placeholder saat pasangan belum punya foto -- tetap menjaga lebar kartu
+/// konsisten dengan yang sudah ada fotonya.
+class _MatchThumbnailPlaceholder extends StatelessWidget {
+  const _MatchThumbnailPlaceholder({required this.isSituation});
+
+  final bool isSituation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        isSituation ? Icons.error_outline : Icons.lightbulb_outline,
+        size: 22,
+        color: AppColors.inkMuted,
       ),
     );
   }
