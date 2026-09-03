@@ -319,8 +319,6 @@ class _ChoiceOptionTile extends StatelessWidget {
       fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
     );
 
-    final rowHeight = (textStyle.fontSize ?? 14) * (textStyle.height ?? 1) * 2;
-
     return Material(
       color: selected ? AppColors.white : AppColors.background,
       clipBehavior: Clip.antiAlias,
@@ -338,40 +336,32 @@ class _ChoiceOptionTile extends StatelessWidget {
             horizontal: AppSpacing.sm,
             vertical: AppSpacing.sm,
           ),
-          child: SizedBox(
-            height: rowHeight,
-            child: Row(
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: selected ? AppColors.primary : AppColors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: selected ? AppColors.primary : AppColors.border,
-                    ),
-                  ),
-                  child: Text(
-                    letter,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: selected ? AppColors.white : AppColors.ink,
-                      fontWeight: FontWeight.w700,
-                    ),
+          child: Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.primary : AppColors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: selected ? AppColors.primary : AppColors.border,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    option.optionText,
-                    style: textStyle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                child: Text(
+                  letter,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: selected ? AppColors.white : AppColors.ink,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              // Tanpa maxLines -- opsi jawaban tidak boleh terpotong, jadi
+              // baris tumbuh sepanjang yang dibutuhkan teksnya.
+              Expanded(child: Text(option.optionText, style: textStyle)),
+            ],
           ),
         ),
       ),
