@@ -707,6 +707,10 @@ class _OrderingSlot extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
+              if (step?.imageUrl case final url? when url.isNotEmpty) ...[
+                _StepThumbnail(imageUrl: url, size: 36),
+                const SizedBox(width: AppSpacing.sm),
+              ],
               Expanded(
                 child: AnimatedSwitcher(
                   duration: AppDuration.fast,
@@ -783,7 +787,7 @@ class _PoolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = _PoolCardSurface(label: step.label);
+    final card = _PoolCardSurface(label: step.label, imageUrl: step.imageUrl);
 
     if (onTap == null) {
       return Opacity(opacity: 0.5, child: card);
@@ -826,9 +830,10 @@ class _PoolCard extends StatelessWidget {
 }
 
 class _PoolCardSurface extends StatelessWidget {
-  const _PoolCardSurface({required this.label});
+  const _PoolCardSurface({required this.label, required this.imageUrl});
 
   final String label;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -844,25 +849,84 @@ class _PoolCardSurface extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: AppColors.primarySoft,
-              child: const Icon(
-                Icons.drag_indicator,
-                size: 15,
-                color: AppColors.primary,
+            if (imageUrl case final url? when url.isNotEmpty)
+              _StepThumbnail(imageUrl: url, size: 48)
+            else
+              CircleAvatar(
+                radius: 14,
+                backgroundColor: AppColors.primarySoft,
+                child: const Icon(
+                  Icons.drag_indicator,
+                  size: 15,
+                  color: AppColors.primary,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 label,
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.ink),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
+            Icon(Icons.drag_indicator, size: 18, color: AppColors.inkMuted),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Foto langkah dari backend, dipakai di kartu pool dan slot yang sudah
+/// terisi. Fallback ke placeholder kalau gambar gagal dimuat.
+class _StepThumbnail extends StatelessWidget {
+  const _StepThumbnail({required this.imageUrl, required this.size});
+
+  final String imageUrl;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: Image.network(
+        imageUrl,
+        width: size,
+        height: size,
+        cacheWidth: (size * 2).round(),
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return _thumbnailPlaceholder(
+            size,
+            child: const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => _thumbnailPlaceholder(
+          size,
+          child: Icon(
+            Icons.image_not_supported_outlined,
+            size: size * 0.4,
+            color: AppColors.inkMuted,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _thumbnailPlaceholder(double size, {required Widget child}) {
+    return Container(
+      width: size,
+      height: size,
+      color: AppColors.background,
+      alignment: Alignment.center,
+      child: child,
     );
   }
 }
