@@ -147,8 +147,6 @@ class _ScenarioHeader extends StatelessWidget {
           style: AppTypography.bodyMedium,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.md),
-        _KickoffBadge(type: type),
       ],
     );
   }
@@ -197,51 +195,6 @@ class _TypeBadge extends StatelessWidget {
     SimulationGameType.matching => Icons.compare_arrows,
     SimulationGameType.ordering => Icons.swap_vert,
     SimulationGameType.unknown => Icons.extension_outlined,
-  };
-}
-
-class _KickoffBadge extends StatelessWidget {
-  const _KickoffBadge({required this.type});
-
-  final SimulationGameType type;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.dangerSoft,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.report_gmailerrorred_outlined,
-            size: 15,
-            color: AppColors.danger,
-          ),
-          const SizedBox(width: AppSpacing.xxs),
-          Text(
-            _labelFor(type),
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.danger,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _labelFor(SimulationGameType type) => switch (type) {
-    SimulationGameType.matching => 'Situasi Dimulai',
-    SimulationGameType.ordering => 'Masalah Terjadi',
-    SimulationGameType.unknown => 'Simulasi Dimulai',
   };
 }
 
