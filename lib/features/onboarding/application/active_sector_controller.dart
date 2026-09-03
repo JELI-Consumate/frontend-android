@@ -17,7 +17,3 @@ class ActiveSectorNotifier extends Notifier<String?> {
 
 final activeSectorSlugProvider =
     NotifierProvider<ActiveSectorNotifier, String?>(ActiveSectorNotifier.new);
-
-Future<void> selectSector(WidgetRef ref, String slug) async {
-  ref.read(activeSectorSlugProvider.notifier).select(slug);
-}

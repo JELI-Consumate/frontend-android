@@ -9,7 +9,7 @@ import 'package:perlindungan_konsumen/core/theme/app_theme.dart';
 import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/learning_status.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/sector.dart';
-import 'package:perlindungan_konsumen/features/onboarding/application/sector_selection_provider.dart';
+import 'package:perlindungan_konsumen/features/onboarding/application/active_sector_controller.dart';
 import 'package:perlindungan_konsumen/features/onboarding/presentation/sector_selection_screen.dart';
 
 import 'support/fake_learning_repository.dart';

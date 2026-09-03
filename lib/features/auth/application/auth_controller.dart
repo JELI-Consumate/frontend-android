@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../notification/application/device_token_controller.dart';
-import '../../onboarding/application/sector_selection_provider.dart';
+import '../../onboarding/application/active_sector_controller.dart';
 import '../data/auth_repository.dart';
 import '../data/models/app_user.dart';
 

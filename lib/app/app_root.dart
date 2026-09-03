@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/auth/application/auth_controller.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/notification/application/notification_listener_controller.dart';
-import '../features/onboarding/application/sector_selection_provider.dart';
+import '../features/onboarding/application/active_sector_controller.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/onboarding/presentation/sector_selection_screen.dart';
 import 'main_shell.dart';

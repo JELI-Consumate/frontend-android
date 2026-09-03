@@ -1,5 +1,5 @@
 // ignore_for_file: strict_top_level_inference
-import 'package:perlindungan_konsumen/features/onboarding/application/sector_selection_provider.dart';
+import 'package:perlindungan_konsumen/features/onboarding/application/active_sector_controller.dart';
 
 /// Sektor aktif sekarang state in-memory (bukan storage) -- lihat
 /// `ActiveSectorNotifier`. Helper ini men-seed nilainya di test: `null`

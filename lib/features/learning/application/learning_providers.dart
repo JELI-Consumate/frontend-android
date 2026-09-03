@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../onboarding/application/sector_selection_provider.dart';
+import '../../onboarding/application/active_sector_controller.dart';
 import '../data/learning_repository.dart';
 import '../data/models/sector.dart';
 import '../data/models/sector_detail.dart';

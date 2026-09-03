@@ -8,7 +8,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../learning/application/learning_providers.dart';
 import '../../learning/data/models/sector.dart';
-import '../application/sector_selection_provider.dart';
+import '../application/active_sector_controller.dart';
 
 class SectorSelectionScreen extends ConsumerStatefulWidget {
   const SectorSelectionScreen({super.key});
@@ -22,12 +22,12 @@ class _SectorSelectionScreenState extends ConsumerState<SectorSelectionScreen> {
   String? _selectedSlug;
   bool _saving = false;
 
-  Future<void> _confirm(String slug) async {
+  void _confirm(String slug) {
     if (_saving) return;
     setState(() => _saving = true);
     // Menyetel sektor aktif sesi ini -> `AppRoot` rebuild ke `MainShell`
     // dan layar ini dibuang, jadi tidak perlu reset `_saving`.
-    await selectSector(ref, slug);
+    ref.read(activeSectorSlugProvider.notifier).select(slug);
   }
 
   @override
