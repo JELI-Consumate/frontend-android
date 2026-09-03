@@ -9,7 +9,7 @@ import '../features/badges/presentation/badges_screen.dart';
 import '../features/main/presentation/dashboard_screen.dart';
 import '../features/main/presentation/journeys_screen.dart';
 import '../features/main/presentation/profile_screen.dart';
-import 'main_tab_provider.dart';
+import '../core/navigation/main_tab_provider.dart';
 
 class MainShell extends ConsumerWidget {
   const MainShell({super.key});

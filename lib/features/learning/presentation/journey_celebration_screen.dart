@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/main_tab_provider.dart';
+import '../../../core/navigation/main_tab_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
