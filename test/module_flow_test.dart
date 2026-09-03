@@ -543,6 +543,53 @@ void main() {
         expect(find.text('Langkah Tersedia:'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'submit ulang setelah sebagian benar tetap bisa selesai, bukan error '
+      '"sudah disubmit"',
+      (tester) async {
+        final module = simulationOrderingModuleFixture();
+        final repository = FakeModuleRepository();
+        await pump(
+          tester,
+          SimulationModuleScreen(
+            module: module,
+            page: module.firstPage!,
+            nav: ModulePageNav.single(),
+          ),
+          repository,
+        );
+
+        // Ronde 1: langkah 1 benar, dua sisanya tertukar.
+        await tester.tap(find.text('Hubungi penjual')); // slot 1 -- benar
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Laporkan ke BPKN')); // slot 2 -- salah
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Ajukan komplain ke platform')); // slot 3 -- salah
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Cek Jalur'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Ada langkah yang belum tepat, susun ulang ya.'),
+          findsOneWidget,
+        );
+        await tester.tap(find.text('OK')); // tutup alert
+        await tester.pumpAndSettle();
+
+        // Ronde 2: perbaiki dua langkah yang salah lalu Cek Jalur lagi.
+        await tester.tap(find.text('Ajukan komplain ke platform')); // slot 2
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Laporkan ke BPKN')); // slot 3
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Cek Jalur'));
+        await tester.pumpAndSettle();
+
+        // Selesai bersih -- BUKAN alert "Attempt sudah pernah diselesaikan".
+        expect(find.text('Simulasi selesai!'), findsOneWidget);
+        expect(find.text('Gagal Mengecek Jawaban'), findsNothing);
+      },
+    );
   });
 
   group('ReflectionModuleScreen', () {
