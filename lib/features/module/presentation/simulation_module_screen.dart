@@ -147,8 +147,6 @@ class _ScenarioHeader extends StatelessWidget {
           style: AppTypography.bodyMedium,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: AppSpacing.md),
-        _KickoffBadge(type: type),
       ],
     );
   }
@@ -197,51 +195,6 @@ class _TypeBadge extends StatelessWidget {
     SimulationGameType.matching => Icons.compare_arrows,
     SimulationGameType.ordering => Icons.swap_vert,
     SimulationGameType.unknown => Icons.extension_outlined,
-  };
-}
-
-class _KickoffBadge extends StatelessWidget {
-  const _KickoffBadge({required this.type});
-
-  final SimulationGameType type;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.dangerSoft,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.report_gmailerrorred_outlined,
-            size: 15,
-            color: AppColors.danger,
-          ),
-          const SizedBox(width: AppSpacing.xxs),
-          Text(
-            _labelFor(type),
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.danger,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _labelFor(SimulationGameType type) => switch (type) {
-    SimulationGameType.matching => 'Situasi Dimulai',
-    SimulationGameType.ordering => 'Masalah Terjadi',
-    SimulationGameType.unknown => 'Simulasi Dimulai',
   };
 }
 
@@ -366,7 +319,7 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
         ),
         const SizedBox(height: AppSpacing.sm),
         for (var i = 0; i < widget.pairs.length; i++) ...[
-          _buildPairRow(widget.pairs[i], _rightItems[i]),
+          _buildPairRow(i, widget.pairs[i], _rightItems[i]),
           const SizedBox(height: AppSpacing.sm),
         ],
       ],
@@ -374,9 +327,11 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
   }
 
   Widget _buildPairRow(
+    int index,
     SimulationMatchingPair left,
     SimulationMatchingPair right,
   ) {
+    final backgroundColor = _matchPairColor(index);
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -386,6 +341,7 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
               label: left.leftLabel,
               description: left.leftDescription,
               imageUrl: left.leftImageUrl,
+              backgroundColor: backgroundColor,
               solved: _solved.contains(left.id),
               selected: _selectedLeftId == left.id,
               onTap: _solved.contains(left.id) || _checking
@@ -403,6 +359,7 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
               label: right.rightLabel,
               description: right.rightDescription,
               imageUrl: right.rightImageUrl,
+              backgroundColor: backgroundColor,
               solved: _solved.contains(right.id),
               selected: false,
               onTap: _solved.contains(right.id) || _checking
@@ -416,11 +373,25 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
   }
 }
 
+/// Warna latar kartu per pasangan, diulang jika pasangan lebih banyak dari
+/// jumlah warna. Kedua kartu (situasi & solusi) dalam satu baris berbagi
+/// warna yang sama supaya terasa sepasang, seperti pada mockup desain.
+Color _matchPairColor(int index) {
+  final colors = [
+    AppColors.primarySoft,
+    AppColors.warningSoft,
+    AppColors.dangerSoft,
+    AppColors.successSoft,
+  ];
+  return colors[index % colors.length];
+}
+
 class _MatchCard extends StatelessWidget {
   const _MatchCard({
     required this.label,
     required this.description,
     required this.imageUrl,
+    required this.backgroundColor,
     required this.solved,
     required this.selected,
     required this.onTap,
@@ -429,13 +400,14 @@ class _MatchCard extends StatelessWidget {
   final String label;
   final String? description;
   final String? imageUrl;
+  final Color backgroundColor;
   final bool solved;
   final bool selected;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = solved
+    final borderColor = solved
         ? AppColors.success
         : selected
         ? AppColors.primary
@@ -444,76 +416,77 @@ class _MatchCard extends StatelessWidget {
     return Opacity(
       opacity: solved ? 0.6 : 1,
       child: Material(
-        color: selected ? AppColors.primarySoft : AppColors.white,
+        color: backgroundColor,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(color: color, width: selected || solved ? 1.6 : 1),
+          side: BorderSide(
+            color: borderColor,
+            width: selected || solved ? 1.6 : 1,
+          ),
         ),
         child: InkWell(
           onTap: onTap,
           child: Stack(
-            alignment: Alignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (imageUrl case final url? when url.isNotEmpty) ...[
-                      AspectRatio(
-                        aspectRatio: 16 / 10,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                          child: Image.network(
-                            url,
-                            cacheWidth: 400,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return const Center(
-                                child: SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  color: AppColors.background,
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                    size: 20,
-                                    color: AppColors.inkMuted,
-                                  ),
-                                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (imageUrl case final url? when url.isNotEmpty)
+                    AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: Image.network(
+                        url,
+                        cacheWidth: 400,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return const Center(
+                            child: SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.background,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 20,
+                            color: AppColors.inkMuted,
                           ),
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                    ],
-                    Text(
-                      label,
-                      style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
                     ),
-                    if (description case final desc? when desc.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        desc,
-                        style: AppTypography.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ],
-                ),
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          label,
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (description case final desc?
+                            when desc.isNotEmpty) ...[
+                          const SizedBox(height: AppSpacing.xxs),
+                          Text(
+                            desc,
+                            style: AppTypography.bodySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
               if (solved)
                 const Positioned(
@@ -608,6 +581,16 @@ class _OrderingGameState extends ConsumerState<_OrderingGame> {
             );
         latestAttempt = result.attempt;
         if (!result.correct) wrongSteps.add(step);
+
+        // Jawaban benar ke-N (N = jumlah langkah) membuat attempt langsung
+        // completed di server. Hentikan loop di sini -- sisa langkah di
+        // batch ini tidak perlu dicek lagi, dan parent langsung menampilkan
+        // layar "Simulasi selesai!" lewat onChecked.
+        if (result.attempt.isCompleted) {
+          widget.onChecked(result.attempt);
+          if (mounted) setState(() => _checking = false);
+          return;
+        }
       } on ApiException catch (error) {
         if (mounted) {
           showAppAlert(
@@ -738,18 +721,26 @@ class _OrderingSlot extends StatelessWidget {
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 12,
-                backgroundColor: filled ? AppColors.success : AppColors.muted,
-                child: Text(
-                  '$position',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
+              Center(
+                widthFactor: 1,
+                heightFactor: 1,
+                child: CircleAvatar(
+                  radius: 12,
+                  backgroundColor: filled ? AppColors.success : AppColors.muted,
+                  child: Text(
+                    '$position',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
+              if (step?.imageUrl case final url? when url.isNotEmpty) ...[
+                _StepThumbnail(imageUrl: url, size: 36),
+                const SizedBox(width: AppSpacing.sm),
+              ],
               Expanded(
                 child: AnimatedSwitcher(
                   duration: AppDuration.fast,
@@ -826,7 +817,7 @@ class _PoolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = _PoolCardSurface(label: step.label);
+    final card = _PoolCardSurface(label: step.label, imageUrl: step.imageUrl);
 
     if (onTap == null) {
       return Opacity(opacity: 0.5, child: card);
@@ -869,9 +860,10 @@ class _PoolCard extends StatelessWidget {
 }
 
 class _PoolCardSurface extends StatelessWidget {
-  const _PoolCardSurface({required this.label});
+  const _PoolCardSurface({required this.label, required this.imageUrl});
 
   final String label;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -887,25 +879,84 @@ class _PoolCardSurface extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: AppColors.primarySoft,
-              child: const Icon(
-                Icons.drag_indicator,
-                size: 15,
-                color: AppColors.primary,
+            if (imageUrl case final url? when url.isNotEmpty)
+              _StepThumbnail(imageUrl: url, size: 48)
+            else
+              CircleAvatar(
+                radius: 14,
+                backgroundColor: AppColors.primarySoft,
+                child: const Icon(
+                  Icons.drag_indicator,
+                  size: 15,
+                  color: AppColors.primary,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 label,
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.ink),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
+            Icon(Icons.drag_indicator, size: 18, color: AppColors.inkMuted),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Foto langkah dari backend, dipakai di kartu pool dan slot yang sudah
+/// terisi. Fallback ke placeholder kalau gambar gagal dimuat.
+class _StepThumbnail extends StatelessWidget {
+  const _StepThumbnail({required this.imageUrl, required this.size});
+
+  final String imageUrl;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: Image.network(
+        imageUrl,
+        width: size,
+        height: size,
+        cacheWidth: (size * 2).round(),
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return _thumbnailPlaceholder(
+            size,
+            child: const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => _thumbnailPlaceholder(
+          size,
+          child: Icon(
+            Icons.image_not_supported_outlined,
+            size: size * 0.4,
+            color: AppColors.inkMuted,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _thumbnailPlaceholder(double size, {required Widget child}) {
+    return Container(
+      width: size,
+      height: size,
+      color: AppColors.background,
+      alignment: Alignment.center,
+      child: child,
     );
   }
 }
