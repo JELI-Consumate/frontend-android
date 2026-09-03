@@ -4,22 +4,51 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../learning/application/learning_providers.dart';
 import '../application/badge_providers.dart';
 import '../data/models/badge.dart';
 import 'widgets/badge_tile.dart';
+
+/// Lencana milik sektor aktif saja, diurutkan mengikuti urutan journey-nya.
+///
+/// Komposisi dua fitur (`badges` + `learning`) hidup di layer presentation
+/// supaya `badges/application` tetap jadi leaf tanpa tahu soal `learning`.
+final _sectorBadgesProvider = FutureProvider.autoDispose<List<Badge>>((
+  ref,
+) async {
+  final badges = await ref.watch(badgesProvider.future);
+  final sectorDetail = await ref.watch(primarySectorDetailProvider.future);
+  final journeys = sectorDetail?.journeys ?? const [];
+
+  final orderByJourneyId = {
+    for (final journey in journeys) journey.id: journey.order,
+  };
+
+  return badges
+      .where((badge) => orderByJourneyId.containsKey(badge.journeyId))
+      .toList()
+    ..sort(
+      (a, b) => orderByJourneyId[a.journeyId]!.compareTo(
+        orderByJourneyId[b.journeyId]!,
+      ),
+    );
+});
 
 class BadgesScreen extends ConsumerWidget {
   const BadgesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final badgesAsync = ref.watch(sectorBadgesProvider);
+    final badgesAsync = ref.watch(_sectorBadgesProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pencapaian')),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => ref.refresh(sectorBadgesProvider.future),
+          onRefresh: () async {
+            ref.invalidate(badgesProvider);
+            return ref.refresh(_sectorBadgesProvider.future);
+          },
           child: switch (badgesAsync) {
             AsyncData(:final value) when value.isNotEmpty => ListView(
               padding: const EdgeInsets.all(AppSpacing.screenPadding),
