@@ -99,3 +99,14 @@ Future<T> guardApi<T>(Future<T> Function() request) async {
     throw ApiException.fromDio(error);
   }
 }
+
+/// Semua endpoint membungkus payload di `{ "data": {...} }`. Helper ini
+/// mengambil objek `data` itu, atau melempar [ApiException] kalau bentuk
+/// responsnya tak dikenali -- dipakai seragam oleh semua repository.
+Map<String, dynamic> requireData(Map<String, dynamic>? body) {
+  final data = body?['data'];
+  if (data is! Map<String, dynamic>) {
+    throw const ApiException(message: 'Respons server tidak dikenali.');
+  }
+  return data;
+}

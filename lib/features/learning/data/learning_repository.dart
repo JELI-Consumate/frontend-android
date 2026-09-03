@@ -26,7 +26,7 @@ class LearningRepository {
   Future<SectorDetail> sectorDetail(String slug) {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>('/sectors/$slug');
-      return SectorDetail.fromJson(_requireData(response.data));
+      return SectorDetail.fromJson(requireData(response.data));
     });
   }
 
@@ -51,17 +51,10 @@ class LearningRepository {
       final response = await _dio.get<Map<String, dynamic>>(
         '/journeys/$journeyId',
       );
-      return JourneyDetail.fromJson(_requireData(response.data));
+      return JourneyDetail.fromJson(requireData(response.data));
     });
   }
 
-  Map<String, dynamic> _requireData(Map<String, dynamic>? body) {
-    final data = body?['data'];
-    if (data is! Map<String, dynamic>) {
-      throw const ApiException(message: 'Respons server tidak dikenali.');
-    }
-    return data;
-  }
 }
 
 final learningRepositoryProvider = Provider<LearningRepository>((ref) {

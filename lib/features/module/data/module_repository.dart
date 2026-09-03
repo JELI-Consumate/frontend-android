@@ -19,7 +19,7 @@ class ModuleRepository {
       final response = await _dio.get<Map<String, dynamic>>(
         '/modules/$moduleId',
       );
-      return ModuleDetail.fromJson(_requireData(response.data));
+      return ModuleDetail.fromJson(requireData(response.data));
     });
   }
 
@@ -36,7 +36,7 @@ class ModuleRepository {
       final response = await _dio.post<Map<String, dynamic>>(
         '/quizzes/$quizContentId/attempts',
       );
-      final data = _requireData(response.data);
+      final data = requireData(response.data);
       return data['attempt_id'] as String;
     });
   }
@@ -58,7 +58,7 @@ class ModuleRepository {
           'likert_scale_option_id': ?likertOptionId,
         },
       );
-      return QuizAnswerCheckResult.fromJson(_requireData(response.data));
+      return QuizAnswerCheckResult.fromJson(requireData(response.data));
     });
   }
 
@@ -67,7 +67,7 @@ class ModuleRepository {
       final response = await _dio.post<Map<String, dynamic>>(
         '/simulations/$simulationContentId/attempts',
       );
-      final data = _requireData(response.data);
+      final data = requireData(response.data);
       return data['attempt_id'] as String;
     });
   }
@@ -105,7 +105,7 @@ class ModuleRepository {
         '/simulation-attempts/$attemptId/check',
         data: data,
       );
-      return SimulationCheckResult.fromJson(_requireData(response.data));
+      return SimulationCheckResult.fromJson(requireData(response.data));
     });
   }
 
@@ -114,7 +114,7 @@ class ModuleRepository {
       final response = await _dio.get<Map<String, dynamic>>(
         '/reflections/$reflectionContentId',
       );
-      return ReflectionContent.fromJson(_requireData(response.data));
+      return ReflectionContent.fromJson(requireData(response.data));
     });
   }
 
@@ -140,17 +140,10 @@ class ModuleRepository {
           ],
         },
       );
-      return ReflectionContent.fromJson(_requireData(response.data));
+      return ReflectionContent.fromJson(requireData(response.data));
     });
   }
 
-  Map<String, dynamic> _requireData(Map<String, dynamic>? body) {
-    final data = body?['data'];
-    if (data is! Map<String, dynamic>) {
-      throw const ApiException(message: 'Respons server tidak dikenali.');
-    }
-    return data;
-  }
 }
 
 final moduleRepositoryProvider = Provider<ModuleRepository>((ref) {

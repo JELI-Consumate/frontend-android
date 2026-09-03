@@ -56,7 +56,7 @@ class AuthRepository {
   Future<AppUser> me() {
     return guardApi(() async {
       final response = await _dio.get<Map<String, dynamic>>('/auth/me');
-      return AppUser.fromJson(_requireData(response.data));
+      return AppUser.fromJson(requireData(response.data));
     });
   }
 
@@ -78,7 +78,7 @@ class AuthRepository {
           if (clearDateOfBirth) 'date_of_birth': null,
         },
       );
-      return AppUser.fromJson(_requireData(response.data));
+      return AppUser.fromJson(requireData(response.data));
     });
   }
 
@@ -147,7 +147,7 @@ class AuthRepository {
   Future<String?> readToken() => _tokenStorage.read();
 
   Future<AppUser> _consumeAuthResult(Map<String, dynamic>? body) async {
-    final data = _requireData(body);
+    final data = requireData(body);
 
     final token = data['token'];
     if (token is! String || token.isEmpty) {
@@ -164,13 +164,6 @@ class AuthRepository {
     return AppUser.fromJson(user);
   }
 
-  Map<String, dynamic> _requireData(Map<String, dynamic>? body) {
-    final data = body?['data'];
-    if (data is! Map<String, dynamic>) {
-      throw const ApiException(message: 'Respons server tidak dikenali.');
-    }
-    return data;
-  }
 
   String? _messageOf(Map<String, dynamic>? body) {
     final meta = body?['meta'];
