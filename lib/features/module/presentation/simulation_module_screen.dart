@@ -738,14 +738,18 @@ class _OrderingSlot extends StatelessWidget {
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 12,
-                backgroundColor: filled ? AppColors.success : AppColors.muted,
-                child: Text(
-                  '$position',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
+              Center(
+                widthFactor: 1,
+                heightFactor: 1,
+                child: CircleAvatar(
+                  radius: 12,
+                  backgroundColor: filled ? AppColors.success : AppColors.muted,
+                  child: Text(
+                    '$position',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
