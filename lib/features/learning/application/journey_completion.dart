@@ -43,6 +43,12 @@ class JourneyCompletionController {
   }) async {
     if (wasCompletedBefore) return null;
 
+    // Ambil ulang dari server -- pakai `Ref` provider ini (stabil), bukan
+    // `WidgetRef` pemanggil yang bisa sudah ter-dispose begitu
+    // `journeyDetailProvider` (autoDispose) di-invalidate dan `JourneyDetail`
+    // sempat menampilkan spinner.
+    _ref.invalidate(journeyDetailProvider(journeyId));
+    _ref.invalidate(primarySectorDetailProvider);
     final refreshed = await _ref.read(journeyDetailProvider(journeyId).future);
     if (!refreshed.journey.progress.status.isCompleted) return null;
 

@@ -53,6 +53,11 @@ class _JourneyDetailBody extends ConsumerWidget {
     WidgetRef ref,
     String moduleId,
   ) async {
+    // Ditangkap sebelum `await` pertama: `journeyDetailProvider` autoDispose,
+    // jadi begitu di-invalidate `_JourneyDetailBody` sempat lepas dari tree
+    // dan `context` di sini jadi unmounted -- `navigator` (root) tetap hidup.
+    final navigator = Navigator.of(context);
+    final completionController = ref.read(journeyCompletionControllerProvider);
     final wasCompleted = detail.journey.progress.status.isCompleted;
     final moduleIds = detail.modules.map((module) => module.id).toList();
 
@@ -62,31 +67,32 @@ class _JourneyDetailBody extends ConsumerWidget {
     // di stack -- tombol kembali dari module mana pun langsung ke sini.
     String? currentId = moduleId;
     while (currentId != null) {
-      final nextId = await Navigator.of(context).push<String>(
+      final nextId = await navigator.push<String>(
         MaterialPageRoute<String>(
           builder: (_) =>
               ModuleScreen(moduleId: currentId!, journeyModuleIds: moduleIds),
         ),
       );
 
-      ref.invalidate(journeyDetailProvider(journeyId));
-      ref.invalidate(primarySectorDetailProvider);
+      // Best-effort refresh layar di bawah; `celebrationAfterModules` ambil
+      // ulang datanya sendiri, jadi aman kalau `ref` sudah tak terpakai.
+      if (context.mounted) {
+        ref.invalidate(journeyDetailProvider(journeyId));
+        ref.invalidate(primarySectorDetailProvider);
+      }
 
       currentId = nextId;
-      if (currentId != null && !context.mounted) return;
     }
 
-    if (wasCompleted || !context.mounted) return;
+    if (wasCompleted) return;
 
-    final celebration = await ref
-        .read(journeyCompletionControllerProvider)
-        .celebrationAfterModules(
-          journeyId: journeyId,
-          wasCompletedBefore: wasCompleted,
-        );
-    if (celebration == null || !context.mounted) return;
+    final celebration = await completionController.celebrationAfterModules(
+      journeyId: journeyId,
+      wasCompletedBefore: wasCompleted,
+    );
+    if (celebration == null || !navigator.mounted) return;
 
-    await Navigator.of(context).push(
+    await navigator.push(
       MaterialPageRoute<void>(
         builder: (_) => JourneyCelebrationScreen(
           journeyOrder: celebration.journeyOrder,
