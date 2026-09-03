@@ -879,7 +879,7 @@ class _PoolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = _PoolCardSurface(label: step.label, imageUrl: step.imageUrl);
+    final card = _PoolCardSurface(label: step.label);
 
     if (onTap == null) {
       return Opacity(opacity: 0.5, child: card);
@@ -922,10 +922,9 @@ class _PoolCard extends StatelessWidget {
 }
 
 class _PoolCardSurface extends StatelessWidget {
-  const _PoolCardSurface({required this.label, required this.imageUrl});
+  const _PoolCardSurface({required this.label});
 
   final String label;
-  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -941,29 +940,22 @@ class _PoolCardSurface extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (imageUrl case final url? when url.isNotEmpty)
-              _StepThumbnail(imageUrl: url, size: 48)
-            else
-              CircleAvatar(
-                radius: 14,
-                backgroundColor: AppColors.primarySoft,
-                child: const Icon(
-                  Icons.drag_indicator,
-                  size: 15,
-                  color: AppColors.primary,
-                ),
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: AppColors.primarySoft,
+              child: const Icon(
+                Icons.drag_indicator,
+                size: 15,
+                color: AppColors.primary,
               ),
-            const SizedBox(width: AppSpacing.sm),
+            ),
+            const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(
                 label,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.ink,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTypography.bodyMedium.copyWith(color: AppColors.ink),
               ),
             ),
-            Icon(Icons.drag_indicator, size: 18, color: AppColors.inkMuted),
           ],
         ),
       ),
