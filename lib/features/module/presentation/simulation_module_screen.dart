@@ -319,7 +319,7 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
         ),
         const SizedBox(height: AppSpacing.sm),
         for (var i = 0; i < widget.pairs.length; i++) ...[
-          _buildPairRow(widget.pairs[i], _rightItems[i]),
+          _buildPairRow(i, widget.pairs[i], _rightItems[i]),
           const SizedBox(height: AppSpacing.sm),
         ],
       ],
@@ -327,9 +327,11 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
   }
 
   Widget _buildPairRow(
+    int index,
     SimulationMatchingPair left,
     SimulationMatchingPair right,
   ) {
+    final backgroundColor = _matchPairColor(index);
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -339,6 +341,7 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
               label: left.leftLabel,
               description: left.leftDescription,
               imageUrl: left.leftImageUrl,
+              backgroundColor: backgroundColor,
               solved: _solved.contains(left.id),
               selected: _selectedLeftId == left.id,
               onTap: _solved.contains(left.id) || _checking
@@ -356,6 +359,7 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
               label: right.rightLabel,
               description: right.rightDescription,
               imageUrl: right.rightImageUrl,
+              backgroundColor: backgroundColor,
               solved: _solved.contains(right.id),
               selected: false,
               onTap: _solved.contains(right.id) || _checking
@@ -369,11 +373,25 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
   }
 }
 
+/// Warna latar kartu per pasangan, diulang jika pasangan lebih banyak dari
+/// jumlah warna. Kedua kartu (situasi & solusi) dalam satu baris berbagi
+/// warna yang sama supaya terasa sepasang, seperti pada mockup desain.
+Color _matchPairColor(int index) {
+  final colors = [
+    AppColors.primarySoft,
+    AppColors.warningSoft,
+    AppColors.dangerSoft,
+    AppColors.successSoft,
+  ];
+  return colors[index % colors.length];
+}
+
 class _MatchCard extends StatelessWidget {
   const _MatchCard({
     required this.label,
     required this.description,
     required this.imageUrl,
+    required this.backgroundColor,
     required this.solved,
     required this.selected,
     required this.onTap,
@@ -382,13 +400,14 @@ class _MatchCard extends StatelessWidget {
   final String label;
   final String? description;
   final String? imageUrl;
+  final Color backgroundColor;
   final bool solved;
   final bool selected;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = solved
+    final borderColor = solved
         ? AppColors.success
         : selected
         ? AppColors.primary
@@ -397,76 +416,77 @@ class _MatchCard extends StatelessWidget {
     return Opacity(
       opacity: solved ? 0.6 : 1,
       child: Material(
-        color: selected ? AppColors.primarySoft : AppColors.white,
+        color: backgroundColor,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(color: color, width: selected || solved ? 1.6 : 1),
+          side: BorderSide(
+            color: borderColor,
+            width: selected || solved ? 1.6 : 1,
+          ),
         ),
         child: InkWell(
           onTap: onTap,
           child: Stack(
-            alignment: Alignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (imageUrl case final url? when url.isNotEmpty) ...[
-                      AspectRatio(
-                        aspectRatio: 16 / 10,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                          child: Image.network(
-                            url,
-                            cacheWidth: 400,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return const Center(
-                                child: SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  color: AppColors.background,
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                    size: 20,
-                                    color: AppColors.inkMuted,
-                                  ),
-                                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (imageUrl case final url? when url.isNotEmpty)
+                    AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: Image.network(
+                        url,
+                        cacheWidth: 400,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return const Center(
+                            child: SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.background,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 20,
+                            color: AppColors.inkMuted,
                           ),
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                    ],
-                    Text(
-                      label,
-                      style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
                     ),
-                    if (description case final desc? when desc.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        desc,
-                        style: AppTypography.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ],
-                ),
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          label,
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (description case final desc?
+                            when desc.isNotEmpty) ...[
+                          const SizedBox(height: AppSpacing.xxs),
+                          Text(
+                            desc,
+                            style: AppTypography.bodySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
               if (solved)
                 const Positioned(
