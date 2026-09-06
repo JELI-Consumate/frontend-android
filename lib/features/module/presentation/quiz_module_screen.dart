@@ -541,8 +541,6 @@ class _LikertOption extends StatelessWidget {
                       : AppColors.inkMuted,
                 ),
                 textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
