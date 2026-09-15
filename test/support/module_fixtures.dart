@@ -8,11 +8,6 @@ import 'package:perlindungan_konsumen/features/module/data/models/content/video_
 import 'package:perlindungan_konsumen/features/module/data/models/module_detail.dart';
 import 'package:perlindungan_konsumen/features/module/data/models/module_page.dart';
 
-/// Fixture satu [ModuleDetail] per tipe module, dipakai `module_flow_test.dart`
-/// dan potongan tes navigasi di `learning_flow_test.dart`. ID soal/opsi/langkah
-/// di sini SENGAJA disamakan dengan konstanta di `FakeModuleRepository`
-/// (`correctChoiceOptionByQuestion`, `correctOrderingPosition`, dst.) supaya
-/// alur jawab-benar/jawab-salah di test itu benar-benar tersimulasikan.
 ModuleDetail videoModuleFixture({
   LearningStatus status = LearningStatus.notStarted,
 }) {

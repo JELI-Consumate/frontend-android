@@ -6,15 +6,6 @@ import 'package:perlindungan_konsumen/features/module/data/models/quiz_attempt.d
 import 'package:perlindungan_konsumen/features/module/data/models/simulation_attempt.dart';
 import 'package:perlindungan_konsumen/features/module/data/module_repository.dart';
 
-/// Fixture disusun langsung dari bentuk resource backend (`ModuleResource`,
-/// `ModulePageResource`, dan resource per tipe konten di
-/// `App\Http\Resources\V1\Content`) -- bukan hasil `curl` sungguhan seperti
-/// `FakeLearningRepository`, karena fitur ini dikerjakan tanpa server
-/// backend yang jalan. Skor kuis/simulasi dihitung manual di sini meniru
-/// `QuizScoringService`/`SimulationScoringService` (lihat konstanta
-/// `correctChoiceOptionId`/`correctPosition...` di bawah), bukan hardcode
-/// satu hasil tetap -- supaya test bisa menjawab benar/salah dan lihat
-/// hasilnya beda.
 class FakeModuleRepository implements ModuleRepository {
   FakeModuleRepository({Map<String, ModuleDetail>? modules, this.onComplete})
     : modules = modules ?? {};
@@ -22,18 +13,10 @@ class FakeModuleRepository implements ModuleRepository {
   final Map<String, ModuleDetail> modules;
   ApiException? failWith;
 
-  /// Dipanggil begitu [completeModulePage] sukses -- test yang perlu
-  /// mensimulasikan efek sampingnya di sisi server (mis. journey jadi
-  /// completed di `FakeLearningRepository`, lihat
-  /// `journey_celebration_flow_test.dart`) taruh mutasinya di sini alih-alih
-  /// bikin fake ini tahu soal fake lain secara langsung.
   final void Function(String modulePageId)? onComplete;
 
   final List<String> calls = [];
 
-  // --- Kuis: journey_id 1 -> kuis id 100, 2 soal pilihan ganda (option
-  // pertama tiap soal "benar") + 1 soal likert (semua opsi "benar" secara
-  // definisi -- likert tidak ada benar/salah). ---
   static const correctChoiceOptionByQuestion = {'201': '301', '202': '304'};
   static const likertOptionValue = {
     '401': 1,
@@ -42,13 +25,12 @@ class FakeModuleRepository implements ModuleRepository {
     '404': 4,
     '405': 5,
   };
-  static const totalQuizQuestions = 3; // 201, 202 (choice) + 203 (likert)
+  static const totalQuizQuestions = 3;
   int quizAttemptCounter = 0;
   final Map<String, String> _quizChoiceAnswers = {};
   final Map<String, bool> _quizChoiceCorrectness = {};
   final Map<String, String> _quizLikertAnswers = {};
 
-  // --- Simulasi ordering: langkah id 601..603 -> posisi benar 1,2,3. ---
   static const correctOrderingPosition = {'601': 1, '602': 2, '603': 3};
   int simulationAttemptCounter = 0;
   final Set<String> _matchingSolved = {};
@@ -85,11 +67,6 @@ class FakeModuleRepository implements ModuleRepository {
     return '$quizAttemptCounter';
   }
 
-  /// Meniru `QuizScoringService::checkAnswer` -- gaya ujian: soal pilihan
-  /// ganda yang SUDAH pernah dicek terkunci ke hasil PERTAMA kali tersimpan
-  /// (jawaban baru yang dikirim diabaikan), beda dari simulasi yang boleh
-  /// dicoba lagi. `review` di [QuizAttempt] cuma terisi begitu SEMUA
-  /// pertanyaan (choice + likert) sudah pernah dicek.
   @override
   Future<QuizAnswerCheckResult> checkQuizAnswer({
     required String attemptId,

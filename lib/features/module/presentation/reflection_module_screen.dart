@@ -100,9 +100,6 @@ class _ReflectionModuleScreenState
     );
   }
 
-  /// [silent] menekan alert sukses -- dipakai saat menyimpan sekalian lanjut
-  /// (`_continue`), supaya dialog "Jawaban tersimpan" tidak muncul lalu
-  /// keburu ter-`pop` oleh `nav.onAdvance()` dan menelan navigasi berikutnya.
   Future<bool> _save({bool silent = false}) async {
     final content = _content;
     if (content == null) return false;

@@ -1,4 +1,4 @@
-// Perilaku tab "Pencapaian" (BadgesScreen).
+
 
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,9 +47,7 @@ void main() {
   testWidgets('badge journey di luar sektor aktif tidak ikut tampil', (
     tester,
   ) async {
-    // FakeLearningRepository.defaultJourneys cuma sampai id 4, jadi badge
-    // id 5 (journey 99, di luar sektor) semestinya tersaring keluar oleh
-    // sectorBadgesProvider.
+
     final badgeRepository = FakeBadgeRepository(
       items: [
         ...FakeBadgeRepository.defaultBadges,
@@ -77,7 +75,6 @@ void main() {
   ) async {
     await pump(tester);
 
-    // 1 dari 4 badge fixture (journey 1) yang earned: true.
     expect(find.text('1/4 Lencana diraih'), findsOneWidget);
     expect(find.textContaining('Diraih 10 Januari 2026'), findsOneWidget);
   });
@@ -132,7 +129,7 @@ void main() {
       expect(find.text('DESKRIPSI BADGE'), findsOneWidget);
       expect(find.text('PESAN SAAT DIRAIH'), findsNothing);
       expect(find.text('PESAN MOTIVASI'), findsNothing);
-      // Baris status di dalam sheet menambah 1 lagi dari yang di list.
+
       expect(
         find.text('Selesaikan journey terkait untuk meraih ini'),
         findsNWidgets(4),
@@ -147,9 +144,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('DESKRIPSI BADGE'), findsOneWidget);
 
-    // Sheet-nya scrollable sekarang (lihat badge_detail_sheet.dart) -- badge
-    // yang sudah diraih plus pesan ucapan selamat & motivasi bikin "Tutup"
-    // ada di bawah lipatan, perlu discroll ke pandangan dulu sebelum tap.
     await tester.ensureVisible(find.text('Tutup'));
     await tester.tap(find.text('Tutup'));
     await tester.pumpAndSettle();

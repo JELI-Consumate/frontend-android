@@ -1,5 +1,4 @@
-// JourneyCard: foto depan journey dari `imageUrl` (fallback ke ilustrasi
-// dummy kalau kosong / gagal / masih dimuat / journey terkunci).
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -60,7 +59,6 @@ void main() {
       _journey(imageUrl: 'https://cdn.example/j1.jpg', unlocked: false),
     );
 
-    // Gembok muncul di thumbnail (dan juga di baris alasan terkunci).
     expect(find.byIcon(Icons.lock_outline), findsWidgets);
     expect(find.byType(Image), findsNothing);
     expect(find.byType(SvgPicture), findsNothing);

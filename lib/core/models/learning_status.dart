@@ -1,8 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Kosakata progres bersama seluruh domain belajar (sector, journey, module,
-/// module page). Sengaja di `core/` -- bukan milik satu fitur -- karena
-/// dipakai lintas fitur `learning` dan `module`.
 enum LearningStatus {
   notStarted('not_started'),
   inProgress('in_progress'),

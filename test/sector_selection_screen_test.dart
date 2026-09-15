@@ -1,6 +1,4 @@
-// Layar "Pilih Sektor" versi grid: kartu per sektor (warna dari field
-// `color`), sektor pertama terpilih otomatis, panel bawah mengikuti pilihan,
-// dan "Mulai Belajar" yang menyetel sektor aktif sesi ini (bukan tap kartu).
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,8 +42,7 @@ void main() {
     WidgetTester tester, {
     Size size = const Size(1170, 12000),
   }) async {
-    // Default sengaja sangat tinggi supaya seluruh grid (8 kartu) ter-build
-    // tanpa perlu scroll -- GridView memvirtualisasi item di luar viewport.
+
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.reset);
@@ -84,7 +81,6 @@ void main() {
     expect(find.text('Jasa Transportasi'), findsOneWidget);
     expect(find.text('Listrik, BBM & Gas Rumah Tangga'), findsOneWidget);
 
-    // Sektor pertama terpilih otomatis -> muncul di kartu DAN panel bawah.
     expect(find.text('Kamu memilih'), findsOneWidget);
     expect(find.text('E-Commerce'), findsNWidgets(2));
     expect(find.text('Mulai Belajar'), findsOneWidget);
@@ -100,7 +96,7 @@ void main() {
 
     expect(find.text('Layanan Kesehatan'), findsNWidgets(2));
     expect(find.text('E-Commerce'), findsOneWidget);
-    // Belum ada sektor aktif sampai "Mulai Belajar" ditekan.
+
     expect(container.read(activeSectorSlugProvider), isNull);
   });
 
@@ -110,8 +106,7 @@ void main() {
     await tester.tap(find.text('Jasa Transportasi'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Mulai Belajar'));
-    // Bukan pumpAndSettle: setelah menyetel, tombol tetap loading (di app
-    // sungguhan AppRoot langsung pindah layar & widget ini dibuang).
+
     await tester.pump();
 
     expect(container.read(activeSectorSlugProvider), 'transportasi');
@@ -122,12 +117,11 @@ void main() {
   ) async {
     await pump(tester);
 
-    // Sektor "elektronik" sengaja tanpa `color` -- tidak boleh bikin error.
     expect(find.text('Elektronik & Kendaraan Bermotor'), findsOneWidget);
   });
 
   testWidgets('tidak overflow di layar HP kecil', (tester) async {
-    await pump(tester, size: const Size(1080, 1920)); // ~360x640 dp
+    await pump(tester, size: const Size(1080, 1920));
 
     expect(tester.takeException(), isNull);
     expect(find.text('Mulai Belajar'), findsOneWidget);

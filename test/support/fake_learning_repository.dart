@@ -7,9 +7,6 @@ import 'package:perlindungan_konsumen/core/models/learning_status.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/sector.dart';
 import 'package:perlindungan_konsumen/features/learning/data/models/sector_detail.dart';
 
-/// Data tiruan yang bentuknya persis hasil `curl` sungguhan ke
-/// `GET /sectors/e-commerce` dan `GET /journeys/1` saat menyusun fitur ini
-/// (lihat ringkasan pekerjaan) — bukan data karangan.
 class FakeLearningRepository implements LearningRepository {
   FakeLearningRepository({
     List<Journey>? journeys,
@@ -24,17 +21,10 @@ class FakeLearningRepository implements LearningRepository {
   List<Journey> journeys;
   List<LearningModule> modules;
 
-  /// Mutable seperti [journeys]/[modules] -- test survei mengganti ini
-  /// dengan varian yang punya `surveys.pretest`/`posttest` terkonfigurasi.
   Sector sector;
 
-  /// Kalau diisi, `sectors()` mengembalikan daftar ini (dipakai tes layar
-  /// "Pilih Sektor" yang butuh lebih dari satu sektor). Default: `[sector]`.
   final List<Sector>? sectorList;
 
-  /// Mutable -- test bisa mengubahnya di tengah jalan (mis. sesudah
-  /// men-simulasikan kuis selesai lewat `FakeModuleRepository.onComplete`)
-  /// supaya panggilan `journeyDetail` BERIKUTNYA memuat nilai barunya.
   int? quizScore;
 
   ApiException? failWith;
@@ -126,7 +116,7 @@ class FakeLearningRepository implements LearningRepository {
       estimatedMinutes: 10,
       isRequired: true,
       progress: LearningProgress.zero,
-      locked: false, // module 1 (sebelumnya) sudah completed
+      locked: false,
     ),
     LearningModule(
       id: '3',
@@ -137,7 +127,7 @@ class FakeLearningRepository implements LearningRepository {
       estimatedMinutes: 5,
       isRequired: true,
       progress: LearningProgress.zero,
-      locked: true, // module 2 (sebelumnya) belum completed
+      locked: true,
     ),
     LearningModule(
       id: '11',

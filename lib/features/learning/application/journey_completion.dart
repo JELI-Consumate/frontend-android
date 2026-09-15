@@ -6,7 +6,6 @@ import '../../badges/data/models/badge.dart';
 import '../data/models/journey_detail.dart';
 import 'learning_providers.dart';
 
-/// Semua yang dibutuhkan layar perayaan setelah sebuah journey tuntas.
 @immutable
 class JourneyCelebrationData {
   const JourneyCelebrationData({
@@ -26,27 +25,17 @@ class JourneyCelebrationData {
   final String? nextJourneyId;
 }
 
-/// Orkestrasi "journey baru saja selesai": ambil ulang detail journey, cek
-/// apakah statusnya kini `completed`, lalu kumpulkan badge yang diraih dan
-/// id journey berikutnya. Murni data -- navigasi tetap di layar pemanggil.
 class JourneyCompletionController {
   JourneyCompletionController(this._ref);
 
   final Ref _ref;
 
-  /// Dipanggil sesudah user keluar dari rantai module sebuah journey.
-  /// Mengembalikan data perayaan kalau journey-nya BARU tuntas di sesi ini,
-  /// atau `null` kalau belum selesai / memang sudah lama selesai.
   Future<JourneyCelebrationData?> celebrationAfterModules({
     required String journeyId,
     required bool wasCompletedBefore,
   }) async {
     if (wasCompletedBefore) return null;
 
-    // Ambil ulang dari server -- pakai `Ref` provider ini (stabil), bukan
-    // `WidgetRef` pemanggil yang bisa sudah ter-dispose begitu
-    // `journeyDetailProvider` (autoDispose) di-invalidate dan `JourneyDetail`
-    // sempat menampilkan spinner.
     _ref.invalidate(journeyDetailProvider(journeyId));
     _ref.invalidate(primarySectorDetailProvider);
     final refreshed = await _ref.read(journeyDetailProvider(journeyId).future);

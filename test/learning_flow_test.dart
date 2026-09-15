@@ -1,4 +1,4 @@
-// Perilaku layar Dashboard, Perjalanan, dan detail journey.
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,13 +39,9 @@ void main() {
           currentUserProvider.overrideWithValue(
             const AppUser(id: '1', name: 'Argy', email: 'argy@example.com'),
           ),
-          // DashboardScreen/JourneysScreen lewat primarySectorDetailProvider
-          // -> activeSectorSlugProvider. Seed 'e-commerce' supaya langsung ke
-          // kontennya, tidak mampir ke SectorSelectionScreen.
+
           activeSectorOverride('e-commerce'),
-          // Cuma benar-benar dibaca kalau test menavigasi ke ModuleScreen
-          // (lihat grup JourneyDetailScreen di bawah) -- provider Riverpod
-          // malas, jadi aman dioverride di semua test lewat helper ini.
+
           moduleRepositoryProvider.overrideWithValue(
             moduleRepository ?? FakeModuleRepository(),
           ),
@@ -71,8 +67,7 @@ void main() {
       await pump(tester, const DashboardScreen(), repository);
 
       expect(find.text('Lanjutkan Belajar'), findsOneWidget);
-      // Module pertama yang belum selesai (id 2) yang jadi judul kartu,
-      // bukan judul journey-nya.
+
       expect(
         find.text('Pentingnya Perlindungan Konsumen dalam E-Commerce'),
         findsOneWidget,
@@ -120,7 +115,6 @@ void main() {
       expect(find.text('12 Materi'), findsOneWidget);
       expect(find.text('2%'), findsOneWidget);
 
-      // 3 journey lain terkunci (belum menyelesaikan journey 1).
       expect(find.text('Selesaikan journey sebelumnya'), findsNWidgets(3));
     });
 
@@ -203,7 +197,7 @@ void main() {
       testWidgets('tidak tampil kalau ada journey yang sudah dikerjakan', (
         tester,
       ) async {
-        // Fixture default: journey 1 sudah in_progress.
+
         final repository = FakeLearningRepository(
           sector: sectorWithSurveys(
             pretest: const SectorSurvey(
@@ -267,7 +261,6 @@ void main() {
         await tester.tap(find.text('Kenali Hakmu sebagai Konsumen'));
         await tester.pumpAndSettle();
 
-        // Tetap di daftar journey -- detail tidak terbuka.
         expect(find.text('Progres Belajar'), findsNothing);
       });
 
@@ -298,7 +291,7 @@ void main() {
       testWidgets(
         'kartu post-test tidak tampil selama belum semua journey selesai',
         (tester) async {
-          // Fixture default: journey 1 in_progress, sisanya terkunci.
+
           final repository = FakeLearningRepository(
             sector: sectorWithSurveys(
               posttest: const SectorSurvey(
@@ -359,13 +352,10 @@ void main() {
       await tester.tap(find.text('Kenali Hakmu sebagai Konsumen'));
       await tester.pumpAndSettle();
 
-      // Fraksi module selesai dari 5 module fixture (1 selesai).
-      // Subtitle-nya sekarang beberapa Text terpisah (ikon + label + "•" +
-      // status), bukan satu string gabungan lagi -- cek tiap bagiannya.
       expect(find.text('1/5'), findsOneWidget);
       expect(find.text('Opening'), findsOneWidget);
       expect(find.text('Selesai'), findsOneWidget);
-      expect(find.text('Video'), findsOneWidget); // module current (id 2)
+      expect(find.text('Video'), findsOneWidget);
       expect(find.text('10 menit'), findsOneWidget);
     });
 
@@ -373,10 +363,7 @@ void main() {
       tester,
     ) async {
       final repository = FakeLearningRepository();
-      // Module id 2 di fixture default ("Pentingnya Perlindungan Konsumen
-      // dalam E-Commerce") bertipe video -- lihat isi lengkap tiap tipe
-      // konten di `module_flow_test.dart`, di sini cukup pastikan
-      // navigasinya benar-benar terjadi ke layar yang sesuai.
+
       final moduleRepository = FakeModuleRepository(
         modules: {'2': videoModuleFixture()},
       );
@@ -402,9 +389,6 @@ void main() {
       await tester.pageBack();
       await tester.pumpAndSettle();
 
-      // Kembali dari ModuleScreen me-refresh checklist journey ini --
-      // panggilan `journeyDetail` bertambah lagi (sekali waktu buka layar,
-      // sekali lagi waktu kembali).
       expect(
         repository.calls.where((call) => call.startsWith('journeyDetail')),
         hasLength(2),
@@ -415,8 +399,7 @@ void main() {
       tester,
     ) async {
       final repository = FakeLearningRepository();
-      // Module id 3 di fixture default ("Mengenal Aturan Hukum Saat Belanja
-      // Online") terkunci -- module 2 sebelumnya belum completed.
+
       final moduleRepository = FakeModuleRepository(
         modules: {'3': articleModuleFixture()},
       );
@@ -436,7 +419,6 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Tidak menavigasi kemana-mana -- masih di layar detail journey.
       expect(find.text('Progres Belajar'), findsOneWidget);
       expect(moduleRepository.calls, isEmpty);
     });

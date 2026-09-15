@@ -2,10 +2,6 @@ import 'package:perlindungan_konsumen/core/network/api_exception.dart';
 import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
 import 'package:perlindungan_konsumen/features/badges/data/models/badge.dart';
 
-/// Empat badge, satu per journey dari `FakeLearningRepository.defaultJourneys`
-/// (journey id 1..4) -- persis pemetaan `BadgeSeeder` di backend
-/// (journey_id unik per badge). Badge journey 1 sengaja ditandai sudah
-/// diraih supaya ada contoh tampilan "diraih" di test, sisanya belum.
 class FakeBadgeRepository implements BadgeRepository {
   FakeBadgeRepository({List<Badge>? items}) : items = items ?? defaultBadges;
 
@@ -36,8 +32,7 @@ class FakeBadgeRepository implements BadgeRepository {
       journeyId: '2',
       name: 'Smart Shopper',
       description: 'Mampu membuat keputusan belanja yang tepat.',
-      // Belum diraih -- pesan ucapan selamat & motivasi cuma relevan begitu
-      // badge diraih (lihat BadgeDetailSheet), jadi wajar null di sini.
+
       congratulationMessage: null,
       motivationalMessage: null,
       iconUrl: 'https://placehold.co/256x256?text=Smart+Shopper',

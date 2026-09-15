@@ -6,17 +6,11 @@ import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../data/module_repository.dart';
 import 'module_page_nav.dart';
 
-/// Perilaku "tandai halaman selesai lalu lanjut" yang identik di layar module
-/// artikel & video. Layar cukup `with ModulePageAdvance`, pakai [isAdvancing]
-/// untuk state tombol, dan panggil [completeAndAdvance] saat tombol ditekan.
 mixin ModulePageAdvance<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   bool _advancing = false;
 
   bool get isAdvancing => _advancing;
 
-  /// Kalau [alreadyComplete] `false`, tandai halaman [pageId] selesai di server
-  /// dulu; kalau gagal, tampilkan alert dan JANGAN lanjut. Setelah sukses (atau
-  /// kalau memang sudah selesai) panggil [onCompleted] lalu `nav.onAdvance()`.
   Future<void> completeAndAdvance({
     required String pageId,
     required bool alreadyComplete,

@@ -371,8 +371,6 @@ class _MatchingGameState extends ConsumerState<_MatchingGame> {
   }
 }
 
-/// Sisi kartu di satu baris pasangan -- menentukan warna/ikon badge (merah
-/// untuk situasi, biru untuk solusi) dan ikon placeholder gambar.
 enum _MatchCardSide { situation, solution }
 
 class _MatchCard extends StatelessWidget {
@@ -424,7 +422,7 @@ class _MatchCard extends StatelessWidget {
           onTap: onTap,
           child: Stack(
             children: [
-              // Gambar menempel ke tepi kartu (tanpa margin), teks di bawahnya.
+
               Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -464,8 +462,6 @@ class _MatchCard extends StatelessWidget {
   }
 }
 
-/// Badge kecil untuk label singkat ("Situasi 1", "Solusi A") -- merah untuk
-/// situasi (meniru chip "Skenario N" di mockup), biru untuk solusi.
 class _MatchBadge extends StatelessWidget {
   const _MatchBadge({required this.label, required this.isSituation});
 
@@ -507,11 +503,8 @@ class _MatchBadge extends StatelessWidget {
   }
 }
 
-/// Rasio foto simulasi: 3:2 (landscape). Gambar mengisi penuh lebar kartu dan
-/// menempel ke tepi (di-clip mengikuti sudut membulat kartu).
 const double _matchImageAspectRatio = 3 / 2;
 
-/// Foto pasangan matching -- full-bleed di bagian atas kartu, tanpa margin.
 class _MatchImage extends StatelessWidget {
   const _MatchImage({required this.imageUrl});
 
@@ -526,7 +519,7 @@ class _MatchImage extends StatelessWidget {
         child: Image.network(
           imageUrl,
           width: double.infinity,
-          // `contain` -- rasio foto non-3:2 dimuat utuh, tidak ke-crop.
+
           fit: BoxFit.contain,
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
@@ -551,8 +544,6 @@ class _MatchImage extends StatelessWidget {
   }
 }
 
-/// Placeholder saat pasangan belum punya foto -- tetap menjaga rasio kartu
-/// konsisten dengan yang sudah ada fotonya.
 class _MatchImagePlaceholder extends StatelessWidget {
   const _MatchImagePlaceholder({required this.isSituation});
 
@@ -652,10 +643,6 @@ class _OrderingGameState extends ConsumerState<_OrderingGame> {
         latestAttempt = result.attempt;
         if (!result.correct) wrongSteps.add(step);
 
-        // Jawaban benar ke-N (N = jumlah langkah) membuat attempt langsung
-        // completed di server. Hentikan loop di sini -- sisa langkah di
-        // batch ini tidak perlu dicek lagi, dan parent langsung menampilkan
-        // layar "Simulasi selesai!" lewat onChecked.
         if (result.attempt.isCompleted) {
           widget.onChecked(result.attempt);
           if (mounted) setState(() => _checking = false);
@@ -969,8 +956,6 @@ class _PoolCardSurface extends StatelessWidget {
   }
 }
 
-/// Foto langkah dari backend, dipakai di kartu pool dan slot yang sudah
-/// terisi. Fallback ke placeholder kalau gambar gagal dimuat.
 class _StepThumbnail extends StatelessWidget {
   const _StepThumbnail({required this.imageUrl, required this.size});
 
@@ -986,7 +971,7 @@ class _StepThumbnail extends StatelessWidget {
         width: size,
         height: size,
         cacheWidth: (size * 2).round(),
-        // `contain` -- thumbnail tetap kotak, foto dimuat utuh tanpa ke-crop.
+
         fit: BoxFit.contain,
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;

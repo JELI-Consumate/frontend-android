@@ -99,13 +99,6 @@ class _ModuleContentRouterState extends State<_ModuleContentRouter> {
       return;
     }
 
-    // Seluruh halaman module ini beres -- kembali ke pemanggil (biasanya
-    // `JourneyDetailScreen`, lihat `_openModule`) lewat hasil pop: id module
-    // berikutnya di journey, atau `null` kalau ini module terakhir. Pemanggil
-    // yang meneruskan rantai module + memutuskan menampilkan layar perayaan
-    // journey. Dulu di sini `pushReplacement` ke module berikutnya sendiri,
-    // yang membuat `await` di `_openModule` selesai terlalu dini sehingga
-    // pengecekan "journey selesai" tidak pernah jalan buat journey >1 module.
     Navigator.of(context).pop(_nextModuleId);
   }
 

@@ -1,4 +1,4 @@
-// Perilaku form auth: validasi lokal, sukses, dan error dari server.
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,9 +12,7 @@ import 'package:perlindungan_konsumen/features/auth/presentation/auth_screen.dar
 import 'support/fake_auth_repository.dart';
 
 void main() {
-  // `main()` produksi menginisialisasi ini sebelum runApp; test membangun
-  // MaterialApp sendiri jadi harus diinisialisasi manual juga, kalau tidak
-  // date picker di form registrasi melempar LocaleDataException.
+
   setUpAll(() => initializeDateFormatting('id_ID'));
 
   Future<void> pumpAuth(
@@ -22,9 +20,7 @@ void main() {
     FakeAuthRepository repository, {
     AuthTab tab = AuthTab.login,
   }) async {
-    // Viewport default flutter_test (800x600) lebih pendek dari HP asli dan
-    // memotong form registrasi yang sekarang enam field; perbesar supaya
-    // tombol & tautan di bawahnya tetap bisa disentuh tanpa scroll manual.
+
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.reset);
@@ -41,11 +37,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  // Konten layar auth ada di dalam SingleChildScrollView, jadi elemen di
-  // bagian bawah (tombol submit, tautan footer) bisa berada di luar
-  // viewport sampai discroll — persis seperti pengguna asli. `tester.tap`
-  // biasa gagal untuk elemen begitu, maka semua tap di sini didahului
-  // `ensureVisible`.
   Future<void> tapVisible(WidgetTester tester, Finder finder) async {
     await tester.ensureVisible(finder);
     await tester.pumpAndSettle();
@@ -125,7 +116,6 @@ void main() {
       );
       await tapVisible(tester, find.widgetWithText(FilledButton, 'Masuk'));
 
-      // Alert modal ala SweetAlert, bukan lagi SnackBar.
       expect(find.byType(Dialog), findsOneWidget);
       expect(find.text('Email atau kata sandi salah.'), findsOneWidget);
     });
@@ -149,8 +139,6 @@ void main() {
       );
       await tapVisible(tester, find.widgetWithText(FilledButton, 'Masuk'));
 
-      // Bukan alert lagi -- login yang gagal karena EMAIL_NOT_VERIFIED
-      // langsung mendorong ke layar OTP, kredensialnya sudah benar.
       expect(find.text('Masukkan Kode OTP'), findsOneWidget);
       expect(find.textContaining('budi@example.com'), findsOneWidget);
     });
@@ -225,8 +213,7 @@ void main() {
       );
 
       expect(repository.calls, contains('resetPassword(budi@example.com)'));
-      // Berhasil reset -> kembali ke AuthScreen (root stack ini); AppBar
-      // "Reset Kata Sandi" dan "Lupa Kata Sandi" sudah tidak ada lagi.
+
       expect(find.text('Reset Kata Sandi'), findsNothing);
       expect(find.text('Lupa Kata Sandi'), findsNothing);
     });

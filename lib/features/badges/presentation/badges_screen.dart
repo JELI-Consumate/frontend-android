@@ -9,10 +9,6 @@ import '../application/badge_providers.dart';
 import '../data/models/badge.dart';
 import 'widgets/badge_tile.dart';
 
-/// Lencana milik sektor aktif saja, diurutkan mengikuti urutan journey-nya.
-///
-/// Komposisi dua fitur (`badges` + `learning`) hidup di layer presentation
-/// supaya `badges/application` tetap jadi leaf tanpa tahu soal `learning`.
 final _sectorBadgesProvider = FutureProvider.autoDispose<List<Badge>>((
   ref,
 ) async {

@@ -57,8 +57,6 @@ class AuthController extends AsyncNotifier<AppUser?> {
     _startFreshSession(user);
   }
 
-  /// Tiap autentikasi baru mulai dari layar pilih sektor lagi (satu user bisa
-  /// banyak sektor) -- reset sektor aktif sesi sebelumnya kalau ada.
   void _startFreshSession(AppUser user) {
     ref.read(activeSectorSlugProvider.notifier).clear();
     state = AsyncValue.data(user);

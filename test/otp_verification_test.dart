@@ -1,9 +1,4 @@
-// Layar OTP: input kode, kirim ulang, dan tombol kembali.
-//
-// Verifikasi sukses/gagal cuma diuji lewat panggilan ke repository di sini
-// (bukan navigasi ke MainShell) -- alur penuh "daftar -> OTP -> MainShell"
-// ada di auth_flow_test.dart & lewat AppRoot yang tidak dipasang di layar
-// berdiri sendiri seperti ini.
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,10 +51,6 @@ void main() {
     expect(find.textContaining(email), findsOneWidget);
   });
 
-  // Kode 6 digit sekarang diisi lewat 6 kotak terpisah (bukan 1 field
-  // panjang) -- lihat _OtpBoxInput. Mengetik/menempel di kotak pertama
-  // menyebar sisa digitnya ke kotak-kotak berikutnya, jadi test tetap bisa
-  // mengisi semuanya lewat satu `enterText` di kotak indeks 0.
   Finder otpBox(int index) => find.byKey(ValueKey('otp-box-$index'));
 
   testWidgets('kode kurang dari 6 digit menampilkan validasi lokal', (
@@ -83,8 +74,6 @@ void main() {
     await tester.enterText(otpBox(0), '123456');
     await tester.pumpAndSettle();
 
-    // Terisi penuh -> verifikasi terpicu otomatis, tanpa perlu menekan
-    // tombol "Verifikasi" secara manual.
     expect(repository.calls, contains('verifyOtp($email, 123456)'));
   });
 
@@ -94,8 +83,6 @@ void main() {
     final repository = FakeAuthRepository();
     await pumpOtpScreen(tester, repository);
 
-    // Isi tiap kotak satu-satu (bukan tempel sekaligus) untuk menguji jalur
-    // ketik-per-digit + auto-pindah fokus, lalu tetap tekan tombolnya.
     for (var i = 0; i < 6; i++) {
       await tester.enterText(otpBox(i), '${i + 1}');
     }
@@ -120,9 +107,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kode OTP salah atau sudah kedaluwarsa.'), findsOneWidget);
-    // Masih di layar OTP, bukan alert modal terpisah.
+
     expect(find.text('Masukkan Kode OTP'), findsOneWidget);
-    // Kotak-kotaknya juga dikosongkan lagi supaya gampang mengetik ulang.
+
     expect(tester.widget<TextField>(otpBox(0)).controller?.text, isEmpty);
   });
 
@@ -138,8 +125,6 @@ void main() {
     expect(repository.calls, contains('resendOtp($email)'));
     expect(find.text('Kode Terkirim'), findsOneWidget);
 
-    // Tutup alert, lalu tombol kirim ulang mestinya nonaktif dengan hitung
-    // mundur selama cooldown berjalan.
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Kirim Ulang Kode ('), findsOneWidget);

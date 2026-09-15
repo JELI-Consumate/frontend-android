@@ -9,9 +9,6 @@ class FakeAuthRepository implements AuthRepository {
 
   ApiException? failWith;
 
-  // Terverifikasi secara default -- itu jalur normal/umum yang dipakai
-  // kebanyakan test di sini. Test yang khusus menguji gerbang verifikasi
-  // email meng-override `user` ini dengan `emailVerifiedAt: null`.
   AppUser user = AppUser(
     id: '1',
     name: 'Budi Santoso',
@@ -78,9 +75,7 @@ class FakeAuthRepository implements AuthRepository {
     calls.add('updateProfile($name)');
     if (failWith != null) throw failWith!;
     if (name != null) {
-      // Pertahankan field lain (termasuk emailVerifiedAt) -- cuma nama yang
-      // diganti di sini, biar test yang memeriksa status verifikasi tidak
-      // ikut ketiban efek samping update profil yang tidak terkait.
+
       user = AppUser(
         id: user.id,
         name: name,

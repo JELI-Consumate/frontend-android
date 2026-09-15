@@ -227,7 +227,6 @@ class _ContinueLearningSection extends ConsumerWidget {
   }
 }
 
-/// Kolom pencarian di Beranda -- khusus mencari journey berdasarkan judul.
 class _JourneySearchField extends StatelessWidget {
   const _JourneySearchField({
     required this.controller,
@@ -280,7 +279,6 @@ class _JourneySearchField extends StatelessWidget {
   }
 }
 
-/// Hasil pencarian journey: filter `sectorDetail.journeys` berdasarkan judul.
 class _JourneySearchResults extends StatelessWidget {
   const _JourneySearchResults({
     required this.query,

@@ -1,6 +1,4 @@
-// Alur "journey baru saja selesai" -- dari JourneyDetailScreen, lewat
-// ModuleScreen, sampai JourneyCelebrationScreen terbuka dengan data yang
-// benar (badge, ringkasan modul, skor kuis, journey berikutnya).
+
 
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,11 +19,7 @@ import 'support/fake_module_repository.dart';
 import 'support/module_fixtures.dart';
 
 void main() {
-  // Journey 1 sengaja disusun dengan CUMA SATU module ("Mengenal Aturan
-  // Hukum...", id 12 -- fixture yang sama dipakai module_flow_test.dart)
-  // yang belum selesai, supaya menuntaskannya lewat tombol "Selesai" di
-  // ArticleModuleScreen langsung membuat journey 1 selesai juga -- tanpa
-  // perlu menyusun seluruh 12 module asli journey 1 di fixture.
+
   Journey inProgressJourney1() => const Journey(
     id: '1',
     slug: 'kenali-hakmu-sebagai-konsumen',
@@ -130,11 +124,6 @@ void main() {
       ],
     );
 
-    // Efek samping "server" begitu satu-satunya module journey 1 ditandai
-    // selesai -- meniru apa yang beneran terjadi di backend secara
-    // sinkron (ProgressService::recalculateJourney + AwardJourneyBadge)
-    // lewat mutasi manual ke fixture, karena fake ini tidak punya mesin
-    // kalkulasi progress sungguhan.
     final moduleRepository = FakeModuleRepository(
       modules: {'12': articleModuleFixture()},
       onComplete: (_) {
@@ -174,7 +163,6 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Masih di dalam ArticleModuleScreen, konten fixture-nya tampil.
       expect(find.text('Selesai'), findsOneWidget);
 
       await tester.tap(find.text('Selesai'));
@@ -199,11 +187,7 @@ void main() {
   testWidgets(
     'journey 2 module: perayaan tetap muncul setelah module TERAKHIR selesai',
     (tester) async {
-      // Regresi: dulu perpindahan antar-module pakai pushReplacement, yang
-      // menyelesaikan `await` di `_openModule` terlalu dini -- jadi
-      // pengecekan "journey selesai" cuma jalan setelah module PERTAMA dan
-      // tidak pernah lagi. Untuk journey >1 module, layar perayaan tidak
-      // pernah muncul.
+
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 3.0;
       addTearDown(tester.view.reset);
@@ -291,14 +275,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Module 1 masih ada module berikutnya -> tombolnya "Selanjutnya".
       await tester.tap(find.text('1. Modul Satu'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Selanjutnya'));
       await tester.pumpAndSettle();
       expect(find.text('PENCAPAIAN BARU!'), findsNothing);
 
-      // Module 2 = TERAKHIR -> tombolnya "Selesai" -> perayaan MUNCUL.
       await tester.tap(find.text('Selesai'));
       await tester.pumpAndSettle();
 
@@ -362,7 +344,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('PENCAPAIAN BARU!'), findsNothing);
-      // Balik ke JourneyDetailScreen seperti biasa, bukan ke celebration.
+
       expect(find.text('Progres Belajar'), findsOneWidget);
     },
   );

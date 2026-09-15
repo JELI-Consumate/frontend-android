@@ -147,7 +147,7 @@ class _Thumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.md),
-      // Cover journey rasio 2:3 (potrait). Lebar tetap 76, tinggi mengikuti.
+
       child: SizedBox(
         width: 76,
         height: 114,
@@ -166,11 +166,9 @@ class _Thumbnail extends StatelessWidget {
     if (url == null || url.isEmpty) return const _CoverFallback();
     return Image.network(
       url,
-      // `contain` -- kalau rasio foto bukan 2:3, muat utuh (letterbox di atas
-      // `primarySoft`), jangan sampai ke-crop.
+
       fit: BoxFit.contain,
-      // Thumbnail cuma ~76px lebar -- dekode kecil supaya foto asli 2-3 MB
-      // dari admin tidak dibaca full-res.
+
       cacheWidth: 300,
       loadingBuilder: (context, child, progress) =>
           progress == null ? child : const _CoverFallback(),

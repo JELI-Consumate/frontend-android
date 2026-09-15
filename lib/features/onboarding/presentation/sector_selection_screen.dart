@@ -25,8 +25,7 @@ class _SectorSelectionScreenState extends ConsumerState<SectorSelectionScreen> {
   void _confirm(String slug) {
     if (_saving) return;
     setState(() => _saving = true);
-    // Menyetel sektor aktif sesi ini -> `AppRoot` rebuild ke `MainShell`
-    // dan layar ini dibuang, jadi tidak perlu reset `_saving`.
+
     ref.read(activeSectorSlugProvider.notifier).select(slug);
   }
 

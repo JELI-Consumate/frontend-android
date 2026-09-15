@@ -66,9 +66,6 @@ class NotificationListenerController {
       final navigator = _ref.read(navigatorKeyProvider).currentState;
       if (navigator == null) return;
 
-      // Rantai module dalam journey: tiap `ModuleScreen` di-pop dengan id
-      // module berikutnya (atau null kalau terakhir / user menekan kembali),
-      // sama seperti `JourneyDetailScreen._openModule`.
       final moduleIds = journeyDetail.modules
           .map((module) => module.id)
           .toList();

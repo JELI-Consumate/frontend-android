@@ -1,6 +1,4 @@
-// SectorSurveyCard di luar konteks JourneysScreen -- alur buka link lalu
-// self-report selesai (lihat learning_flow_test.dart untuk kapan kartu ini
-// tampil/tidak di layar Perjalanan).
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

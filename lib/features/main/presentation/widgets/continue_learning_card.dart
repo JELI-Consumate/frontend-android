@@ -100,8 +100,6 @@ class ContinueLearningCard extends StatelessWidget {
   }
 }
 
-/// Cover journey rasio 2:3 (potrait), ditaruh di sisi kiri kartu. Foto dimuat
-/// utuh (`contain`) supaya rasio non-2:3 tidak ke-crop.
 class _CoverImage extends StatelessWidget {
   const _CoverImage({required this.imageUrl});
 

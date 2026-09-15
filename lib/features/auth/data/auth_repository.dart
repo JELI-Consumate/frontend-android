@@ -164,7 +164,6 @@ class AuthRepository {
     return AppUser.fromJson(user);
   }
 
-
   String? _messageOf(Map<String, dynamic>? body) {
     final meta = body?['meta'];
     if (meta is Map && meta['message'] is String) {

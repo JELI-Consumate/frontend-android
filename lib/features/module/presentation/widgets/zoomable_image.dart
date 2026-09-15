@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Batas lebar dekode untuk gambar konten (infografis/komik). Foto asli dari
-/// admin bisa 2-4 MB @ 3000px+ -- kalau di-dekode full-res, satu gambar bisa
-/// makan puluhan MB RAM dan gagal diam-diam di HP kelas menengah. Dibatasi
-/// ke ~2x lebar layar; masih tajam, tapi jauh lebih ringan.
 int _decodeWidth(BuildContext context) {
   final size = MediaQuery.sizeOf(context);
   final dpr = MediaQuery.devicePixelRatioOf(context);

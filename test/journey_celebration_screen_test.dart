@@ -1,6 +1,4 @@
-// JourneyCelebrationScreen di luar konteks alur penyelesaian journey penuh
-// (lihat journey_celebration_flow_test.dart untuk itu) -- cuma variasi
-// tampilan berdasarkan data yang diterimanya.
+
 
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,7 +86,7 @@ void main() {
     );
 
     expect(find.text('Yuk lanjut ke Journey 2!'), findsNothing);
-    // Skor kuis null -> tanda strip, bukan "null%" atau kosong diam-diam.
+
     expect(find.text('–'), findsOneWidget);
   });
 

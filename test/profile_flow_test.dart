@@ -1,4 +1,4 @@
-// Perilaku tab "Profil", khususnya bottom sheet ubah nama.
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +25,7 @@ void main() {
       ProviderScope(
         overrides: [
           authRepositoryProvider.overrideWithValue(repository),
-          // MainShell me-render semua tab lewat IndexedStack sekaligus.
+
           learningRepositoryProvider.overrideWithValue(
             FakeLearningRepository(),
           ),
@@ -44,9 +44,7 @@ void main() {
   }
 
   Future<void> openEditNameSheet(WidgetTester tester) async {
-    // Tidak ada lagi tombol "Ubah Nama" terpisah -- nama di header sendiri
-    // yang jadi pemicunya (lihat `_ProfileHeader`, ada ikon pensil kecil di
-    // sebelahnya sebagai penanda visual bisa diketuk).
+
     await tester.tap(find.text('Budi Santoso'));
     await tester.pumpAndSettle();
   }
@@ -61,9 +59,7 @@ void main() {
         find.text('Nama ini akan tampil di profil dan sertifikatmu.'),
         findsOneWidget,
       );
-      // Header profil + field yang sudah terisi nama sekarang -- `find.text`
-      // ikut mencocokkan isi `EditableText`, jadi field terprefill juga
-      // kehitung di sini.
+
       expect(find.text('Budi Santoso'), findsNWidgets(2));
     },
   );
@@ -96,10 +92,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.calls, contains('updateProfile(Nama Baru)'));
-    expect(find.text('Nama Baru'), findsOneWidget); // header ter-update
+    expect(find.text('Nama Baru'), findsOneWidget);
     expect(
       find.text('Nama ini akan tampil di profil dan sertifikatmu.'),
-      findsNothing, // sheet sudah tertutup
+      findsNothing,
     );
     expect(find.text('Nama berhasil diperbarui.'), findsOneWidget);
   });
@@ -116,7 +112,7 @@ void main() {
       repository.calls,
       isNot(contains('updateProfile(Nama Yang Dibatalkan)')),
     );
-    expect(find.text('Budi Santoso'), findsOneWidget); // nama tidak berubah
+    expect(find.text('Budi Santoso'), findsOneWidget);
     expect(
       find.text('Nama ini akan tampil di profil dan sertifikatmu.'),
       findsNothing,
@@ -147,9 +143,6 @@ void main() {
     await tester.tap(find.text('Keluar'));
     await tester.pumpAndSettle();
 
-    // Ada 2 "Keluar" di layar sekarang: tombol pemicu di baris profil (sudah
-    // ketutup di belakang modal) dan tombol konfirmasi di dalam modal --
-    // ambil yang PALING TERAKHIR (di atas, dalam modal).
     await tester.tap(find.text('Keluar').last);
     await tester.pumpAndSettle();
 
