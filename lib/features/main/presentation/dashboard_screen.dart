@@ -4,23 +4,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_alert_dialog.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../learning/application/learning_providers.dart';
 import '../../learning/data/learning_repository.dart';
+import '../../learning/data/models/journey.dart';
 import '../../learning/data/models/sector_detail.dart';
 import '../../learning/presentation/journey_detail_screen.dart';
 import '../../learning/presentation/widgets/sector_survey_card.dart';
 import 'widgets/continue_learning_card.dart';
 import 'widgets/journey_card.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) => setState(() => _query = value);
+
+  void _clearSearch() {
+    _searchController.clear();
+    FocusScope.of(context).unfocus();
+    setState(() => _query = '');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final sectorAsync = ref.watch(primarySectorDetailProvider);
+    final searchQuery = _query.trim();
 
     return Scaffold(
       body: SafeArea(
@@ -61,15 +84,25 @@ class DashboardScreen extends ConsumerWidget {
                     style: AppTypography.bodyMedium,
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  const _SearchBarStub(),
+                  _JourneySearchField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    onClear: _clearSearch,
+                  ),
                   const SizedBox(height: AppSpacing.lg),
-                  switch (sectorAsync) {
-                    AsyncData(:final value) => _DashboardBody(
-                      sectorDetail: value,
-                    ),
-                    AsyncError() => const _ErrorState(),
-                    _ => const _LoadingState(),
-                  },
+                  if (searchQuery.isNotEmpty)
+                    _JourneySearchResults(
+                      query: searchQuery,
+                      sectorAsync: sectorAsync,
+                    )
+                  else
+                    switch (sectorAsync) {
+                      AsyncData(:final value) => _DashboardBody(
+                        sectorDetail: value,
+                      ),
+                      AsyncError() => const _ErrorState(),
+                      _ => const _LoadingState(),
+                    },
                 ],
               ),
             ),
@@ -194,49 +227,116 @@ class _ContinueLearningSection extends ConsumerWidget {
   }
 }
 
-class _SearchBarStub extends StatelessWidget {
-  const _SearchBarStub();
+/// Kolom pencarian di Beranda -- khusus mencari journey berdasarkan judul.
+class _JourneySearchField extends StatelessWidget {
+  const _JourneySearchField({
+    required this.controller,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.white,
+    final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        onTap: () => showAppAlert(
-          context,
-          type: AppAlertType.info,
-          title: 'Belum Tersedia',
-          message: 'Pencarian belum tersedia.',
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.search, color: AppColors.muted, size: 20),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  'Cari bahan pembelajaran...',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.muted,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+      borderSide: BorderSide(color: AppColors.border),
+    );
+
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      textInputAction: TextInputAction.search,
+      style: AppTypography.bodyMedium,
+      decoration: InputDecoration(
+        isDense: true,
+        filled: true,
+        fillColor: AppColors.white,
+        hintText: 'Cari journey...',
+        hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.muted),
+        prefixIcon: const Icon(Icons.search, color: AppColors.muted, size: 20),
+        suffixIcon: controller.text.isEmpty
+            ? null
+            : IconButton(
+                onPressed: onClear,
+                icon: const Icon(Icons.close, size: 18),
+                color: AppColors.muted,
+                tooltip: 'Hapus pencarian',
               ),
-            ],
-          ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        border: border,
+        enabledBorder: border,
+        focusedBorder: border.copyWith(
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
       ),
+    );
+  }
+}
+
+/// Hasil pencarian journey: filter `sectorDetail.journeys` berdasarkan judul.
+class _JourneySearchResults extends StatelessWidget {
+  const _JourneySearchResults({
+    required this.query,
+    required this.sectorAsync,
+  });
+
+  final String query;
+  final AsyncValue<SectorDetail?> sectorAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (sectorAsync) {
+      AsyncData(:final value) => _buildResults(context, value),
+      AsyncError() => const _ErrorState(),
+      _ => const _LoadingState(),
+    };
+  }
+
+  Widget _buildResults(BuildContext context, SectorDetail? detail) {
+    final needle = query.toLowerCase();
+    final matches = (detail?.journeys ?? const <Journey>[])
+        .where((journey) => journey.title.toLowerCase().contains(needle))
+        .toList();
+
+    if (matches.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.xl),
+        child: Text(
+          'Tidak ada journey yang cocok dengan "$query".',
+          style: AppTypography.bodySmall,
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${matches.length} journey ditemukan',
+          style: AppTypography.bodySmall,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        for (final journey in matches) ...[
+          JourneyCard(
+            journey: journey,
+            label: 'Journey ${journey.order}',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => JourneyDetailScreen(journeyId: journey.id),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+      ],
     );
   }
 }
