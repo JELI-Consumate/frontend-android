@@ -33,73 +33,75 @@ class ContinueLearningCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 130,
-              width: double.infinity,
-              child: ColoredBox(
-                color: AppColors.primarySoft,
-                child: _CoverImage(imageUrl: imageUrl),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    currentModule.title,
-                    style: AppTypography.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.schedule_outlined,
-                        size: 14,
-                        color: AppColors.inkMuted,
-                      ),
-                      const SizedBox(width: AppSpacing.xxs),
-                      Text(
-                        '${currentModule.estimatedMinutes} menit tersisa',
-                        style: AppTypography.bodySmall,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                          child: LinearProgressIndicator(
-                            value: percent / 100,
-                            minHeight: 6,
-                            backgroundColor: AppColors.border,
-                            valueColor: const AlwaysStoppedAnimation(
-                              AppColors.primary,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _CoverImage(imageUrl: imageUrl),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      currentModule.title,
+                      style: AppTypography.titleMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule_outlined,
+                          size: 14,
+                          color: AppColors.inkMuted,
+                        ),
+                        const SizedBox(width: AppSpacing.xxs),
+                        Flexible(
+                          child: Text(
+                            '${currentModule.estimatedMinutes} menit tersisa',
+                            style: AppTypography.bodySmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                            child: LinearProgressIndicator(
+                              value: percent / 100,
+                              minHeight: 6,
+                              backgroundColor: AppColors.border,
+                              valueColor: const AlwaysStoppedAnimation(
+                                AppColors.primary,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text('$percent%', style: AppTypography.bodySmall),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: AppSpacing.xs),
+                        Text('$percent%', style: AppTypography.bodySmall),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+/// Cover journey rasio 2:3 (potrait), ditaruh di sisi kiri kartu. Foto dimuat
+/// utuh (`contain`) supaya rasio non-2:3 tidak ke-crop.
 class _CoverImage extends StatelessWidget {
   const _CoverImage({required this.imageUrl});
 
@@ -107,14 +109,26 @@ class _CoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: SizedBox(
+        width: 96,
+        height: 144,
+        child: ColoredBox(
+          color: AppColors.primarySoft,
+          child: _cover(),
+        ),
+      ),
+    );
+  }
+
+  Widget _cover() {
     final url = imageUrl;
     if (url == null || url.isEmpty) return const _CoverFallback();
     return Image.network(
       url,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      // Banner cuma 130px tinggi -- batasi lebar dekode.
-      cacheWidth: 1080,
+      fit: BoxFit.contain,
+      cacheWidth: 300,
       loadingBuilder: (context, child, progress) =>
           progress == null ? child : const _CoverFallback(),
       errorBuilder: (_, _, _) => const _CoverFallback(),
@@ -129,11 +143,8 @@ class _CoverFallback extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: SvgPicture.asset(
-          'assets/images/journey_illustration.svg',
-          height: 104,
-        ),
+        padding: const EdgeInsets.all(AppSpacing.xs),
+        child: SvgPicture.asset('assets/images/journey_illustration.svg'),
       ),
     );
   }
