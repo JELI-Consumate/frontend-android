@@ -507,9 +507,9 @@ class _MatchBadge extends StatelessWidget {
   }
 }
 
-/// Tinggi gambar di atas kartu matching. Gambar mengisi penuh lebar kartu dan
+/// Rasio foto simulasi: 3:2 (landscape). Gambar mengisi penuh lebar kartu dan
 /// menempel ke tepi (di-clip mengikuti sudut membulat kartu).
-const double _matchImageHeight = 110;
+const double _matchImageAspectRatio = 3 / 2;
 
 /// Foto pasangan matching -- full-bleed di bagian atas kartu, tanpa margin.
 class _MatchImage extends StatelessWidget {
@@ -519,31 +519,31 @@ class _MatchImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: _matchImageHeight,
-      width: double.infinity,
-      child: Image.network(
-        imageUrl,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            color: AppColors.background,
-            alignment: Alignment.center,
-            child: const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+    return AspectRatio(
+      aspectRatio: _matchImageAspectRatio,
+      child: ColoredBox(
+        color: AppColors.background,
+        child: Image.network(
+          imageUrl,
+          width: double.infinity,
+          // `contain` -- rasio foto non-3:2 dimuat utuh, tidak ke-crop.
+          fit: BoxFit.contain,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return const Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) => Center(
+            child: Icon(
+              Icons.image_not_supported_outlined,
+              color: AppColors.inkMuted,
+              size: 28,
             ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: AppColors.background,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.image_not_supported_outlined,
-            color: AppColors.inkMuted,
-            size: 28,
           ),
         ),
       ),
@@ -551,7 +551,7 @@ class _MatchImage extends StatelessWidget {
   }
 }
 
-/// Placeholder saat pasangan belum punya foto -- tetap menjaga tinggi kartu
+/// Placeholder saat pasangan belum punya foto -- tetap menjaga rasio kartu
 /// konsisten dengan yang sudah ada fotonya.
 class _MatchImagePlaceholder extends StatelessWidget {
   const _MatchImagePlaceholder({required this.isSituation});
@@ -560,15 +560,17 @@ class _MatchImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: _matchImageHeight,
-      width: double.infinity,
-      color: AppColors.background,
-      alignment: Alignment.center,
-      child: Icon(
-        isSituation ? Icons.error_outline : Icons.lightbulb_outline,
-        size: 28,
-        color: AppColors.inkMuted,
+    return AspectRatio(
+      aspectRatio: _matchImageAspectRatio,
+      child: ColoredBox(
+        color: AppColors.background,
+        child: Center(
+          child: Icon(
+            isSituation ? Icons.error_outline : Icons.lightbulb_outline,
+            size: 28,
+            color: AppColors.inkMuted,
+          ),
+        ),
       ),
     );
   }
@@ -984,7 +986,8 @@ class _StepThumbnail extends StatelessWidget {
         width: size,
         height: size,
         cacheWidth: (size * 2).round(),
-        fit: BoxFit.cover,
+        // `contain` -- thumbnail tetap kotak, foto dimuat utuh tanpa ke-crop.
+        fit: BoxFit.contain,
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;
           return _thumbnailPlaceholder(
