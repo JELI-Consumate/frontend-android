@@ -12,6 +12,7 @@ import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/data/models/app_user.dart';
+import 'privacy_policy_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -182,6 +183,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     onTap: _busy
                         ? null
                         : () => _editBirthDate(user.dateOfBirth),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _ProfileField(
+                    label: 'Informasi Lainnya',
+                    value: 'Kebijakan Privasi',
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const PrivacyPolicyScreen(),
+                      ));
+                    },
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   Align(
