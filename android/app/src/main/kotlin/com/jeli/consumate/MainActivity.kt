@@ -1,4 +1,4 @@
-package com.argy.perlindungankonsumen
+package com.jeli.consumate
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -6,7 +6,7 @@
          tanpa baris ini. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="Perlindungan Konsumen"
+        android:label="Consumate"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
