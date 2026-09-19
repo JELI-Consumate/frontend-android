@@ -13,6 +13,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/data/models/app_user.dart';
 import 'privacy_policy_screen.dart';
+import 'widgets/delete_account_dialog.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -114,6 +115,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  Future<void> _confirmDeleteAccount() async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => DeleteAccountDialog(userEmail: user.email),
+    );
+
+    if (confirmed == true) {
+      await _run(() async {
+        await ref.read(authControllerProvider.notifier).deleteAccount();
+      });
+    }
+  }
+
   Future<void> _confirmSignOut() async {
     await showAppAlert(
       context,
@@ -200,12 +217,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     },
                   ),
                   const SizedBox(height: AppSpacing.xxl),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: _LogoutPillButton(
-                      busy: _busy,
-                      onPressed: _busy ? null : _confirmSignOut,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: _busy ? null : _confirmDeleteAccount,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.danger,
+                          side: const BorderSide(color: AppColors.danger, width: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.lg,
+                            vertical: AppSpacing.sm,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                        ),
+                        icon: const Icon(Icons.delete_forever, size: 18),
+                        label: const Text(
+                          'Hapus Akun',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      _LogoutPillButton(
+                        busy: _busy,
+                        onPressed: _busy ? null : _confirmSignOut,
+                      ),
+                    ],
                   ),
                 ],
               ),

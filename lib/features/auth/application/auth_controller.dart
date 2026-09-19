@@ -87,6 +87,12 @@ class AuthController extends AsyncNotifier<AppUser?> {
     state = const AsyncValue.data(null);
   }
 
+  Future<void> deleteAccount() async {
+    await _repository.deleteAccount();
+    ref.read(activeSectorSlugProvider.notifier).clear();
+    state = const AsyncValue.data(null);
+  }
+
   Future<String> forgotPassword(String email) {
     return _repository.forgotPassword(email);
   }

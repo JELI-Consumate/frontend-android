@@ -92,6 +92,21 @@ class AuthRepository {
     }
   }
 
+  Future<void> deleteAccount() async {
+    try {
+      await guardApi(() => _dio.delete<Map<String, dynamic>>('/auth/profile'));
+    } catch (error) {
+      // Ignore errors for deletion if unauthorized
+      if (error is ApiException && error.isUnauthorized) {
+        // expected if token was suddenly revoked
+      } else {
+        rethrow;
+      }
+    } finally {
+      await _tokenStorage.clear();
+    }
+  }
+
   Future<String> forgotPassword(String email) {
     return guardApi(() async {
       final response = await _dio.post<Map<String, dynamic>>(
