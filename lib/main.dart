@@ -26,7 +26,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       navigatorKey: ref.watch(navigatorKeyProvider),
-      title: 'Perlindungan Konsumen',
+      title: 'Consumate',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       locale: const Locale('id', 'ID'),

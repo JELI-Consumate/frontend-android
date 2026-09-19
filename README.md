@@ -1,4 +1,4 @@
-# Aplikasi Perlindungan Konsumen
+# Consumate
 
 Aplikasi Android (Flutter) untuk perlindungan konsumen.
 
