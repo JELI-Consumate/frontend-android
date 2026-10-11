@@ -1,6 +1,6 @@
-import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/features/auth/data/auth_repository.dart';
-import 'package:perlindungan_konsumen/features/auth/data/models/app_user.dart';
+import 'package:consumate/core/network/api_exception.dart';
+import 'package:consumate/features/auth/data/auth_repository.dart';
+import 'package:consumate/features/auth/data/models/app_user.dart';
 
 class FakeAuthRepository implements AuthRepository {
   FakeAuthRepository({this.storedToken});
@@ -92,6 +92,13 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<void> logout() async {
     calls.add('logout');
+    storedToken = null;
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    calls.add('deleteAccount');
+    if (failWith != null) throw failWith!;
     storedToken = null;
   }
 

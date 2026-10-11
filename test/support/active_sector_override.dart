@@ -1,5 +1,6 @@
+import 'package:flutter_riverpod/misc.dart' show Override;
 
-import 'package:perlindungan_konsumen/features/onboarding/application/active_sector_controller.dart';
+import 'package:consumate/features/onboarding/application/active_sector_controller.dart';
 
 class _SeededActiveSector extends ActiveSectorNotifier {
   _SeededActiveSector(this._seed);
@@ -10,5 +11,5 @@ class _SeededActiveSector extends ActiveSectorNotifier {
   String? build() => _seed;
 }
 
-activeSectorOverride([String? slug = 'e-commerce']) =>
+Override activeSectorOverride([String? slug = 'e-commerce']) =>
     activeSectorSlugProvider.overrideWith(() => _SeededActiveSector(slug));

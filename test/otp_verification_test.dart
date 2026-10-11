@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/core/theme/app_theme.dart';
-import 'package:perlindungan_konsumen/features/auth/data/auth_repository.dart';
-import 'package:perlindungan_konsumen/features/auth/presentation/otp_verification_screen.dart';
+import 'package:consumate/core/network/api_exception.dart';
+import 'package:consumate/core/theme/app_theme.dart';
+import 'package:consumate/features/auth/data/auth_repository.dart';
+import 'package:consumate/features/auth/presentation/otp_verification_screen.dart';
 
 import 'support/fake_auth_repository.dart';
 

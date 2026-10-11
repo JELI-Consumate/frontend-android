@@ -1,6 +1,6 @@
-import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
-import 'package:perlindungan_konsumen/features/badges/data/models/badge.dart';
+import 'package:consumate/core/network/api_exception.dart';
+import 'package:consumate/features/badges/data/badge_repository.dart';
+import 'package:consumate/features/badges/data/models/badge.dart';
 
 class FakeBadgeRepository implements BadgeRepository {
   FakeBadgeRepository({List<Badge>? items}) : items = items ?? defaultBadges;

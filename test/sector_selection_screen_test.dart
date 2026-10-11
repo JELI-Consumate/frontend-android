@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:perlindungan_konsumen/core/theme/app_theme.dart';
-import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
-import 'package:perlindungan_konsumen/core/models/learning_status.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/sector.dart';
-import 'package:perlindungan_konsumen/features/onboarding/application/active_sector_controller.dart';
-import 'package:perlindungan_konsumen/features/onboarding/presentation/sector_selection_screen.dart';
+import 'package:consumate/core/theme/app_theme.dart';
+import 'package:consumate/features/learning/data/learning_repository.dart';
+import 'package:consumate/core/models/learning_status.dart';
+import 'package:consumate/features/learning/data/models/sector.dart';
+import 'package:consumate/features/onboarding/application/active_sector_controller.dart';
+import 'package:consumate/features/onboarding/presentation/sector_selection_screen.dart';
 
 import 'support/fake_learning_repository.dart';
 

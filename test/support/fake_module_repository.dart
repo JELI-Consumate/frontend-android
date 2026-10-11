@@ -1,10 +1,10 @@
-import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/features/module/data/models/content/quiz_content.dart';
-import 'package:perlindungan_konsumen/features/module/data/models/content/reflection_content.dart';
-import 'package:perlindungan_konsumen/features/module/data/models/module_detail.dart';
-import 'package:perlindungan_konsumen/features/module/data/models/quiz_attempt.dart';
-import 'package:perlindungan_konsumen/features/module/data/models/simulation_attempt.dart';
-import 'package:perlindungan_konsumen/features/module/data/module_repository.dart';
+import 'package:consumate/core/network/api_exception.dart';
+import 'package:consumate/features/module/data/models/content/quiz_content.dart';
+import 'package:consumate/features/module/data/models/content/reflection_content.dart';
+import 'package:consumate/features/module/data/models/module_detail.dart';
+import 'package:consumate/features/module/data/models/quiz_attempt.dart';
+import 'package:consumate/features/module/data/models/simulation_attempt.dart';
+import 'package:consumate/features/module/data/module_repository.dart';
 
 class FakeModuleRepository implements ModuleRepository {
   FakeModuleRepository({Map<String, ModuleDetail>? modules, this.onComplete})

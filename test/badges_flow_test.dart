@@ -4,12 +4,12 @@ import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/core/theme/app_theme.dart';
-import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
-import 'package:perlindungan_konsumen/features/badges/data/models/badge.dart';
-import 'package:perlindungan_konsumen/features/badges/presentation/badges_screen.dart';
-import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
+import 'package:consumate/core/network/api_exception.dart';
+import 'package:consumate/core/theme/app_theme.dart';
+import 'package:consumate/features/badges/data/badge_repository.dart';
+import 'package:consumate/features/badges/data/models/badge.dart';
+import 'package:consumate/features/badges/presentation/badges_screen.dart';
+import 'package:consumate/features/learning/data/learning_repository.dart';
 
 import 'support/active_sector_override.dart';
 import 'support/fake_badge_repository.dart';

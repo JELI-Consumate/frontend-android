@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:perlindungan_konsumen/core/navigation/main_tab_provider.dart';
-import 'package:perlindungan_konsumen/features/badges/data/models/badge.dart';
-import 'package:perlindungan_konsumen/features/learning/presentation/journey_celebration_screen.dart';
+import 'package:consumate/core/navigation/main_tab_provider.dart';
+import 'package:consumate/features/badges/data/models/badge.dart';
+import 'package:consumate/features/learning/presentation/journey_celebration_screen.dart';
 
 void main() {
   const badgeWithMotivation = Badge(

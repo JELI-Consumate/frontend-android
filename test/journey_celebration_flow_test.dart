@@ -3,14 +3,14 @@
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:perlindungan_konsumen/features/badges/data/badge_repository.dart';
-import 'package:perlindungan_konsumen/features/badges/data/models/badge.dart';
-import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/journey.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/learning_module.dart';
-import 'package:perlindungan_konsumen/core/models/learning_status.dart';
-import 'package:perlindungan_konsumen/features/learning/presentation/journey_detail_screen.dart';
-import 'package:perlindungan_konsumen/features/module/data/module_repository.dart';
+import 'package:consumate/features/badges/data/badge_repository.dart';
+import 'package:consumate/features/badges/data/models/badge.dart';
+import 'package:consumate/features/learning/data/learning_repository.dart';
+import 'package:consumate/features/learning/data/models/journey.dart';
+import 'package:consumate/features/learning/data/models/learning_module.dart';
+import 'package:consumate/core/models/learning_status.dart';
+import 'package:consumate/features/learning/presentation/journey_detail_screen.dart';
+import 'package:consumate/features/module/data/module_repository.dart';
 
 import 'support/active_sector_override.dart';
 import 'support/fake_badge_repository.dart';

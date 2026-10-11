@@ -1,11 +1,11 @@
-import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/features/learning/data/learning_repository.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/journey.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/journey_detail.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/learning_module.dart';
-import 'package:perlindungan_konsumen/core/models/learning_status.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/sector.dart';
-import 'package:perlindungan_konsumen/features/learning/data/models/sector_detail.dart';
+import 'package:consumate/core/network/api_exception.dart';
+import 'package:consumate/features/learning/data/learning_repository.dart';
+import 'package:consumate/features/learning/data/models/journey.dart';
+import 'package:consumate/features/learning/data/models/journey_detail.dart';
+import 'package:consumate/features/learning/data/models/learning_module.dart';
+import 'package:consumate/core/models/learning_status.dart';
+import 'package:consumate/features/learning/data/models/sector.dart';
+import 'package:consumate/features/learning/data/models/sector_detail.dart';
 
 class FakeLearningRepository implements LearningRepository {
   FakeLearningRepository({

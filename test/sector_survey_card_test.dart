@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:perlindungan_konsumen/core/network/api_exception.dart';
-import 'package:perlindungan_konsumen/features/learning/presentation/widgets/sector_survey_card.dart';
+import 'package:consumate/core/network/api_exception.dart';
+import 'package:consumate/features/learning/presentation/widgets/sector_survey_card.dart';
 
 void main() {
   Future<void> pump(WidgetTester tester, Widget child) async {
