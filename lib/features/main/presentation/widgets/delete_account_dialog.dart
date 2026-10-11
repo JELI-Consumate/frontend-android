@@ -4,7 +4,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/primary_button.dart';
 
 class DeleteAccountDialog extends StatefulWidget {
   final String userEmail;
@@ -96,17 +95,24 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
             AppTextField(
               controller: _emailController,
               hintText: 'Ketik emailmu...',
+              icon: Icons.email_outlined,
             ),
             const SizedBox(height: AppSpacing.xl),
-            PrimaryButton(
-              label: 'Ya, Hapus Akun Saya',
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.danger,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: _canSubmit
                   ? () {
                       Navigator.of(context).pop(true);
                     }
                   : null,
-              backgroundColor: AppColors.danger,
-              foregroundColor: Colors.white,
+              child: const Text('Ya, Hapus Akun Saya'),
             ),
             const SizedBox(height: AppSpacing.sm),
             TextButton(
