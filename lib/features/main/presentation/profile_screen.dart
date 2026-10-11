@@ -12,6 +12,7 @@ import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/data/models/app_user.dart';
+import '../../complaint/presentation/complaint_agencies_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'widgets/delete_account_dialog.dart';
 
@@ -200,6 +201,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     onTap: _busy
                         ? null
                         : () => _editBirthDate(user.dateOfBirth),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _ProfileField(
+                    label: 'Bantuan Konsumen',
+                    value: 'Layanan Pengaduan',
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ComplaintAgenciesScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   _ProfileField(
