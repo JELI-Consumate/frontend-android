@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/markdown_text.dart';
 import '../data/models/content/article_content.dart';
 import '../data/models/module_detail.dart';
 import '../data/models/module_page.dart';
@@ -120,7 +121,7 @@ class _ArticleBlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (block.blockType) {
-      ArticleBlockType.paragraph => Text(
+      ArticleBlockType.paragraph => MarkdownText(
         block.text ?? '',
         style: AppTypography.bodyLarge,
         textAlign: TextAlign.justify,
@@ -202,7 +203,7 @@ class _ListItemBlock extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(
+            child: MarkdownText(
               text,
               style: AppTypography.bodyLarge,
               textAlign: TextAlign.justify,
@@ -221,6 +222,6 @@ class _ReferenceBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: AppTypography.bodySmall);
+    return MarkdownText(text, style: AppTypography.bodySmall);
   }
 }
